@@ -1,0 +1,15 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: dungeon_master
+      MONGO_INITDB_ROOT_PASSWORD: dice_roller
+      MONGO_INITDB_DATABASE: dungeon_master
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
