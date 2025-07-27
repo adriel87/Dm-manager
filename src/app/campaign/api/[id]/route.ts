@@ -42,3 +42,25 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ message: 'Campaign updated successfully' });
 }
+
+// DELETE CAMPAIGN
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {   
+    const collection = await getCollection('campaigns');
+    const id = (await params).id;
+
+    // Check if the campaign exists
+    const existingCampaign = await collection.findOne({ _id: new ObjectId(id) });
+
+    if (!existingCampaign) {
+        return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+    }
+
+    // Delete the campaign from the database
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+        return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: 'Campaign deleted successfully' });
+}
