@@ -5,6 +5,7 @@ export const campaignSchema = z.object({
   description: z.string(),
   status: z.enum(["activa", "pausada", "finalizada"]).default("activa"),
   createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().optional().default(() => new Date()),
 });
 
 export type Campaign = z.infer<typeof campaignSchema>;
