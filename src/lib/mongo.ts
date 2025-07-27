@@ -1,4 +1,4 @@
-import { MongoClient, Db, Collection } from 'mongodb';
+import { MongoClient, Db, Collection, Document } from 'mongodb';
 
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
 const dbName = process.env.MONGODB_DB || 'mydatabase';
@@ -13,7 +13,7 @@ export async function getCollection(collection: string): Promise<Collection<Docu
     client = new MongoClient(uri,{ auth: { username, password} });
     await client.connect();
     db = client.db(dbName);
-    return db.collection(collection);
+    return db.collection(collection) as Collection<Document>;
 }
 
 export async function disconnectFromDatabase() {
