@@ -1,6 +1,6 @@
 import { Campaign } from "@/domain/entities/campaign";
 import { CampaignRepository } from "@/domain/repositories/CampaignRepository";
-import { campaignSchema } from "@/infrastructure/campaign/schema";
+import { campaignSchema } from "@/infrastructure/adapters/schemas/campaign.schema";
 
 
 export const updateCampaign = async (repository: CampaignRepository, campaignData: Campaign): Promise<Campaign | null> => {
