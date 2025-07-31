@@ -1,6 +1,5 @@
 import { Campaign } from "@/domain/entities/campaign";
 import { CampaignRepository } from "@/domain/repositories/CampaignRepository";
-import { campaignSchema } from "@/infrastructure/adapters/schemas/campaign.schema";
 
 
 export const updateCampaign = async (repository: CampaignRepository, campaignData: Campaign): Promise<Campaign | null> => {
@@ -9,8 +8,8 @@ export const updateCampaign = async (repository: CampaignRepository, campaignDat
         if (!campaignData.id) {
             throw new Error("Invalid campaign data or ID");
         }
-        const campaign = campaignSchema.parse(campaignData);
-        const updatedCampaign = await repository.updateCampaign({id: campaignData.id, ...campaign});
+        // const campaign = campaignSchema.parse(campaignData);
+        const updatedCampaign = await repository.updateCampaign(campaignData);
         return updatedCampaign;
     } catch (error) {
         console.error("Error updating campaign:", error);

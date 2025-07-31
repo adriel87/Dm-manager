@@ -4,7 +4,7 @@ import { campaignSchema } from '@/infrastructure/adapters/schemas/campaign.schem
 import { NextRequest, NextResponse } from 'next/server';
 
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     const campaigns = await getAllCampaigns(campaignRepository);
     return NextResponse.json(campaigns);
 }
