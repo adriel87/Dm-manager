@@ -1,4 +1,4 @@
-import { CampaignStatus } from "@/domain/entities/campaign";
+import { CampaignStatus } from "@/domain/campaign.ts/campaign";
 import { z } from "zod";
 
 export const campaignSchema = z.object({

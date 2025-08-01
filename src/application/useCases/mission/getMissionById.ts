@@ -1,5 +1,5 @@
-import { Mission } from "@/domain/entities/mission";
-import { MissionRespository } from "@/domain/repositories/MissionRepository";
+import { Mission } from "@/domain/mission/mission";
+import { MissionRespository } from "@/domain/mission/MissionRepository";
 
 export const getMissionById = async (repository: MissionRespository, id: string): Promise<Mission | null> => {
     try {

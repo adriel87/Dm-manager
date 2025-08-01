@@ -1,4 +1,4 @@
-import { Mission } from "../entities/mission";
+import { Mission } from "./mission";
 
 export interface MissionRespository {
     getAllMissions(): Promise<Mission[]>;

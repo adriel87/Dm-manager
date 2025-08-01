@@ -1,4 +1,4 @@
-import { Mission } from "@/domain/entities/mission";
+import { Mission } from "@/domain/mission/mission";
 import { Document, WithId } from "mongodb";
 
 export const mapMissionFromMongoToDomain = (mission: WithId<Document>): Mission =>( {
