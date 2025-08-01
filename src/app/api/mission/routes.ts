@@ -3,7 +3,7 @@ import { missionRepository } from "@/infrastructure/adapters/repositories/mongo/
 import { missionSchema } from "@/infrastructure/adapters/schemas/mission.schema";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     const missions = await getAllMissions(missionRepository);
     return NextResponse.json(missions);
 }
