@@ -4,7 +4,7 @@ export interface Character {
     id: string;
     name: string;
     age: AgeType;
-    class: keyof typeof DnDClassEnum;
+    classType: DnDClassEnum;
     level: number;
     hitPoints: number;
     createdAt: Date;
@@ -25,7 +25,7 @@ export class CharacterEntity implements Character {
     id: string; 
     name: string;
     age: AgeType;
-    class: keyof typeof DnDClassEnum;
+    classType: DnDClassEnum;
     level: number;
     hitPoints: number;
     createdAt: Date;
@@ -37,7 +37,7 @@ export class CharacterEntity implements Character {
         id: string,
         name: string,
         age: AgeType,
-        classType: keyof typeof DnDClassEnum,
+        classType: DnDClassEnum,
         level: number,
         hitPoints: number,
         createdAt: Date,
@@ -52,7 +52,7 @@ export class CharacterEntity implements Character {
         this.id = id;
         this.name = name;
         this.age = age;
-        this.class = classType
+        this.classType = classType
         this.level = level;
         this.hitPoints = hitPoints;
         this.createdAt = createdAt;
@@ -65,7 +65,7 @@ export class CharacterEntity implements Character {
     updateCharacter(partial: Partial<Character>) {
         if (partial.name) this.name = partial.name;
         if (partial.age) this.age = partial.age;
-        if (partial.class) this.class = partial.class;
+        if (partial.classType) this.classType = partial.classType;
         if (partial.level) this.level = partial.level;
         if (partial.hitPoints) this.hitPoints = partial.hitPoints;
         if (partial.description) this.description = partial.description;
@@ -76,13 +76,19 @@ export class CharacterEntity implements Character {
 }
 
 export const isValidCharacter = (character: Partial<Character>): boolean => {
-    if (!character.name || !character.age || !character.class || character.level === undefined || character.level < 1 || character.hitPoints === undefined || character.hitPoints < 0) {
+    if (!character.name || !character.age || !character.classType || character.level === undefined || character.level < 1 || character.hitPoints === undefined || character.hitPoints < 0) {
         return false;
     }
     return true;
 }
 
 export type AgeType = 'child' | 'teenager' | 'adult' | 'elderly';
+export const AgeTypeEnum: Record<AgeType, AgeType> = {
+    child: 'child',
+    teenager: 'teenager',
+    adult: 'adult',
+    elderly: 'elderly'
+};
 export enum DnDClassEnum {
     Barbarian = 'Barbarian',
     Bard = 'Bard',
