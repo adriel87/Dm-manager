@@ -22,7 +22,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     // Validate the body against the campaign schema
     const campaign = campaignSchema.parse(body);
     // Check if the campaign exists
-    updateCampaign(campaignRepository, { id, ...campaign });
+    const updatedCampaign = await updateCampaign(campaignRepository, { ...campaign, id });
+
+    if (!updatedCampaign) {
+        return NextResponse.json({ error: 'oooo fck fail' }, { status: 404 });
+    }
+    return NextResponse.json(updatedCampaign);
+
 }
 
 // DELETE CAMPAIGN
