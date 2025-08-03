@@ -1,5 +1,5 @@
-import { Campaign } from "@/domain/campaign.ts/campaign";
-import { CampaignRepository } from "@/domain/campaign.ts/CampaignRepository";
+import { Campaign } from "@/domain/campaign/campaign";
+import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 
 
 export const updateCampaign = async (repository: CampaignRepository, campaignData: Partial<Campaign>): Promise<Campaign | null> => {

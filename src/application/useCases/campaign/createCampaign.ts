@@ -1,5 +1,5 @@
-import { Campaign } from "@/domain/campaign.ts/campaign";
-import { CampaignRepository } from "@/domain/campaign.ts/CampaignRepository";
+import { Campaign } from "@/domain/campaign/campaign";
+import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 
 export const createCampaign = async (repository: CampaignRepository, campaignData: Omit<Campaign, "id">): Promise<Campaign> => {
     try {
