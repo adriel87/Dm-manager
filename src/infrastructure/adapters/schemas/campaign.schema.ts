@@ -1,12 +1,13 @@
 import { CampaignStatus } from "@/domain/campaign.ts/campaign";
 import { z } from "zod";
 
+
+const campaignEnum = z.enum(CampaignStatus)
+const records = z.record(campaignEnum, z.string().optional());
 export const campaignSchema = z.object({
   name: z.string().min(1),
   description: z.string(),
-  status: z.enum(CampaignStatus).default(CampaignStatus.Activa),
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().optional().default(() => new Date()),
+  status: z.optional(campaignEnum).default(CampaignStatus.Activa)
 });
 
 export type Campaign = z.infer<typeof campaignSchema>;
