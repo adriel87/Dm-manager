@@ -1,5 +1,5 @@
 import { createCampaign, getAllCampaigns } from '@/application/useCases/campaign';
-import { campaignRepository } from '@/infrastructure/adapters/repositories/campaign.repository';
+import { campaignRepository } from '@/infrastructure/adapters/repositories/mongo/campaign.repository';
 import { campaignSchema } from '@/infrastructure/adapters/schemas/campaign.schema';
 import { NextRequest, NextResponse } from 'next/server';
 

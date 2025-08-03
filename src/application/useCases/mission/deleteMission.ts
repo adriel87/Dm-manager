@@ -1,4 +1,4 @@
-import { MissionRespository } from "@/domain/repositories/MissionRepository";
+import { MissionRespository } from "@/domain/mission/MissionRepository";
 
 export const deleteMission = async (repository: MissionRespository, id: string): Promise<boolean> => {
     try {

@@ -1,4 +1,4 @@
-import { CampaignRepository } from "@/domain/repositories/CampaignRepository";
+import { CampaignRepository } from "@/domain/campaign.ts/CampaignRepository";
 
 export const delelteCampaign = async (repository: CampaignRepository, id: string): Promise<boolean> => {
     try {

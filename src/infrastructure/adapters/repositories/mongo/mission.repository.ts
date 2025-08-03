@@ -1,5 +1,5 @@
-import { Mission } from "@/domain/entities/mission";
-import { MissionRespository } from "@/domain/repositories/MissionRepository";
+import { Mission } from "@/domain/mission/mission";
+import { MissionRespository } from "@/domain/mission/MissionRepository";
 import { getCollection } from "@/infrastructure/config/mongodb";
 import { mapMissionFromMongoToDomain } from "../../mappers/mission.mappers";
 import { ObjectId } from "mongodb";

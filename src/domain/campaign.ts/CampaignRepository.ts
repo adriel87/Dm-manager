@@ -1,4 +1,4 @@
-import { Campaign } from "../entities/campaign";
+import { Campaign } from "./campaign";
 
 export interface CampaignRepository {
     getAllCampaigns(): Promise<Campaign[]>;

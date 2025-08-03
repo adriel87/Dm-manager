@@ -1,4 +1,4 @@
-import { MissionStatus } from "@/domain/entities/mission";
+import { MissionStatus } from "@/domain/mission/mission";
 import { z } from "zod";
 
 export const missionSchema =  z.object({
