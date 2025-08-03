@@ -1,4 +1,4 @@
-import { CampaignStatus } from "@/domain/campaign.ts/campaign";
+import { CampaignStatus } from "@/domain/campaign/campaign";
 import { z } from "zod";
 
 

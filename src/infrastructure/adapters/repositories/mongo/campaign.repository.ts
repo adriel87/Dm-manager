@@ -1,5 +1,5 @@
-import { Campaign } from "@/domain/campaign.ts/campaign";
-import { CampaignRepository } from "@/domain/campaign.ts/CampaignRepository";
+import { Campaign } from "@/domain/campaign/campaign";
+import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 import { getCollection } from "@/infrastructure/config/mongodb";
 import { Document, ObjectId, WithId } from "mongodb";
 
