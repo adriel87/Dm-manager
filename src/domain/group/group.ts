@@ -9,3 +9,22 @@ export interface Group {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+
+export const validateGroup = (group: Partial<Group>): boolean => {
+    if (!group.name || group.name.trim() === "") {
+        throw new Error("Group name is required");
+    }
+    if (!group.description || group.description.trim() === "") {
+        throw new Error("Group description is required");
+    }
+    if (!Array.isArray(group.members)) {
+        throw new Error("Group members must be an array");
+    }
+    group.members.forEach(member => {
+        if (!member.id || !member.name || !member.classType) {
+            throw new Error("Each member must have id, name, and classType");
+        }
+    });
+    return true;
+}
