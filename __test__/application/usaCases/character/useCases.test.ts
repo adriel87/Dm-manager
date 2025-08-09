@@ -107,7 +107,6 @@ describe("Character use cases", () => {
             expect(result).rejects.toThrow("Invalid character data");
             expect(mockCharacterRepository.createCharacter).not.toHaveBeenCalled();
 
-            expect(createCharacter(mockCharacterRepository, invalidCharacter)).rejects.toThrow("Invalid character data");
         })
     })
 
