@@ -10,3 +10,5 @@ export interface GroupRepository {
     removeMembersFromGroup(groupId: string, memberIds: string[]): Promise<boolean>
     deleteGroup(id: string): Promise<boolean>
 }
+
+export type ValidGroupRepository = GroupRepository;
