@@ -1,9 +1,12 @@
 import { createGroup } from "@/application/useCases/group/createGroup";
+import { deleteGroup } from "@/application/useCases/group/deleteGroup";
 import { getAllGroups } from "@/application/useCases/group/getAllGroups";
 import { getGroupById } from "@/application/useCases/group/getGroup";
+import { updatedGroup } from "@/application/useCases/group/updateGroup";
 import { Group } from "@/domain/group/group";
 import { GroupRepository } from "@/domain/group/groupRepository";
-import { describe, expect, it, vi } from "vitest";
+import { group } from "console";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe('Testing use case group', () => {
 
@@ -16,6 +19,10 @@ describe('Testing use case group', () => {
         removeMembersFromGroup: vi.fn(),
         deleteGroup: vi.fn(),
     }
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+    });
 
     describe('getAllGroups', () => {
 
@@ -117,15 +124,100 @@ describe('Testing use case group', () => {
             expect(mockGroupRepository.createGroup).toHaveBeenCalledOnce();
         }),
 
-        it('should throw an error for invalid group data',() =>{
+        it('should throw an error for invalid group data', async() =>{
             //Arrange           
-         
+            const invalidGroup = { ...group, name: "" };
             //Act
-          
-            //@ts-ignore
+            const result = createGroup(mockGroupRepository, invalidGroup);
            
             //Assert
-           
+            expect(result).rejects.toThrow("Invalid group data");
+            expect(mockGroupRepository.createGroup).not.toHaveBeenCalled();
         })
+    })
+
+    describe ('deleteGroupById', () => {
+        it('Should delete a group successfully', async() =>{
+            //Arrange
+            const validId : string = '1'
+            vi.mocked(mockGroupRepository.deleteGroup).mockResolvedValue(true);
+
+            //Act
+            const result = await deleteGroup(mockGroupRepository,validId)
+
+            //Assert
+            expect(result).toBe(true);
+            expect(mockGroupRepository.deleteGroup).toHaveBeenCalledWith(validId);
+        }),
+
+        it('should throw an error if id is not valid, when is empty null or undefined', () =>{
+            //Arrange     
+            const invalidEmptyId = ''
+            const invalidNullId = null
+            const invalidUndefinedId = undefined
+            //Act
+            const resultinvalidEmptyId = deleteGroup(mockGroupRepository,invalidEmptyId);
+            //@ts-ignore
+            const resultinvalidNullId = deleteGroup(mockGroupRepository,invalidNullId);
+             //@ts-ignore
+            const resultinvalidUndefinedId = deleteGroup(mockGroupRepository,invalidUndefinedId);
+
+            //Assert
+            expect(resultinvalidEmptyId).rejects.toThrow("Invalid group id")
+            expect(resultinvalidNullId).rejects.toThrow("Invalid group id")
+            expect(resultinvalidUndefinedId).rejects.toThrow("Invalid group id")
+        })
+    })
+
+    describe ('updateGroupById', () => {
+        const validGroup: Group = {
+                id: '1',
+                name: 'pepe',
+                description: 'fabuloso',
+                members: [],
+            }
+        it('Should update a group successfully when is a valid group', async() =>{
+
+            //act
+            const updateGroup = {...validGroup, name: "Updated Group"}
+            vi.mocked(mockGroupRepository.getGroupById).mockResolvedValue(validGroup);
+            vi.mocked(mockGroupRepository.updateGroup).mockResolvedValue(updateGroup);
+
+            //Act
+            const result = await updatedGroup(mockGroupRepository,validGroup.id, updateGroup)
+
+            //Assert
+            expect(result?.name).toBe("Updated Group");
+            expect(mockGroupRepository.updateGroup).toHaveBeenCalledOnce();
+        }),
+
+        it("debe arrojar una error cuando el nombre del grupo es invalido, el error debe ser 'Nombre del grupo invalido minimo 3 charectes'",  () => {
+            // arrange
+            const groupWithNameWithLessCharacters = {
+                ...validGroup,
+                name: 'do'
+            }
+            const groupWithNameNull = {
+                ...validGroup,
+                name: null
+            }
+            const groupWithNameUndefined = {
+                ...validGroup,
+                name: undefined
+            }
+            vi.mocked(mockGroupRepository.getGroupById).mockResolvedValue(groupWithNameWithLessCharacters);
+            //act
+            const result = updatedGroup(mockGroupRepository,'22', groupWithNameWithLessCharacters)
+            // @ts-ignore
+            const resultNull = updatedGroup(mockGroupRepository,'22', groupWithNameNull)
+            const resultUndefined = updatedGroup(mockGroupRepository,'22', groupWithNameUndefined)
+
+            // assert
+            expect(result).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
+            expect(resultNull).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
+            expect(resultUndefined).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
+        })
+
+       
     })
 })
