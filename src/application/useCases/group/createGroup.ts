@@ -4,7 +4,8 @@ import { GroupRepository } from "@/domain/group/groupRepository";
 export const createGroup = async (groupRepository : GroupRepository, group: Omit<Group, "id" | "createdAt" | "updatedAt">) : Promise<Group> => {
     //Validate the group object
      if (!groupRepository || !('createGroup' in groupRepository))  throw new Error('Invalid Repository');
-     if (!group || !group.name || !group.description) throw new Error('Invalid group data');
+
+     if (!group || !group.name?.trim() || !group.description?.trim()) throw new Error('Invalid group data');
 
      const groupData : Omit<Group, "id"> = {
         ...group,
