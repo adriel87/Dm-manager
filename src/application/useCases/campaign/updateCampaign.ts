@@ -1,8 +1,8 @@
-import { Campaign } from "@/domain/campaign/campaign";
+import { CampaignI } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 
 
-export const updateCampaign = async (repository: CampaignRepository, campaignData: Partial<Campaign>): Promise<Campaign | null> => {
+export const updateCampaign = async (repository: CampaignRepository, campaignData: Partial<CampaignI>): Promise<CampaignI | null> => {
     try {
         // Ensure the campaignData contains the necessary fields for update
         if (!campaignData.id) {

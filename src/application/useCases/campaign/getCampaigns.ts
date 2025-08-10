@@ -1,7 +1,7 @@
-import { Campaign } from "@/domain/campaign/campaign";
+import { CampaignI } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 
-export const getAllCampaigns = async (repository: CampaignRepository): Promise<Campaign[]> => {
+export const getAllCampaigns = async (repository: CampaignRepository): Promise<CampaignI[]> => {
     try {
         const campaigns = await repository.getAllCampaigns();
         return campaigns;

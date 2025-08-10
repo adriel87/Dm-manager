@@ -1,4 +1,4 @@
-import { Campaign } from "@/domain/campaign/campaign";
+import { CampaignI } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 import { getCollection } from "@/infrastructure/config/mongodb";
 import { Document, ObjectId, WithId } from "mongodb";
@@ -6,7 +6,7 @@ import { Document, ObjectId, WithId } from "mongodb";
 export const campaignRepository : CampaignRepository = {
     getAllCampaigns: async () => {
         const campaigns = await getCollection('campaigns');
-        const campaignsList: Campaign[] = (await campaigns.find({}).toArray()).map(mapCampaignFromMongoToDomain);
+        const campaignsList: CampaignI[] = (await campaigns.find({}).toArray()).map(mapCampaignFromMongoToDomain);
         return campaignsList;
     },
     getCampaignById: async (id: string) => {
@@ -25,13 +25,13 @@ export const campaignRepository : CampaignRepository = {
             id: result.insertedId.toString() // Convert ObjectId to string
         }
     },
-    updateCampaign: async ( campaign: Campaign) => {
+    updateCampaign: async ( campaign: CampaignI) => {
         const campaigns = await getCollection('campaigns');
         const existingCampaign = await campaigns.findOne({ _id: new ObjectId(campaign.id) });
         if (!existingCampaign) {
             return null; // Campaign not found
         }
-        const newCampaign : Campaign = {
+        const newCampaign : CampaignI = {
             ...existingCampaign,
             ...campaign,
             updatedAt: new Date() // Update the updatedAt field
@@ -46,7 +46,7 @@ export const campaignRepository : CampaignRepository = {
     }
 };
 
-export const mapCampaignFromMongoToDomain = (campaign: WithId<Document>): Campaign => {
+export const mapCampaignFromMongoToDomain = (campaign: WithId<Document>): CampaignI => {
     return {
         id: campaign._id.toString(),
         description: campaign.description,
