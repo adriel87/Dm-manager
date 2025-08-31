@@ -8,8 +8,16 @@ import { Character } from "@/domain/character/character";
 
 
 export const groupRepository: GroupRepository = {
-    createGroup: function (group: Omit<Group, "id" | "createdAt" | "updatedAt">): Promise<Group> {
-        throw new Error("Function not implemented.");
+    createGroup: async function (group: Omit<Group, 'id'>): Promise<Group> {
+        const collection = await getCollection("groups");
+        const result = await collection.insertOne(group);
+        if(!result.acknowledged){
+            throw new Error("Couldn't create a group")
+        }
+        return {
+            ...group,
+            id: result.insertedId.toString()
+        };
     },
     getGroupById: async function (id: string): Promise<Group | null> {
         if (!id) {

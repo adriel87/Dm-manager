@@ -5,7 +5,6 @@ import { getGroupById } from "@/application/useCases/group/getGroup";
 import { updatedGroup } from "@/application/useCases/group/updateGroup";
 import { Group } from "@/domain/group/group";
 import { GroupRepository } from "@/domain/group/groupRepository";
-import { group } from "console";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe('Testing use case group', () => {
@@ -124,14 +123,14 @@ describe('Testing use case group', () => {
             expect(mockGroupRepository.createGroup).toHaveBeenCalledOnce();
         }),
 
-        it('should throw an error for invalid group data', async() =>{
+        it('should throw an error for invalid group data, Group name is required', async() =>{
             //Arrange           
             const invalidGroup = { ...group, name: "" };
             //Act
             const result = createGroup(mockGroupRepository, invalidGroup);
            
             //Assert
-            expect(result).rejects.toThrow("Invalid group data");
+            expect(result).rejects.toThrow("Group name is required");
             expect(mockGroupRepository.createGroup).not.toHaveBeenCalled();
         })
     })
