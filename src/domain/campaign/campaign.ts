@@ -55,26 +55,39 @@ export class Campaign implements CampaignI {
     
     this.updatedAt = new Date()
   }
-  validateCampaign(partialCampaign: Partial<CampaignI>){
+
+}
+
+  export const validateCampaign = (partialCampaign: Partial<CampaignI>)=>{
+    const errors : Array<string> = []
     if(
       partialCampaign.name === null || 
       partialCampaign.name === undefined ||
       partialCampaign.name.length < 3
     ){
-      throw new Error("Campaign name is invalid, almost 3 characters")
+      errors.push("Campaign name is invalid, almost 3 characters")
     } 
     if(
       partialCampaign.status === null ||
       partialCampaign.status === undefined ||
       !(partialCampaign.status in CampaignStatus)
     ) {
-      throw new Error("Campaign status is invalid")
+      errors.push("Campaign status is invalid")
     }
     if( partialCampaign.description === null || 
       partialCampaign.description === undefined ||
       partialCampaign.description.length < 3) {
-        throw new Error("Campaign description is invalid, almost 3 characters")
+        errors.push("Campaign description is invalid, almost 3 characters")
       }
+    if( 
+      partialCampaign.sessions === null || 
+      partialCampaign.sessions === undefined ||
+      partialCampaign.sessions < 0
+    ) {
+        errors.push("Invalid group Session")
+      }
+    if (errors.length > 0) {
+      throw new Error(`Errors in character: \n${errors.join('\n')}`)
+    }
     return true
   }
-}
