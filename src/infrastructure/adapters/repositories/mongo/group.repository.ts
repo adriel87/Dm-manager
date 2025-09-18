@@ -59,7 +59,7 @@ export const groupRepository: GroupRepository = {
         );
         return updateResult.modifiedCount > 0 
     },
-    removeMembersFromGroup: async function (groupId: string, memberIds: string[]): Promise<boolean> {
+    removeCharactersFromGroup: async function (groupId: string, memberIds: string[]): Promise<boolean> {
         if (!groupId || !memberIds || memberIds.length === 0) {
             throw new Error("Group ID and member IDs are required");
         }

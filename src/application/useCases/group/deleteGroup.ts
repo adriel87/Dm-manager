@@ -1,4 +1,3 @@
-import { Group } from "@/domain/group/group";
 import { GroupRepository } from "@/domain/group/groupRepository";
 
 export const deleteGroup = async (groupRepository : GroupRepository, id: string ) : Promise<boolean> => {
