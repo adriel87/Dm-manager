@@ -21,10 +21,14 @@ export const validateGroup = (group: Partial<Group>): boolean => {
     if (!Array.isArray(group.members)) {
         throw new Error("Group members must be an array");
     }
-    group.members.forEach(member => {
+    validateMembers(group.members);
+    return true;
+}
+
+export function validateMembers(members: Pick<Character, "id" | "name" | "classType">[]) {
+    members?.forEach(member => {
         if (!member.id || !member.name || !member.classType) {
             throw new Error("Each member must have id, name, and classType");
         }
     });
-    return true;
 }

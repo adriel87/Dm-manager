@@ -1,8 +1,11 @@
+import { addMenberToGroup } from "@/application/useCases/group/addCharactersToGroup";
 import { createGroup } from "@/application/useCases/group/createGroup";
 import { deleteGroup } from "@/application/useCases/group/deleteGroup";
 import { getAllGroups } from "@/application/useCases/group/getAllGroups";
 import { getGroupById } from "@/application/useCases/group/getGroup";
+import { removeCharactersFromGroup } from "@/application/useCases/group/removeCharactersFromGroup";
 import { updatedGroup } from "@/application/useCases/group/updateGroup";
+import { Character, DnDClassEnum } from "@/domain/character/character";
 import { Group } from "@/domain/group/group";
 import { GroupRepository } from "@/domain/group/groupRepository";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -15,7 +18,7 @@ describe('Testing use case group', () => {
         getAllGroups: vi.fn(),
         updateGroup: vi.fn(),
         addMembersToGroup: vi.fn(),
-        removeMembersFromGroup: vi.fn(),
+        removeCharactersFromGroup: vi.fn(),
         deleteGroup: vi.fn(),
     }
 
@@ -218,5 +221,115 @@ describe('Testing use case group', () => {
         })
 
        
+    })
+
+    describe ('add menbers to group', ()=>{
+        it('Con una lista de miembros validos se deben incluir al grupo', ()=>{
+            //arrange
+            const characters : Pick<Character, "id" | "name" | "classType">[] = [{
+                id: '1',
+                classType: DnDClassEnum.Barbarian,
+                name: 'pepito'
+            }]
+            const groupId = '1'
+            vi.mocked(mockGroupRepository.addMembersToGroup).mockResolvedValue(true)
+            vi.mocked(mockGroupRepository.getGroupById).mockResolvedValue({
+                id: '1',
+                name: 'pepe',
+                description: 'fabuloso',
+                members: [],
+            })
+            vi.mocked(mockGroupRepository.updateGroup).mockResolvedValue({
+                id: '1',
+                name: 'pepe',
+                description: 'fabuloso',
+                members: [],
+            })
+            //act
+            const result = addMenberToGroup(mockGroupRepository, groupId, characters)
+            //assert
+            expect(result).toBeTruthy()
+
+        })
+        it('Con una lista de miembros invalidos debej arrojar algun error', ()=>{
+            //arrange
+            const characters : Pick<Character, "id" | "name" | "classType">[] = [{
+                id: '1',
+                classType: DnDClassEnum.Barbarian,
+                name: ''
+            }]
+            const groupId = '1'
+            vi.mocked(mockGroupRepository.addMembersToGroup).mockResolvedValue(true)
+            vi.mocked(mockGroupRepository.getGroupById).mockResolvedValue({
+                id: '1',
+                name: 'pepe',
+                description: 'fabuloso',
+                members: [],
+            })
+            vi.mocked(mockGroupRepository.updateGroup).mockResolvedValue({
+                id: '1',
+                name: 'pepe',
+                description: 'fabuloso',
+                members: [],
+            })
+            //act
+            const result = addMenberToGroup(mockGroupRepository, groupId, characters)
+            //assert
+            expect(result).rejects.toThrow('Each member must have id, name, and classType')
+
+        })
+        it('Con un id invalido debe arrojar un error, Invalid Id', ()=>{
+        //arrange
+        const characters : Pick<Character, "id" | "name" | "classType">[] = [{
+            id: '1',
+            classType: DnDClassEnum.Barbarian,
+            name: 'chicho'
+        }]
+        const groupId = null
+        vi.mocked(mockGroupRepository.addMembersToGroup).mockResolvedValue(true)
+        vi.mocked(mockGroupRepository.getGroupById).mockResolvedValue({
+            id: '1',
+            name: 'pepe',
+            description: 'fabuloso',
+            members: [],
+        })
+        vi.mocked(mockGroupRepository.updateGroup).mockResolvedValue({
+            id: '1',
+            name: 'pepe',
+            description: 'fabuloso',
+            members: [],
+        })
+        //act
+        // @ts-ignore
+        const result = addMenberToGroup(mockGroupRepository, groupId, characters)
+        //assert
+        expect(result).rejects.toThrow('Invalid ID')
+
+    })
+
+    })
+
+    describe('remove characters from group', ()=> {
+        it("Con una lista de ids de miembros valido y un id de grupo validos, se debe poder borrar el miembro del grupo", async()=>{
+            // arrange
+            const membersId = ['1']
+            const groupId = '1'
+            vi.mocked(mockGroupRepository.removeCharactersFromGroup).mockResolvedValue(true)
+            //act
+            const result = await removeCharactersFromGroup(mockGroupRepository, groupId, membersId)
+            //assert
+            expect(result).toBeTruthy()
+        })
+
+        it("Con una lista de ids de miembros vacía y un id de grupo valido, no se debe puede borrar una lista vacía", ()=>{
+            // arrange
+            const membersId = [] as any
+            const groupId = '1'
+            vi.mocked(mockGroupRepository.removeCharactersFromGroup).mockResolvedValue(true)
+            //act
+            const result = removeCharactersFromGroup(mockGroupRepository, groupId, membersId)
+            //assert
+             expect(result).rejects.toThrow("Empty data cannot be deleted")
+        })
     })
 })
