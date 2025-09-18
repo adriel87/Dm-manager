@@ -1,9 +1,9 @@
-import { Campaign } from "./campaign";
+import { CampaignI } from "./campaign";
 
 export interface CampaignRepository {
-    getAllCampaigns(): Promise<Campaign[]>;
-    getCampaignById(id: string): Promise<Campaign | null>;
-    createCampaign(campaign: Omit<Campaign, "id">): Promise<Campaign>;
-    updateCampaign(campaign: Campaign): Promise<Campaign | null>;
+    getAllCampaigns(): Promise<CampaignI[]>;
+    getCampaignById(id: string): Promise<CampaignI | null>;
+    createCampaign(campaign: Omit<CampaignI, "id">): Promise<CampaignI>;
+    updateCampaign(campaign: CampaignI): Promise<CampaignI | null>;
     deleteCampaign(id: string): Promise<boolean>;
 }

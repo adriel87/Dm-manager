@@ -1,8 +1,15 @@
+import {Document} from 'mongodb'
+
 export const MapperUtils = {
-    fromDocumentListToEntityList: <T>(docs: Document[], mapper: (doc: Document) => T): T[] => {
+    fromMongoDocumentListToEntityList: <T>(docs: Document[], mapper: (doc: Document) => T): T[] => {
         if (!docs || docs.length === 0) {
             return [];
         }
-        return docs.map(mapper);
+        return docs.map(doc => MapperUtils.fromMongoDocumentToEntity<T>(doc, mapper));
     },
+    fromMongoDocumentToEntity :<T>(docs: Document, mapper: (doc: Document) => T): T => {
+    return docs.map(mapper);
 }
+}
+
+
