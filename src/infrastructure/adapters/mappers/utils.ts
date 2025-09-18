@@ -1,7 +1,9 @@
-import {Document} from 'mongodb'
+import { Document, WithId } from 'mongodb';
+
+type MongoDocs = Document | WithId<Document> ;
 
 export const MapperUtils = {
-    fromMongoDocumentListToEntityList: <T>(docs: Document[], mapper: (doc: Document) => T): T[] => {
+    fromDocumentListToEntityList: <T>(docs: MongoDocs[], mapper: (doc: MongoDocs) => T): T[] => {
         if (!docs || docs.length === 0) {
             return [];
         }

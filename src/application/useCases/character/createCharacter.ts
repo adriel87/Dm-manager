@@ -1,6 +1,5 @@
 import { Character } from "@/domain/character/character";
 import { CharacterRepository } from "@/domain/character/characterRepository";
-import { CharacterSchema } from "@/infrastructure/adapters/schemas/character.schema";
 
 export const createCharacter = async (characterRepository: CharacterRepository, character: Omit<Character, "id" | "createdAt" | "updatedAt">) => {
     // Validate the character object
