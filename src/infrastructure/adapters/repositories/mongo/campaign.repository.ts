@@ -1,15 +1,15 @@
 import { CampaignI } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 import { getCollection } from "@/infrastructure/config/mongodb";
-import { Document, ObjectId, WithId } from "mongodb";
-import { MapperUtils } from "../../mappers/utils";
+import { ObjectId } from "mongodb";
 import { campaingMappers } from "../../mappers/campaign.mapper";
+import { MapperUtils } from "../../mappers/utils";
 
 export const campaignRepository : CampaignRepository = {
     getAllCampaigns: async () => {
         const campaigns = await getCollection('campaigns');
         const campaignList = await campaigns.find().toArray()
-        const campaignsList: CampaignI[] = MapperUtils.fromMongoDocumentListToEntityList(campaignList, campaingMappers.fromMongoDocumentToEntity)
+        const campaignsList: CampaignI[] = MapperUtils.fromDocumentListToEntityList(campaignList, campaingMappers.fromMongoDocumentToEntity)
         return campaignsList;
     },
     getCampaignById: async (id: string) => {

@@ -10,7 +10,8 @@ export const createCampaign = async (repository: CampaignRepository, campaignDat
         }
         const newCampaign = await repository.createCampaign(campaign);
         return newCampaign;
-    } catch (error) {
+    } catch (e) {
+        console.error(e)
         throw new Error("Failed to create campaign");
     }
 }

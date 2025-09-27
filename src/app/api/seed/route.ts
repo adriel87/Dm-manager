@@ -22,11 +22,11 @@ export async function POST() {
             message: 'seed executed',
 
         });
-    } catch (error: any) {
+    } catch (error) {
         return NextResponse.json(
             {
                 message: 'Failed to execute seed',
-                error: error.message,
+                error: error
             },
         );
     }
