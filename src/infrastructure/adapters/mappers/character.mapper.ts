@@ -10,7 +10,7 @@ export const characterMapper = {
             doc._id,
             doc.name,
             doc.age,
-            doc.class,
+            doc.classType,
             doc.level,
             doc.hitPoints,
             new Date(doc.createdAt),

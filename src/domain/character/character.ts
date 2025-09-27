@@ -46,7 +46,7 @@ export class CharacterEntity implements Character {
         location?: string,
         isNPC?: boolean
     ) {
-        if (!id || !name || !age || !classType || level < 1 || hitPoints < 0) {
+        if (!name || !age || !classType || level < 1 || hitPoints < 0) {
             throw new Error("Invalid character data");
         }
         this.id = id;
