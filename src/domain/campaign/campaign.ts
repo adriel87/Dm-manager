@@ -1,3 +1,5 @@
+import { Group } from "../group/group";
+
 export interface CampaignI
 {
   id: string;
@@ -27,6 +29,7 @@ export class Campaign implements CampaignI {
   description: string;
   status: CampaignStatusType;
   sessions: number
+  groups: Array<Pick<Group, "id" | 'name'>>
   nextSessionAt?: Date | undefined;
   lastSessionAt?: Date | undefined;
   createdAt?: Date;
@@ -42,6 +45,7 @@ export class Campaign implements CampaignI {
     this.lastSessionAt = campaign.lastSessionAt ?? undefined
     this.createdAt = campaign.createdAt || new Date();
     this.updatedAt = campaign.updatedAt
+    this.groups = []
   }
 
   updateCampaign(partialCampaign: Partial<CampaignI>){

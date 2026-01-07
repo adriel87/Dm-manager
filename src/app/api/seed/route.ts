@@ -1,23 +1,58 @@
+import { createCampaign } from "@/application/useCases/campaign";
+import { createCharacter } from "@/application/useCases/character/createCharacter";
+import { createGroup } from "@/application/useCases/group/createGroup";
+import { createMission } from "@/application/useCases/mission";
+import { CampaignI } from "@/domain/campaign/campaign";
 import { Character, DnDClassEnum } from "@/domain/character/character";
+import { Group } from "@/domain/group/group";
+import { Mission } from "@/domain/mission/mission";
+import { campaignRepository } from "@/infrastructure/adapters/repositories/mongo/campaign.repository";
 import { characterRepository } from "@/infrastructure/adapters/repositories/mongo/character.repository";
+import { groupRepository } from "@/infrastructure/adapters/repositories/mongo/group.repository";
+import { missionRepository } from "@/infrastructure/adapters/repositories/mongo/mission.repository";
 import { NextResponse } from "next/server";
 
 //CHARACTER
 const characterData: Omit<Character, 'id'> = {
-    name: 'Bárbara',
+    name: 'Carmelo',
     age: "adult",
-    classType: DnDClassEnum.Barbarian,
+    classType: DnDClassEnum.Druid,
     level: 10,
     hitPoints: 50,
     createdAt: new Date('2025-09-20'),
     updatedAt: undefined,
-    description: 'A fierce barbarian warrior',
-    location: 'The Northern Wastes',
-    isNPC: true
+    description: 'A fierce carmelo warrior',
+    location: 'moya',
+    isNPC: false
+}
+const campaign :Omit<CampaignI, "id"> = {
+    description: 'campaña test',
+    name: 'la tesita',
+    sessions: 0,
+    status: "Activa",
+
+}
+const misision : Omit<Mission, "id"> = {
+    description: 'la misionnita',
+    endDate: new Date('2025-09-20'),
+    name: 'la mision de test',
+    startDate: new Date('2025-09-20'),
+    status: "Activa"
+}
+
+const group: Omit<Group, "id" | "createdAt" | "updatedAt"> ={
+    description: 'el grupo de la siembra',
+    name: 'siesmbrones',
+    members:[]
 }
 export async function POST() {
     try {
-        await characterRepository.createCharacter(characterData)
+        await createCharacter(characterRepository,characterData)
+        await createCampaign(campaignRepository,campaign)
+        await createMission(missionRepository,misision)
+        await createGroup(groupRepository, group)
+        // await characterRepository.createCharacter(characterData)
+        // await campaignRepository.
         return NextResponse.json({
             message: 'seed executed',
 
