@@ -1,6 +1,6 @@
-import { Document, WithId } from 'mongodb';
+import { Document as domongo, WithId } from 'mongodb';
 
-type MongoDocs = Document | WithId<Document> ;
+type MongoDocs = domongo | WithId<Document> ;
 
 export const MapperUtils = {
     fromDocumentListToEntityList: <T>(docs: MongoDocs[], mapper: (doc: MongoDocs) => T): T[] => {
@@ -9,8 +9,8 @@ export const MapperUtils = {
         }
         return docs.map(doc => MapperUtils.fromMongoDocumentToEntity<T>(doc, mapper));
     },
-    fromMongoDocumentToEntity :<T>(docs: Document, mapper: (doc: Document) => T): T => {
-    return docs.map(mapper);
+    fromMongoDocumentToEntity :<T>(docs: domongo, mapper: (doc: domongo) => T): T => {
+    return mapper(docs)
 }
 }
 
