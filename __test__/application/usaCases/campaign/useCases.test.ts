@@ -1,7 +1,7 @@
 import { createCampaign, delelteCampaign, getAllCampaigns, getCampaignById, updateCampaign } from "@/application/useCases/campaign";
 import { CampaignI } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach,  describe,  expect, it, vi } from "vitest";
 
 
 describe("Character use cases", () => {
