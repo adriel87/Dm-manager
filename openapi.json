@@ -1,0 +1,627 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "DM Manager API",
+    "description": "API for Dungeon Masters to manage campaigns, missions, characters and groups.",
+    "version": "0.1.0"
+  },
+  "tags": [
+    { "name": "campaigns" },
+    { "name": "missions" },
+    { "name": "characters" },
+    { "name": "sessions" },
+    { "name": "seed" }
+  ],
+  "paths": {
+    "/api/campaign": {
+      "get": {
+        "summary": "Get all campaigns",
+        "tags": ["campaigns"],
+        "responses": {
+          "200": {
+            "description": "List of campaigns",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Campaign" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a campaign",
+        "tags": ["campaigns"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CampaignInput" },
+              "example": {
+                "name": "La destruccion del anillo",
+                "description": "Un grupo de aventureros tienen que destruir un anillo",
+                "status": "Activa",
+                "sessions": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Campaign created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Campaign" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/campaign/{id}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/id" }
+      ],
+      "get": {
+        "summary": "Get campaign by ID",
+        "tags": ["campaigns"],
+        "responses": {
+          "200": {
+            "description": "Campaign found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Campaign" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "summary": "Update campaign by ID",
+        "tags": ["campaigns"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CampaignInput" },
+              "example": {
+                "name": "La destruccion del anillo",
+                "description": "Descripcion actualizada",
+                "status": "Finalizada",
+                "sessions": 3
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Campaign updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Campaign" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "summary": "Delete campaign by ID",
+        "tags": ["campaigns"],
+        "responses": {
+          "200": {
+            "description": "Deletion result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mission": {
+      "get": {
+        "summary": "Get all missions",
+        "tags": ["missions"],
+        "responses": {
+          "200": {
+            "description": "List of missions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Mission" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a mission",
+        "tags": ["missions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MissionInput" },
+              "example": {
+                "name": "Recuperar el artefacto",
+                "description": "Los aventureros deben recuperar el artefacto perdido",
+                "status": "Activa",
+                "startDate": "2024-01-01T00:00:00.000Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Mission created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Mission" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/mission/{id}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/id" }
+      ],
+      "get": {
+        "summary": "Get mission by ID",
+        "tags": ["missions"],
+        "responses": {
+          "200": {
+            "description": "Mission found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Mission" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "summary": "Update mission by ID",
+        "tags": ["missions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/MissionInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mission updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Mission" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete mission by ID",
+        "tags": ["missions"],
+        "responses": {
+          "200": {
+            "description": "Deletion result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/character": {
+      "get": {
+        "summary": "Get all characters",
+        "tags": ["characters"],
+        "responses": {
+          "200": {
+            "description": "List of characters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Character" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a character",
+        "tags": ["characters"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CharacterInput" },
+              "example": {
+                "name": "Gandalf",
+                "age": "elderly",
+                "classType": "Wizard",
+                "level": 20,
+                "hitPoints": 100,
+                "description": "A powerful wizard",
+                "location": "Middle Earth",
+                "isNPC": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Character created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Character" }
+              }
+            }
+          },
+          "400": {
+            "description": "Character creation failed",
+            "content": {
+              "text/plain": {
+                "schema": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/character/{id}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/id" }
+      ],
+      "get": {
+        "summary": "Get character by ID",
+        "tags": ["characters"],
+        "responses": {
+          "200": {
+            "description": "Character found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Character" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "summary": "Update character by ID",
+        "tags": ["characters"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CharacterInput" },
+              "example": {
+                "name": "Gandalf the White",
+                "level": 20,
+                "hitPoints": 120,
+                "location": "Minas Tirith"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Character updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Character" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "summary": "Delete character by ID",
+        "tags": ["characters"],
+        "responses": {
+          "200": {
+            "description": "Deletion result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/session": {
+      "get": {
+        "summary": "Get all sessions",
+        "tags": ["sessions"],
+        "responses": {
+          "200": {
+            "description": "List of sessions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Session" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a session",
+        "tags": ["sessions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SessionInput" },
+              "example": {
+                "campaignId": "60d21b4667d0d8992e610c85",
+                "title": "The Dark Forest",
+                "notes": "Players found the ancient map.",
+                "sessionNumber": 1,
+                "date": "2024-01-15T18:00:00.000Z"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Session created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Session" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/session/{id}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/id" }
+      ],
+      "get": {
+        "summary": "Get session by ID",
+        "tags": ["sessions"],
+        "responses": {
+          "200": {
+            "description": "Session found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Session" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "summary": "Update session by ID",
+        "tags": ["sessions"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SessionInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Session" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "summary": "Delete session by ID",
+        "tags": ["sessions"],
+        "responses": {
+          "200": {
+            "description": "Deletion result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/seed": {
+      "post": {
+        "summary": "Seed database with sample data",
+        "tags": ["seed"],
+        "responses": {
+          "200": {
+            "description": "Seed result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "id": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" },
+        "description": "MongoDB ObjectId"
+      }
+    },
+    "schemas": {
+      "Campaign": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["Activa", "Pausada", "Finalizada"] },
+          "sessions": { "type": "integer" },
+          "nextSessionAt": { "type": "string", "format": "date-time" },
+          "lastSessionAt": { "type": "string", "format": "date-time" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "name", "description", "status", "sessions"]
+      },
+      "CampaignInput": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["Activa", "Pausada", "Finalizada"], "default": "Activa" },
+          "sessions": { "type": "integer", "default": 0 }
+        },
+        "required": ["name", "description"]
+      },
+      "Mission": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["Activa", "Pausada", "Finalizada"] },
+          "startDate": { "type": "string", "format": "date-time" },
+          "endDate": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "name", "description", "status"]
+      },
+      "MissionInput": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "description": { "type": "string", "minLength": 10, "maxLength": 1000 },
+          "status": { "type": "string", "enum": ["Activa", "Pausada", "Finalizada"], "default": "Activa" },
+          "startDate": { "type": "string", "format": "date-time" },
+          "endDate": { "type": "string", "format": "date-time" }
+        },
+        "required": ["name", "description"]
+      },
+      "Character": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "age": { "type": "string", "enum": ["child", "teenager", "adult", "elderly"] },
+          "classType": {
+            "type": "string",
+            "enum": ["Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard", "Artificer", "Blood Hunter", "Normal", "Other"]
+          },
+          "level": { "type": "integer", "minimum": 1 },
+          "hitPoints": { "type": "integer", "minimum": 0 },
+          "description": { "type": "string" },
+          "location": { "type": "string" },
+          "isNPC": { "type": "boolean" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "name", "age", "classType", "level", "hitPoints", "createdAt"]
+      },
+      "CharacterInput": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "age": { "type": "string", "enum": ["child", "teenager", "adult", "elderly"], "default": "adult" },
+          "classType": {
+            "type": "string",
+            "enum": ["Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard", "Artificer", "Blood Hunter", "Normal", "Other"],
+            "default": "Normal"
+          },
+          "level": { "type": "integer", "minimum": 1, "default": 1 },
+          "hitPoints": { "type": "integer", "minimum": 1, "default": 10 },
+          "description": { "type": "string" },
+          "location": { "type": "string" },
+          "isNPC": { "type": "boolean", "default": false }
+        },
+        "required": ["name"]
+      },
+      "Session": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "campaignId": { "type": "string" },
+          "title": { "type": "string" },
+          "notes": { "type": "string" },
+          "sessionNumber": { "type": "integer", "minimum": 1 },
+          "date": { "type": "string", "format": "date-time" }
+        },
+        "required": ["id", "campaignId", "title", "sessionNumber", "date"]
+      },
+      "SessionInput": {
+        "type": "object",
+        "properties": {
+          "campaignId": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "notes": { "type": "string", "default": "" },
+          "sessionNumber": { "type": "integer", "minimum": 1 },
+          "date": { "type": "string", "format": "date-time" }
+        },
+        "required": ["campaignId", "title", "sessionNumber", "date"]
+      },
+      "MessageResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        },
+        "required": ["message"]
+      }
+    },
+    "responses": {
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "error": { "type": "string" }
+              },
+              "required": ["error"]
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    { "url": "http://localhost:3000", "description": "Local development" }
+  ]
+}
