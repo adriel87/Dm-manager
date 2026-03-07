@@ -36,8 +36,16 @@ export const createNewMission = (newMision : Partial<Mission>) : Omit<Mission,"i
   description: newMision.description ?? "",
   name: newMision.name ?? "name",
   status: newMision.status ?? 'Activa',
-  startDate: newMision.startDate ?? null,
-  endDate: null
+  startDate: newMision.startDate ?? undefined,
+  endDate: undefined,
+  missionEvents: [{
+    name: '',
+    difficult: ''
+  }],
+  missionGuide:'',
+  missionPriority:'',
+  relatedCharacters:null,
+  rewards: null
 })
 
 export type MissionStatusType = keyof typeof MissionStatus;

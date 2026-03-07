@@ -40,14 +40,13 @@ describe("Character use cases", () => {
             expect(mockCampaignRepository.getCampaignById).toHaveBeenCalledOnce();
         })
 
-        it("should throw an error for invalid campaign data", () => {
+        it("should throw an error for invalid campaign data", async () => {
             vi.clearAllMocks()
             // arrange
-            // vi.mocked(mockCampaignRepository.updateCampaign).mockResolvedValue(null);
             // act
-            const result = updateCampaign(mockCampaignRepository, {});
+            const result = updateCampaign(mockCampaignRepository, {} as CampaignI);
             // assert
-            expect(result).rejects.toThrow("Invalid campaign data");
+            await expect(result).rejects.toThrow("Invalid campaign data or ID");
         })
     })
     describe("deleteCharacter", () => {
@@ -69,13 +68,13 @@ describe("Character use cases", () => {
             expect(mockCampaignRepository.deleteCampaign).toHaveBeenCalledWith( validCampaign.id);
         })
 
-        it("should throw an error if character does not exist",  () => {
+        it("should throw an error if character does not exist", async () => {
             // arrange
             vi.mocked(mockCampaignRepository.deleteCampaign).mockResolvedValue(false);
             // act
             const result = delelteCampaign(mockCampaignRepository, null as any);
             // assert
-            expect(result).rejects.toThrow("Failed to delete campaign");
+            await expect(result).rejects.toThrow("Failed to delete campaign");
         })
     })
 
@@ -99,32 +98,32 @@ describe("Character use cases", () => {
             expect(mockCampaignRepository.getCampaignById).toHaveBeenCalledWith(validCampaign.id);
         })
 
-        it("should throw an error if character does not exist, the error would be 'Character not found'",  () => {
+        it("should throw an error if character does not exist, the error would be 'Character not found'", async () => {
             // arrange
             vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(null);
             const id = "non-existent-id";
             // act
-            const result =  getCampaignById(mockCampaignRepository, id);
+            const result = getCampaignById(mockCampaignRepository, id);
             // assert
-            expect(result).resolves.toBe(null);
+            await expect(result).resolves.toBe(null);
         })
-        it("should return null when campaign not exist",  () => {
+        it("should return null when campaign not exist", async () => {
             // arrange
             vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(null);
             const id = "non-existent-id";
             // act
-            const result =  getCampaignById(mockCampaignRepository, id);
+            const result = getCampaignById(mockCampaignRepository, id);
             // assert
-            expect(result).resolves.toBe(null);
+            await expect(result).resolves.toBe(null);
         })
-        it("should throw an error when the id is invalid, Invalid id",  () => {
+        it("should throw an error when the id is invalid, Invalid id", async () => {
             // arrange
             vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(null);
             const id = null;
             // act
-            const result =  getCampaignById(mockCampaignRepository, id);
+            const result = getCampaignById(mockCampaignRepository, id as unknown as string);
             // assert
-            expect(result).rejects.toThrow("Invalid id")
+            await expect(result).rejects.toThrow("Invalid id")
         })
     })
 

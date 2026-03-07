@@ -2,20 +2,20 @@ import { CampaignI } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 import { getCollection } from "@/infrastructure/config/mongodb";
 import { ObjectId } from "mongodb";
-import { campaingMappers } from "../../mappers/campaign.mapper";
+import { campaignMappers } from "../../mappers/campaign.mapper";
 import { MapperUtils } from "../../mappers/utils";
 
 export const campaignRepository : CampaignRepository = {
     getAllCampaigns: async () => {
         const campaigns = await getCollection('campaigns');
         const campaignList = await campaigns.find().toArray()
-        const campaignsList: CampaignI[] = MapperUtils.fromDocumentListToEntityList(campaignList, campaingMappers.fromMongoDocumentToEntity)
+        const campaignsList: CampaignI[] = MapperUtils.fromDocumentListToEntityList(campaignList, campaignMappers.fromMongoDocumentToEntity)
         return campaignsList;
     },
     getCampaignById: async (id: string) => {
         const collection = await getCollection('campaigns');
         const campaign = await collection.findOne({ _id: new ObjectId(id) });
-        return campaign ? MapperUtils.fromMongoDocumentToEntity(campaign, campaingMappers.fromMongoDocumentToEntity) : null
+        return campaign ? MapperUtils.fromMongoDocumentToEntity(campaign, campaignMappers.fromMongoDocumentToEntity) : null
     },
     createCampaign: async (campaign) => {
         const collection = await getCollection('campaigns');

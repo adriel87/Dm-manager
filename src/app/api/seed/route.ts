@@ -37,7 +37,15 @@ const misision : Omit<Mission, "id"> = {
     endDate: new Date('2025-09-20'),
     name: 'la mision de test',
     startDate: new Date('2025-09-20'),
-    status: "Activa"
+    status: "Activa",
+    missionEvents: [{
+        name: 'llslsls',
+        difficult: 'super hipel'
+    }],
+    missionGuide: 'la guia',
+    missionPriority: 'alta',
+    relatedCharacters: null,
+    rewards: ''
 }
 
 const group: Omit<Group, "id" | "createdAt" | "updatedAt"> ={

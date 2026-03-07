@@ -1,10 +1,20 @@
 import { MissionStatus } from "@/domain/mission/mission";
 import { z } from "zod";
 
-export const missionSchema =  z.object({
+const typeEventSchema = z.object({
+    name: z.string(),
+    difficult: z.string(),
+});
+
+export const missionSchema = z.object({
     name: z.string().min(1).max(100),
     description: z.string().min(10).max(1000),
-    status: z.enum(MissionStatus).default(MissionStatus.Activa),
-    startDate: z.date().nullish(),
-    endDate: z.date().nullish(),
+    missionGuide: z.string(),
+    missionPriority: z.string(),
+    missionEvents: z.array(typeEventSchema).nullable(),
+    rewards: z.string().nullable(),
+    relatedCharacters: z.array(z.object({ id: z.string(), name: z.string() })).nullable(),
+    status: z.nativeEnum(MissionStatus).default(MissionStatus.Activa),
+    startDate: z.coerce.date().optional(),
+    endDate: z.coerce.date().optional(),
 });

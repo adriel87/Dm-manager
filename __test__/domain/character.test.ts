@@ -38,7 +38,7 @@ describe("CharacterEntity", () => {
         });
 
         it("should throw an error for invalid character data", () => {
-            expect(() => new CharacterEntity("", "", "adult", "Warrior", 0, -1, new Date())).toThrow("Invalid character data");
+            expect(() => new CharacterEntity("", "", "adult", DnDClassEnum.Artificer, 0, -1, new Date())).toThrow("Invalid character data");
         });
     });
 });

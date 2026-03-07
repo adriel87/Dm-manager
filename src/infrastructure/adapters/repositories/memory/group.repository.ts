@@ -1,4 +1,3 @@
-import { Character } from "@/domain/character/character";
 import { Group } from "@/domain/group/group";
 import { GroupRepository } from "@/domain/group/groupRepository";
 
