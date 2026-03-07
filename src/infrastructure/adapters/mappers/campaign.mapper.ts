@@ -1,5 +1,5 @@
 import { CampaignI } from "@/domain/campaign/campaign";
-import { WithId, Document, InsertOneResult, FindCursor } from "mongodb";
+import { Document, WithId } from "mongodb";
 
 export const campaingMappers = {
     fromMongoDocumentToEntity: (doc: Document | WithId<Document> ): CampaignI => {

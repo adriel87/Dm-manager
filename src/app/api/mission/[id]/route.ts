@@ -3,8 +3,8 @@ import { missionRepository } from "@/infrastructure/adapters/repositories/mongo/
 import { missionSchema } from "@/infrastructure/adapters/schemas/mission.schema";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+    const id = (await params).id;
     const mission = await getMissionById(missionRepository, id);
     if (!mission) {
         return NextResponse.json({ error: 'Mission not found' }, { status: 404 });
@@ -12,9 +12,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 
     return NextResponse.json(mission);
 }
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
-    const body = await request.json();
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+   const id = (await params).id;
+    const body = await req.json();
 
     // Validate the body against the mission schema
     const mission = missionSchema.parse(body);
@@ -23,8 +23,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     return NextResponse.json(updatedMission);
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
-    const id = params.id;
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {  
+    const id = (await params).id;
     const isDeleted = await deleteMission(missionRepository, id);
     return NextResponse.json({ message: isDeleted ? 'Mission deleted successfully' : 'Failed to delete mission' });
 }

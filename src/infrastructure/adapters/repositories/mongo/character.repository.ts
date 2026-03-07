@@ -24,7 +24,7 @@ export const characterRepository : CharacterRepository = {
         // Implementation to fetch all characters from the database
         const collection = await getCollection("characters");
         const characters = await collection.find().toArray();
-        const list = MapperUtils.fromMongoDocumentListToEntityList(characters as WithId<Document>[], characterMapper.fromMongoDocumentToEntity);
+        const list = MapperUtils.fromDocumentListToEntityList(characters as WithId<Document>[], characterMapper.fromMongoDocumentToEntity);
         return list;
     },
 

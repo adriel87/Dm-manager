@@ -30,16 +30,9 @@ export const missionRepository: MissionRespository = {
     },
     updateMission: async (mission: Mission): Promise<Mission | null> => {
         const missions = await getCollection('missions');
-        const existingMission = await missions.findOne({ _id: new ObjectId(mission.id) });
-        if (existingMission) {
-            const updatedMission = {
-                ...existingMission,
-                ...mission,
-            };
-            await missions.updateOne({ _id: new ObjectId(mission.id) }, { $set: updatedMission });
-            return mapMissionFromMongoToDomain(updatedMission);
-        }
-        return null;
+        await missions.updateOne({ _id: new ObjectId(mission.id) }, { $set: mission });
+        return mission;
+         
     },
     deleteMission: async (id: string): Promise<boolean> => {
         const missions = await getCollection('missions');
