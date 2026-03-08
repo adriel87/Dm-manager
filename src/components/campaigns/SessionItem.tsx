@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardBody, CardHeader } from '@heroui/react';
+import { formatDate } from '@/utils/formatDate';
 
 export interface Session {
   id: string;
@@ -15,25 +16,13 @@ interface SessionItemProps {
   session: Session;
 }
 
-/** Formats an ISO date string to a long Spanish locale date. */
-function formatDate(isoString?: string): string | null {
-  if (!isoString) return null;
-  const date = new Date(isoString);
-  if (isNaN(date.getTime())) return null;
-  return date.toLocaleDateString('es-ES', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
-}
-
 /**
  * Pure Server Component — displays a single session card.
  * Shows session number, title, date, and a notes preview.
  */
 export function SessionItem({ session }: SessionItemProps) {
-  const formattedDate = formatDate(session.date);
+  const formattedDateRaw = formatDate(session.date);
+  const formattedDate = formattedDateRaw === '—' ? null : formattedDateRaw;
 
   return (
     <Card

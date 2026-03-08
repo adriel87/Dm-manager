@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardBody, CardHeader, CardFooter, Chip } from '@heroui/react';
+import { MapPinIcon } from '@/components/icons';
 
 export interface Character {
   id: string;
@@ -26,26 +27,6 @@ const AGE_LABELS: Record<Character['age'], string> = {
   adult: 'Adulto',
   elderly: 'Anciano',
 };
-
-function MapPinIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
 
 /**
  * Pure Server Component — renders a single character card.
@@ -108,7 +89,7 @@ export function CharacterCard({ character }: CharacterCardProps) {
       {character.location && (
         <CardFooter className="pt-3 border-t border-zinc-700">
           <span className="flex items-center gap-1.5 text-zinc-500 text-xs">
-            <MapPinIcon />
+            <MapPinIcon size={12} aria-hidden="true" />
             <span className="line-clamp-1">{character.location}</span>
           </span>
         </CardFooter>

@@ -14,6 +14,7 @@ import {
   SelectItem,
   useDisclosure,
 } from '@heroui/react';
+import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES } from '@/constants/ui';
 
 interface CreateMissionButtonProps {
   onCreated: () => void;
@@ -46,12 +47,6 @@ const STATUS_OPTIONS = [
   { key: 'Pausada', label: 'Pausada' },
   { key: 'Finalizada', label: 'Finalizada' },
 ] as const;
-
-const INPUT_CLASSES = {
-  label: 'text-zinc-300',
-  input: 'text-white',
-  inputWrapper: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
-};
 
 /**
  * Client Component island — renders a button that opens a modal form.
@@ -139,11 +134,7 @@ export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
         onClose={handleClose}
         placement="center"
         size="lg"
-        classNames={{
-          base: 'bg-zinc-900 border border-zinc-700',
-          header: 'border-b border-zinc-700',
-          footer: 'border-t border-zinc-700',
-        }}
+        classNames={MODAL_CLASSES}
       >
         <ModalContent>
           {() => (
@@ -233,10 +224,7 @@ export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
                 </div>
 
                 {error && (
-                  <p
-                    role="alert"
-                    className="text-danger-400 text-sm bg-danger-50/10 border border-danger-200/20 rounded-lg px-3 py-2"
-                  >
+                  <p role="alert" className={ERROR_CLASSES}>
                     {error}
                   </p>
                 )}

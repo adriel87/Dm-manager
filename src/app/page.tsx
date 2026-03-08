@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { CampaignCard, type Campaign } from '@/components/campaigns/CampaignCard';
 import { CreateCampaignButton } from '@/components/campaigns/CreateCampaignButton';
+import { fetchApi } from '@/lib/api';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { EmptyState } from '@/components/ui/EmptyState';
 
 export const metadata: Metadata = {
   title: 'Campañas | DM Manager',
@@ -8,66 +11,24 @@ export const metadata: Metadata = {
 };
 
 /**
- * Fetches campaigns from the internal API.
- * cache: 'no-store' ensures fresh data on every visit — campaigns change often.
- * Returns an empty array on any network or parse error so the page never crashes.
- */
-async function getCampaigns(): Promise<Campaign[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
-
-  try {
-    const res = await fetch(`${baseUrl}/api/campaign`, {
-      cache: 'no-store',
-    });
-
-    if (!res.ok) return [];
-
-    const data: unknown = await res.json();
-
-    if (Array.isArray(data)) return data as Campaign[];
-
-    if (
-      data !== null &&
-      typeof data === 'object' &&
-      'data' in data &&
-      Array.isArray((data as { data: unknown }).data)
-    ) {
-      return (data as { data: Campaign[] }).data;
-    }
-
-    return [];
-  } catch {
-    return [];
-  }
-}
-
-/**
  * Campaign Dashboard — Server Component.
  * Data is fetched server-side; no client-side fetch or useEffect needed.
  */
 export default async function CampaignDashboard() {
-  const campaigns = await getCampaigns();
+  const campaigns = (await fetchApi<Campaign[]>('/api/campaign')) ?? [];
 
   return (
     <section aria-labelledby="campaigns-heading">
       {/* Page header */}
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1
-            id="campaigns-heading"
-            className="text-white text-2xl font-bold tracking-tight"
-          >
-            Campañas
-          </h1>
-          <p className="text-zinc-400 text-sm mt-1">
-            {campaigns.length === 0
-              ? 'Crea tu primera campaña para empezar.'
-              : `${campaigns.length} ${campaigns.length === 1 ? 'campaña' : 'campañas'}`}
-          </p>
-        </div>
-
-        <CreateCampaignButton />
-      </div>
+      <PageHeader
+        title="Campañas"
+        subtitle={
+          campaigns.length === 0
+            ? 'Crea tu primera campaña para empezar.'
+            : `${campaigns.length} ${campaigns.length === 1 ? 'campaña' : 'campañas'}`
+        }
+        action={<CreateCampaignButton />}
+      />
 
       {/* Campaign grid */}
       {campaigns.length > 0 ? (
@@ -83,27 +44,13 @@ export default async function CampaignDashboard() {
           ))}
         </ul>
       ) : (
-        <EmptyState />
+        <EmptyState
+          emoji="🎲"
+          title="No hay campañas todavía"
+          message={'Pulsa \u201c+ Nueva campaña\u201d para empezar a gestionar tus aventuras.'}
+        />
       )}
     </section>
   );
 }
 
-/** Informative empty state — tells the user what to do next. */
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
-      <span className="text-6xl mb-4" role="img" aria-label="Dados">
-        🎲
-      </span>
-      <h2 className="text-white text-xl font-semibold mb-2">
-        No hay campañas todavía
-      </h2>
-      <p className="text-zinc-400 text-sm max-w-sm">
-        Pulsa{' '}
-        <span className="text-white font-medium">&ldquo;+ Nueva campaña&rdquo;</span>{' '}
-        para empezar a gestionar tus aventuras.
-      </p>
-    </div>
-  );
-}

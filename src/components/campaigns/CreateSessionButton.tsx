@@ -12,6 +12,7 @@ import {
   Textarea,
   useDisclosure,
 } from '@heroui/react';
+import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES } from '@/constants/ui';
 
 interface CreateSessionButtonProps {
   campaignId: string;
@@ -30,12 +31,6 @@ const EMPTY_FORM: FormState = {
   notes: '',
   sessionNumber: '',
   date: '',
-};
-
-const INPUT_CLASSES = {
-  label: 'text-zinc-300',
-  input: 'text-white',
-  inputWrapper: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
 };
 
 /**
@@ -130,11 +125,7 @@ export function CreateSessionButton({ campaignId, onCreated }: CreateSessionButt
         onClose={handleClose}
         placement="center"
         size="lg"
-        classNames={{
-          base: 'bg-zinc-900 border border-zinc-700',
-          header: 'border-b border-zinc-700',
-          footer: 'border-t border-zinc-700',
-        }}
+        classNames={MODAL_CLASSES}
       >
         <ModalContent>
           {() => (
@@ -195,10 +186,7 @@ export function CreateSessionButton({ campaignId, onCreated }: CreateSessionButt
                 />
 
                 {error && (
-                  <p
-                    role="alert"
-                    className="text-danger-400 text-sm bg-danger-50/10 border border-danger-200/20 rounded-lg px-3 py-2"
-                  >
+                  <p role="alert" className={ERROR_CLASSES}>
                     {error}
                   </p>
                 )}

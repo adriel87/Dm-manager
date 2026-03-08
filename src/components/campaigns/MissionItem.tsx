@@ -1,6 +1,8 @@
 'use client';
 
 import { Card, CardBody, CardHeader, CardFooter, Chip } from '@heroui/react';
+import { STATUS_COLOR, PRIORITY_COLOR } from '@/constants/ui';
+import { formatDate } from '@/utils/formatDate';
 
 export interface Mission {
   id: string;
@@ -20,46 +22,18 @@ interface MissionItemProps {
   mission: Mission;
 }
 
-const statusConfig: Record<
-  Mission['status'],
-  { color: 'success' | 'warning' | 'default' }
-> = {
-  Activa: { color: 'success' },
-  Pausada: { color: 'warning' },
-  Finalizada: { color: 'default' },
-};
-
-const priorityConfig: Record<
-  string,
-  { color: 'danger' | 'warning' | 'default'; label: string }
-> = {
-  Alta: { color: 'danger', label: 'Alta' },
-  Media: { color: 'warning', label: 'Media' },
-  Baja: { color: 'default', label: 'Baja' },
-};
-
-/** Formats an ISO date string to a short Spanish locale date. */
-function formatDate(isoString?: string): string | null {
-  if (!isoString) return null;
-  const date = new Date(isoString);
-  if (isNaN(date.getTime())) return null;
-  return date.toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
 /**
  * Pure Server Component — displays a single mission card.
  * No interactivity required; all data is passed as props.
  */
 export function MissionItem({ mission }: MissionItemProps) {
-  const { color: statusColor } = statusConfig[mission.status] ?? statusConfig['Finalizada'];
+  const statusColor = STATUS_COLOR[mission.status] ?? STATUS_COLOR['Finalizada'];
   const priorityLabel = mission.missionPriority ?? 'Baja';
-  const priority = priorityConfig[priorityLabel] ?? priorityConfig['Baja'];
-  const startDate = formatDate(mission.startDate);
-  const endDate = formatDate(mission.endDate);
+  const priorityColor = PRIORITY_COLOR[priorityLabel] ?? PRIORITY_COLOR['Baja'];
+  const startDateRaw = formatDate(mission.startDate);
+  const endDateRaw = formatDate(mission.endDate);
+  const startDate = startDateRaw === '—' ? null : startDateRaw;
+  const endDate = endDateRaw === '—' ? null : endDateRaw;
 
   return (
     <Card
@@ -71,8 +45,8 @@ export function MissionItem({ mission }: MissionItemProps) {
           {mission.name}
         </h3>
         <div className="flex items-center gap-1.5 shrink-0">
-          <Chip size="sm" color={priority.color} variant="flat" className="text-xs">
-            {priority.label}
+          <Chip size="sm" color={priorityColor} variant="flat" className="text-xs">
+            {priorityLabel}
           </Chip>
           <Chip size="sm" color={statusColor} variant="flat" className="text-xs">
             {mission.status}

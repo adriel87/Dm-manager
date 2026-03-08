@@ -3,38 +3,10 @@ import { notFound } from 'next/navigation';
 import { CampaignDetailHeader } from '@/components/campaigns/CampaignDetailHeader';
 import { CampaignTabs } from '@/components/campaigns/CampaignTabs';
 import type { Campaign } from '@/components/campaigns/CampaignCard';
+import { fetchApi } from '@/lib/api';
 
 interface CampaignDetailPageProps {
   params: Promise<{ id: string }>;
-}
-
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
-
-/**
- * Fetches a single campaign by ID from the internal API.
- * Returns null if not found or on any network/parse error.
- */
-async function getCampaign(id: string): Promise<Campaign | null> {
-  try {
-    const res = await fetch(`${BASE}/api/campaign/${id}`, {
-      cache: 'no-store',
-    });
-
-    if (res.status === 404) return null;
-    if (!res.ok) return null;
-
-    const data: unknown = await res.json();
-
-    // API may wrap result in { data: Campaign }
-    if (data !== null && typeof data === 'object') {
-      if ('id' in data) return data as Campaign;
-      if ('data' in data) return (data as { data: Campaign }).data;
-    }
-
-    return null;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -45,7 +17,7 @@ export async function generateMetadata(
   { params }: CampaignDetailPageProps
 ): Promise<Metadata> {
   const { id } = await params;
-  const campaign = await getCampaign(id);
+  const campaign = await fetchApi<Campaign>(`/api/campaign/${id}`);
 
   if (!campaign) {
     return {
@@ -72,7 +44,7 @@ export async function generateMetadata(
  */
 export default async function CampaignDetailPage({ params }: CampaignDetailPageProps) {
   const { id } = await params;
-  const campaign = await getCampaign(id);
+  const campaign = await fetchApi<Campaign>(`/api/campaign/${id}`);
 
   if (!campaign) {
     notFound();
