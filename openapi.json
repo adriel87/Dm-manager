@@ -2,13 +2,14 @@
   "openapi": "3.0.1",
   "info": {
     "title": "DM Manager API",
-    "description": "API for Dungeon Masters to manage campaigns, missions, characters and groups.",
-    "version": "0.1.0"
+    "description": "API for Dungeon Masters to manage campaigns, missions, characters, groups and sessions.",
+    "version": "0.2.0"
   },
   "tags": [
     { "name": "campaigns" },
     { "name": "missions" },
     { "name": "characters" },
+    { "name": "groups" },
     { "name": "sessions" },
     { "name": "seed" }
   ],
@@ -151,9 +152,10 @@
               "schema": { "$ref": "#/components/schemas/MissionInput" },
               "example": {
                 "name": "Recuperar el artefacto",
-                "description": "Los aventureros deben recuperar el artefacto perdido",
-                "status": "Activa",
-                "startDate": "2024-01-01T00:00:00.000Z"
+                "description": "Los aventureros deben recuperar el artefacto perdido en las ruinas",
+                "missionGuide": "Guia detallada para el DM sobre como conducir la mision",
+                "missionPriority": "Alta",
+                "status": "Activa"
               }
             }
           }
@@ -305,15 +307,14 @@
         }
       },
       "put": {
-        "summary": "Update character by ID",
+        "summary": "Update character by ID (partial)",
         "tags": ["characters"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/CharacterInput" },
+              "schema": { "$ref": "#/components/schemas/CharacterInputPartial" },
               "example": {
-                "name": "Gandalf the White",
                 "level": 20,
                 "hitPoints": 120,
                 "location": "Minas Tirith"
@@ -344,8 +345,112 @@
                 "schema": { "$ref": "#/components/schemas/MessageResponse" }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/group": {
+      "get": {
+        "summary": "Get all groups",
+        "tags": ["groups"],
+        "responses": {
+          "200": {
+            "description": "List of groups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Group" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a group",
+        "tags": ["groups"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GroupInput" },
+              "example": {
+                "name": "La Comunidad del Anillo",
+                "description": "El grupo principal de aventureros",
+                "members": [
+                  { "id": "60d21b4667d0d8992e610c85", "name": "Gandalf", "classType": "Wizard" }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Group created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Group" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/group/{id}": {
+      "parameters": [
+        { "$ref": "#/components/parameters/id" }
+      ],
+      "get": {
+        "summary": "Get group by ID",
+        "tags": ["groups"],
+        "responses": {
+          "200": {
+            "description": "Group found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Group" }
+              }
+            }
           },
           "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "summary": "Update group by ID (partial)",
+        "tags": ["groups"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GroupInputPartial" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Group updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Group" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "summary": "Delete group by ID",
+        "tags": ["groups"],
+        "responses": {
+          "200": {
+            "description": "Deletion result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
+              }
+            }
+          }
         }
       }
     },
@@ -417,13 +522,13 @@
         }
       },
       "put": {
-        "summary": "Update session by ID",
+        "summary": "Update session by ID (partial)",
         "tags": ["sessions"],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": { "$ref": "#/components/schemas/SessionInput" }
+              "schema": { "$ref": "#/components/schemas/SessionInputPartial" }
             }
           }
         },
@@ -463,12 +568,7 @@
             "description": "Seed result",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": { "type": "string" }
-                  }
-                }
+                "schema": { "$ref": "#/components/schemas/MessageResponse" }
               }
             }
           }
@@ -495,12 +595,16 @@
           "description": { "type": "string" },
           "status": { "type": "string", "enum": ["Activa", "Pausada", "Finalizada"] },
           "sessions": { "type": "integer" },
-          "nextSessionAt": { "type": "string", "format": "date-time" },
-          "lastSessionAt": { "type": "string", "format": "date-time" },
+          "nextSessionAt": { "type": "string", "format": "date-time", "nullable": true },
+          "lastSessionAt": { "type": "string", "format": "date-time", "nullable": true },
+          "groups": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/GroupRef" }
+          },
           "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" }
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
         },
-        "required": ["id", "name", "description", "status", "sessions"]
+        "required": ["id", "name", "description", "status", "sessions", "groups"]
       },
       "CampaignInput": {
         "type": "object",
@@ -518,22 +622,62 @@
           "id": { "type": "string" },
           "name": { "type": "string" },
           "description": { "type": "string" },
+          "missionGuide": { "type": "string" },
+          "missionPriority": { "type": "string" },
           "status": { "type": "string", "enum": ["Activa", "Pausada", "Finalizada"] },
-          "startDate": { "type": "string", "format": "date-time" },
-          "endDate": { "type": "string", "format": "date-time" }
+          "missionEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "difficult": { "type": "string" }
+              },
+              "required": ["name", "difficult"]
+            }
+          },
+          "relatedCharacters": {
+            "type": "array",
+            "nullable": true,
+            "items": { "$ref": "#/components/schemas/CharacterRef" }
+          },
+          "rewards": { "type": "string", "nullable": true },
+          "startDate": { "type": "string", "format": "date-time", "nullable": true },
+          "endDate": { "type": "string", "format": "date-time", "nullable": true }
         },
-        "required": ["id", "name", "description", "status"]
+        "required": ["id", "name", "description", "missionGuide", "missionPriority", "status"]
       },
       "MissionInput": {
         "type": "object",
         "properties": {
-          "name": { "type": "string", "minLength": 1, "maxLength": 100 },
-          "description": { "type": "string", "minLength": 10, "maxLength": 1000 },
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 10 },
+          "missionGuide": { "type": "string" },
+          "missionPriority": { "type": "string" },
           "status": { "type": "string", "enum": ["Activa", "Pausada", "Finalizada"], "default": "Activa" },
-          "startDate": { "type": "string", "format": "date-time" },
-          "endDate": { "type": "string", "format": "date-time" }
+          "missionEvents": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": { "type": "string" },
+                "difficult": { "type": "string" }
+              },
+              "required": ["name", "difficult"]
+            }
+          },
+          "relatedCharacters": {
+            "type": "array",
+            "nullable": true,
+            "items": { "$ref": "#/components/schemas/CharacterRef" }
+          },
+          "rewards": { "type": "string", "nullable": true },
+          "startDate": { "type": "string", "format": "date-time", "nullable": true },
+          "endDate": { "type": "string", "format": "date-time", "nullable": true }
         },
-        "required": ["name", "description"]
+        "required": ["name", "description", "missionGuide", "missionPriority"]
       },
       "Character": {
         "type": "object",
@@ -541,17 +685,14 @@
           "id": { "type": "string" },
           "name": { "type": "string" },
           "age": { "type": "string", "enum": ["child", "teenager", "adult", "elderly"] },
-          "classType": {
-            "type": "string",
-            "enum": ["Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard", "Artificer", "Blood Hunter", "Normal", "Other"]
-          },
+          "classType": { "$ref": "#/components/schemas/DnDClass" },
           "level": { "type": "integer", "minimum": 1 },
           "hitPoints": { "type": "integer", "minimum": 0 },
-          "description": { "type": "string" },
-          "location": { "type": "string" },
-          "isNPC": { "type": "boolean" },
+          "description": { "type": "string", "nullable": true },
+          "location": { "type": "string", "nullable": true },
+          "isNPC": { "type": "boolean", "default": false },
           "createdAt": { "type": "string", "format": "date-time" },
-          "updatedAt": { "type": "string", "format": "date-time" }
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
         },
         "required": ["id", "name", "age", "classType", "level", "hitPoints", "createdAt"]
       },
@@ -560,11 +701,7 @@
         "properties": {
           "name": { "type": "string", "minLength": 1 },
           "age": { "type": "string", "enum": ["child", "teenager", "adult", "elderly"], "default": "adult" },
-          "classType": {
-            "type": "string",
-            "enum": ["Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard", "Artificer", "Blood Hunter", "Normal", "Other"],
-            "default": "Normal"
-          },
+          "classType": { "$ref": "#/components/schemas/DnDClass" },
           "level": { "type": "integer", "minimum": 1, "default": 1 },
           "hitPoints": { "type": "integer", "minimum": 1, "default": 10 },
           "description": { "type": "string" },
@@ -572,6 +709,60 @@
           "isNPC": { "type": "boolean", "default": false }
         },
         "required": ["name"]
+      },
+      "CharacterInputPartial": {
+        "type": "object",
+        "description": "All fields optional — only provided fields are updated",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "age": { "type": "string", "enum": ["child", "teenager", "adult", "elderly"] },
+          "classType": { "$ref": "#/components/schemas/DnDClass" },
+          "level": { "type": "integer", "minimum": 1 },
+          "hitPoints": { "type": "integer", "minimum": 1 },
+          "description": { "type": "string" },
+          "location": { "type": "string" },
+          "isNPC": { "type": "boolean" }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "members": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/GroupMember" }
+          },
+          "createdAt": { "type": "string", "format": "date-time", "nullable": true },
+          "updatedAt": { "type": "string", "format": "date-time", "nullable": true }
+        },
+        "required": ["id", "name", "description", "members"]
+      },
+      "GroupInput": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "members": {
+            "type": "array",
+            "default": [],
+            "items": { "$ref": "#/components/schemas/GroupMember" }
+          }
+        },
+        "required": ["name", "description"]
+      },
+      "GroupInputPartial": {
+        "type": "object",
+        "description": "All fields optional — only provided fields are updated",
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "members": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/GroupMember" }
+          }
+        }
       },
       "Session": {
         "type": "object",
@@ -583,18 +774,58 @@
           "sessionNumber": { "type": "integer", "minimum": 1 },
           "date": { "type": "string", "format": "date-time" }
         },
-        "required": ["id", "campaignId", "title", "sessionNumber", "date"]
+        "required": ["id", "campaignId", "title", "notes", "sessionNumber", "date"]
       },
       "SessionInput": {
         "type": "object",
         "properties": {
           "campaignId": { "type": "string", "minLength": 1 },
-          "title": { "type": "string", "minLength": 1, "maxLength": 100 },
+          "title": { "type": "string", "minLength": 1 },
           "notes": { "type": "string", "default": "" },
           "sessionNumber": { "type": "integer", "minimum": 1 },
           "date": { "type": "string", "format": "date-time" }
         },
         "required": ["campaignId", "title", "sessionNumber", "date"]
+      },
+      "SessionInputPartial": {
+        "type": "object",
+        "description": "All fields optional — only provided fields are updated",
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "notes": { "type": "string" },
+          "sessionNumber": { "type": "integer", "minimum": 1 },
+          "date": { "type": "string", "format": "date-time" }
+        }
+      },
+      "GroupMember": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "classType": { "$ref": "#/components/schemas/DnDClass" }
+        },
+        "required": ["id", "name", "classType"]
+      },
+      "GroupRef": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "name"]
+      },
+      "CharacterRef": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" }
+        },
+        "required": ["id", "name"]
+      },
+      "DnDClass": {
+        "type": "string",
+        "enum": ["Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard", "Artificer", "Blood Hunter", "Normal", "Other"],
+        "default": "Normal"
       },
       "MessageResponse": {
         "type": "object",
