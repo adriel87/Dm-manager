@@ -1,12 +1,12 @@
 import { createCharacter } from "@/application/useCases/character/createCharacter";
 import { getAllCharacters } from "@/application/useCases/character/getAllCharacters";
-import { characterRepository } from "@/infrastructure/adapters/repositories/mongo/character.repository";
+import { repositories } from "@/infrastructure/config/repositories";
 import { characterSchema } from "@/infrastructure/adapters/schemas/character.schema";
 
 export async function POST(req: Request) {
     const character = await req.json();
     const validatedCharacter = characterSchema.parse(character);
-    const createdCharacter = await createCharacter(characterRepository, validatedCharacter);
+    const createdCharacter = await createCharacter(repositories.character, validatedCharacter);
     if (!createdCharacter) {
         return new Response("Character creation failed", { status: 400 });
     }
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(){
-    const characters = await getAllCharacters(characterRepository)
+    const characters = await getAllCharacters(repositories.character)
     if (characters) {
         return new Response(JSON.stringify(characters), {status: 200})
     }

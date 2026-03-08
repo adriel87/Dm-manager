@@ -28,7 +28,7 @@ describe('Testing use case group', () => {
 
     describe('getAllGroups', () => {
 
-        it('Must return a group list', () => {
+        it('Must return a group list', async () => {
             //Arrange
             const groups: Group[] = [{
                 id: '1',
@@ -41,24 +41,24 @@ describe('Testing use case group', () => {
             const result = getAllGroups(mockGroupRepository)
 
             //Assert
-            expect(result).resolves.toEqual(groups);
+            await expect(result).resolves.toEqual(groups);
 
         })
-        it('Si el repo no es válido debe devolver el error "es necesario un repositorio válido"', () => {
+        it('Si el repo no es válido debe devolver el error "es necesario un repositorio válido"', async () => {
             //Arrange
-           
+
             //Act
             //@ts-ignore
             const result = getAllGroups()
 
             //Assert
-            expect(result).rejects.toThrow('es necesario un repositorio válido');
+            await expect(result).rejects.toThrow('es necesario un repositorio válido');
 
         })
     })
 
     describe ('getGroupById', () => {
-        it('Must return one group passing an id',() =>{
+        it('Must return one group passing an id', async () =>{
             //Arrange
              const group: Group = {
                 id: '1',
@@ -72,11 +72,11 @@ describe('Testing use case group', () => {
             const result = getGroupById(mockGroupRepository,'1')
 
             //Assert
-            expect(result).resolves.toEqual(group);
+            await expect(result).resolves.toEqual(group);
         }),
 
-        it('Debe arrojar un error si el id no es válido, No es válido si el id es distinto a un string o no sea cadena vacía',() =>{
-            //Arrange           
+        it('Debe arrojar un error si el id no es válido, No es válido si el id es distinto a un string o no sea cadena vacía', async () =>{
+            //Arrange
             vi.mocked(mockGroupRepository.getGroupById).mockResolvedValue(null);
             const id = "";
             const nullId = null;
@@ -85,19 +85,19 @@ describe('Testing use case group', () => {
             //@ts-ignore
             const result2 = getGroupById(mockGroupRepository,nullId);
             //Assert
-            expect(result).rejects.toThrow('Invalid ID');
-            expect(result2).rejects.toThrow('Invalid ID');
+            await expect(result).rejects.toThrow('Invalid ID');
+            await expect(result2).rejects.toThrow('Invalid ID');
         })
-        it('Debe arrojar un error si el id no es válido, No es válido si el id es distinto a un string o no sea cadena vacía',() =>{
-            //Arrange           
-       
+        it('Debe arrojar un error si el id no es válido, No es válido si el id es distinto a un string o no sea cadena vacía', async () =>{
+            //Arrange
+
             //Act
             //@ts-ignore
             const result = getGroupById('','2');
-            
+
             //Assert
-            expect(result).rejects.toThrow('Invalid Repository');
-           
+            await expect(result).rejects.toThrow('Invalid Repository');
+
         })
     })
 
@@ -127,13 +127,13 @@ describe('Testing use case group', () => {
         }),
 
         it('should throw an error for invalid group data, Group name is required', async() =>{
-            //Arrange           
+            //Arrange
             const invalidGroup = { ...group, name: "" };
             //Act
             const result = createGroup(mockGroupRepository, invalidGroup);
-           
+
             //Assert
-            expect(result).rejects.toThrow("Group name is required");
+            await expect(result).rejects.toThrow("Group name is required");
             expect(mockGroupRepository.createGroup).not.toHaveBeenCalled();
         })
     })
@@ -152,8 +152,8 @@ describe('Testing use case group', () => {
             expect(mockGroupRepository.deleteGroup).toHaveBeenCalledWith(validId);
         }),
 
-        it('should throw an error if id is not valid, when is empty null or undefined', () =>{
-            //Arrange     
+        it('should throw an error if id is not valid, when is empty null or undefined', async () =>{
+            //Arrange
             const invalidEmptyId = ''
             const invalidNullId = null
             const invalidUndefinedId = undefined
@@ -165,9 +165,9 @@ describe('Testing use case group', () => {
             const resultinvalidUndefinedId = deleteGroup(mockGroupRepository,invalidUndefinedId);
 
             //Assert
-            expect(resultinvalidEmptyId).rejects.toThrow("Invalid group id")
-            expect(resultinvalidNullId).rejects.toThrow("Invalid group id")
-            expect(resultinvalidUndefinedId).rejects.toThrow("Invalid group id")
+            await expect(resultinvalidEmptyId).rejects.toThrow("Invalid group id")
+            await expect(resultinvalidNullId).rejects.toThrow("Invalid group id")
+            await expect(resultinvalidUndefinedId).rejects.toThrow("Invalid group id")
         })
     })
 
@@ -193,7 +193,7 @@ describe('Testing use case group', () => {
             expect(mockGroupRepository.updateGroup).toHaveBeenCalledOnce();
         }),
 
-        it("debe arrojar una error cuando el nombre del grupo es invalido, el error debe ser 'Nombre del grupo invalido minimo 3 charectes'",  () => {
+        it("debe arrojar una error cuando el nombre del grupo es invalido, el error debe ser 'Nombre del grupo invalido minimo 3 charectes'", async () => {
             // arrange
             const groupWithNameWithLessCharacters = {
                 ...validGroup,
@@ -215,9 +215,9 @@ describe('Testing use case group', () => {
             const resultUndefined = updatedGroup(mockGroupRepository,'22', groupWithNameUndefined)
 
             // assert
-            expect(result).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
-            expect(resultNull).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
-            expect(resultUndefined).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
+            await expect(result).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
+            await expect(resultNull).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
+            await expect(resultUndefined).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
         })
 
        
@@ -251,7 +251,7 @@ describe('Testing use case group', () => {
             expect(result).toBeTruthy()
 
         })
-        it('Con una lista de miembros invalidos debej arrojar algun error', ()=>{
+        it('Con una lista de miembros invalidos debej arrojar algun error', async ()=>{
             //arrange
             const characters : Pick<Character, "id" | "name" | "classType">[] = [{
                 id: '1',
@@ -275,10 +275,10 @@ describe('Testing use case group', () => {
             //act
             const result = addMenberToGroup(mockGroupRepository, groupId, characters)
             //assert
-            expect(result).rejects.toThrow('Each member must have id, name, and classType')
+            await expect(result).rejects.toThrow('Each member must have id, name, and classType')
 
         })
-        it('Con un id invalido debe arrojar un error, Invalid Id', ()=>{
+        it('Con un id invalido debe arrojar un error, Invalid Id', async ()=>{
         //arrange
         const characters : Pick<Character, "id" | "name" | "classType">[] = [{
             id: '1',
@@ -303,7 +303,7 @@ describe('Testing use case group', () => {
         // @ts-ignore
         const result = addMenberToGroup(mockGroupRepository, groupId, characters)
         //assert
-        expect(result).rejects.toThrow('Invalid ID')
+        await expect(result).rejects.toThrow('Invalid ID')
 
     })
 
@@ -321,7 +321,7 @@ describe('Testing use case group', () => {
             expect(result).toBeTruthy()
         })
 
-        it("Con una lista de ids de miembros vacía y un id de grupo valido, no se debe puede borrar una lista vacía", ()=>{
+        it("Con una lista de ids de miembros vacía y un id de grupo valido, no se debe puede borrar una lista vacía", async ()=>{
             // arrange
             const membersId = [] as any
             const groupId = '1'
@@ -329,7 +329,7 @@ describe('Testing use case group', () => {
             //act
             const result = removeCharactersFromGroup(mockGroupRepository, groupId, membersId)
             //assert
-             expect(result).rejects.toThrow("Empty data cannot be deleted")
+            await expect(result).rejects.toThrow("Empty data cannot be deleted")
         })
     })
 })

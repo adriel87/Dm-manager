@@ -39,24 +39,24 @@ describe("Character use cases", () => {
     });
 
     describe("getAllCharacters", () => {
-        it("should return all characters", () => {
+        it("should return all characters", async () => {
             // arrange
             // Implement test logic here
             vi.mocked(mockCharacterRepository.getAllCharacters).mockResolvedValue(validCharacterList);
             // act
             const result = getAllCharacters(mockCharacterRepository);
            // assert
-           expect(result).resolves.toEqual(validCharacterList);
+           await expect(result).resolves.toEqual(validCharacterList);
            expect(mockCharacterRepository.getAllCharacters).toHaveBeenCalledTimes(1);
         })
 
-        it("should handle empty character list", () => {
+        it("should handle empty character list", async () => {
             // arrange
             vi.mocked(mockCharacterRepository.getAllCharacters).mockResolvedValue([]);
             // act
             const result = getAllCharacters(mockCharacterRepository);
-            // assert 
-            expect(result).resolves.toEqual([]);
+            // assert
+            await expect(result).resolves.toEqual([]);
             expect(mockCharacterRepository.getAllCharacters).toHaveBeenCalledTimes(1);
 
         })
@@ -97,14 +97,14 @@ describe("Character use cases", () => {
             expect(mockCharacterRepository.createCharacter).toHaveBeenCalledOnce();
         })
 
-        it("should throw an error for invalid character data", () => {
+        it("should throw an error for invalid character data", async () => {
             // arrange
             const invalidCharacter = { ...characterToCreate, name: "" };
 
             // act
             const result = createCharacter(mockCharacterRepository, invalidCharacter);
             // assert
-            expect(result).rejects.toThrow("Invalid character data");
+            await expect(result).rejects.toThrow("Invalid character data");
             expect(mockCharacterRepository.createCharacter).not.toHaveBeenCalled();
 
         })
@@ -123,13 +123,13 @@ describe("Character use cases", () => {
             expect(mockCharacterRepository.updateCharacter).toHaveBeenCalledOnce();
         })
 
-        it("should throw an error for invalid character data", () => {
+        it("should throw an error for invalid character data", async () => {
             // arrange
             const invalidUpdate = { ...validCharacter, level: -1 };
             // act
             const result = updateCharacter(mockCharacterRepository, invalidUpdate.id, invalidUpdate);
             // assert
-            expect(result).rejects.toThrow("Invalid character data");
+            await expect(result).rejects.toThrow("Invalid character data");
         })
     })
     describe("deleteCharacter", () => {
@@ -144,13 +144,13 @@ describe("Character use cases", () => {
             expect(mockCharacterRepository.deleteCharacter).toHaveBeenCalledWith(validCharacter.id);
         })
 
-        it("should throw an error if character does not exist",  () => {
+        it("should throw an error if character does not exist", async () => {
             // arrange
             vi.mocked(mockCharacterRepository.deleteCharacter).mockResolvedValue(false);
             // act
             const result = deleteCharacter(mockCharacterRepository, null as any);
             // assert
-            expect(result).rejects.toThrow("Invalid character ID");
+            await expect(result).rejects.toThrow("Invalid character ID");
         })
     })
 
@@ -167,14 +167,14 @@ describe("Character use cases", () => {
             expect(mockCharacterRepository.getCharacterById).toHaveBeenCalledWith(validCharacter.id);
         })
 
-        it("should throw an error if character does not exist, the error would be 'Character not found'",  () => {
+        it("should throw an error if character does not exist, the error would be 'Character not found'", async () => {
             // arrange
             vi.mocked(mockCharacterRepository.getCharacterById).mockResolvedValue(null);
             const id = "non-existent-id";
             // act
             const result =  getCharacterById(mockCharacterRepository, id);
             // assert
-            expect(result).rejects.toThrow("Character not found");
+            await expect(result).rejects.toThrow("Character not found");
         })
     })
 

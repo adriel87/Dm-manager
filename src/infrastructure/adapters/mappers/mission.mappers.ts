@@ -7,5 +7,10 @@ export const mapMissionFromMongoToDomain = (mission: WithId<Document>): Mission 
         status: mission.status,
         endDate: mission.endDate,
         startDate: mission.startDate,
-        name: mission.name
+        name: mission.name,
+        missionEvents: null,
+        missionGuide: '',
+        missionPriority: '',
+        relatedCharacters: [],
+        rewards: ''
 })

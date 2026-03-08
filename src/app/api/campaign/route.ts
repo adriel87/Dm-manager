@@ -1,11 +1,11 @@
 import { createCampaign, getAllCampaigns } from '@/application/useCases/campaign';
-import { campaignRepository } from '@/infrastructure/adapters/repositories/mongo/campaign.repository';
+import { repositories } from '@/infrastructure/config/repositories';
 import { campaignSchema } from '@/infrastructure/adapters/schemas/campaign.schema';
 import { NextRequest, NextResponse } from 'next/server';
 
 
 export async function GET() {
-    const campaigns = await getAllCampaigns(campaignRepository);
+    const campaigns = await getAllCampaigns(repositories.campaign);
     return NextResponse.json(campaigns);
 }
 
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     // Validate the body against the campaign schema
     const campaign = campaignSchema.parse(body);
-    const createdCampaign = await createCampaign(campaignRepository, campaign);
+    const createdCampaign = await createCampaign(repositories.campaign, campaign);
     return NextResponse.json(createdCampaign, { status: 201 });
 }
 

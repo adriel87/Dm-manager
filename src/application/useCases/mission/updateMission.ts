@@ -1,4 +1,4 @@
-import { Mission, updateMissionParams } from "@/domain/mission/mission";
+import { Mission } from "@/domain/mission/mission";
 import { MissionRespository } from "@/domain/mission/MissionRepository";
 
 

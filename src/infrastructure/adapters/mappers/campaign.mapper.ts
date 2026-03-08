@@ -1,7 +1,7 @@
 import { CampaignI } from "@/domain/campaign/campaign";
 import { Document, WithId } from "mongodb";
 
-export const campaingMappers = {
+export const campaignMappers = {
     fromMongoDocumentToEntity: (doc: Document | WithId<Document> ): CampaignI => {
         if (!doc) {
             throw new Error("Document is null or undefined");
