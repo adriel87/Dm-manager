@@ -36,16 +36,16 @@ describe("createSession", () => {
     expect(mockSessionRepository.createSession).toHaveBeenCalledOnce();
   });
 
-  it("should throw when title is missing", () => {
+  it("should throw when title is missing", async () => {
     const { id, ...input } = validSession;
     const result = createSession(mockSessionRepository, { ...input, title: "" });
-    expect(result).rejects.toThrow("Session title is required");
+    await expect(result).rejects.toThrow("Session title is required");
   });
 
-  it("should throw when campaignId is missing", () => {
+  it("should throw when campaignId is missing", async () => {
     const { id, ...input } = validSession;
     const result = createSession(mockSessionRepository, { ...input, campaignId: "" });
-    expect(result).rejects.toThrow("Session campaignId is required");
+    await expect(result).rejects.toThrow("Session campaignId is required");
   });
 });
 
@@ -67,9 +67,9 @@ describe("getSessionById", () => {
     expect(result).toBeNull();
   });
 
-  it("should throw when id is invalid", () => {
+  it("should throw when id is invalid", async () => {
     const result = getSessionById(mockSessionRepository, null as any);
-    expect(result).rejects.toThrow("Invalid id");
+    await expect(result).rejects.toThrow("Invalid id");
   });
 });
 
@@ -84,11 +84,11 @@ describe("updateSession", () => {
     expect(mockSessionRepository.updateSession).toHaveBeenCalledOnce();
   });
 
-  it("should throw when session does not exist", () => {
+  it("should throw when session does not exist", async () => {
     vi.mocked(mockSessionRepository.getSessionById).mockResolvedValue(null);
 
     const result = updateSession(mockSessionRepository, { id: "non-existent", title: "x" });
-    expect(result).rejects.toThrow("Session not found");
+    await expect(result).rejects.toThrow("Session not found");
   });
 });
 
@@ -102,14 +102,14 @@ describe("deleteSession", () => {
     expect(mockSessionRepository.deleteSession).toHaveBeenCalledWith("1");
   });
 
-  it("should throw when id is invalid", () => {
+  it("should throw when id is invalid", async () => {
     const result = deleteSession(mockSessionRepository, null as any);
-    expect(result).rejects.toThrow("Invalid id");
+    await expect(result).rejects.toThrow("Invalid id");
   });
 
-  it("should throw when delete fails", () => {
+  it("should throw when delete fails", async () => {
     vi.mocked(mockSessionRepository.deleteSession).mockResolvedValue(false);
     const result = deleteSession(mockSessionRepository, "1");
-    expect(result).rejects.toThrow("Failed to delete session");
+    await expect(result).rejects.toThrow("Failed to delete session");
   });
 });
