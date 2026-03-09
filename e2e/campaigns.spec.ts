@@ -5,7 +5,7 @@ test.describe('Campaign Dashboard (/)', () => {
 
   test('TC-01: muestra el heading Campañas', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Campañas' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Campañas', exact: true })).toBeVisible();
   });
 
   test('TC-02: muestra tarjeta de campaña creada vía API', async ({ page, request }) => {
@@ -27,8 +27,8 @@ test.describe('Campaign Dashboard (/)', () => {
     const modal = page.getByRole('dialog');
     await expect(modal).toBeVisible();
 
-    await page.getByLabel('Nombre de la campaña').fill('Mi Campaña E2E');
-    await page.getByLabel('Descripción de la campaña').fill('Campaña de prueba automatizada');
+    await page.getByLabel('Nombre').fill('Mi Campaña E2E');
+    await page.getByLabel('Descripción').fill('Campaña de prueba automatizada');
 
     await modal.getByRole('button', { name: 'Crear campaña' }).click();
 
@@ -63,15 +63,15 @@ test.describe('Campaign Dashboard (/)', () => {
 
     const modal = page.getByRole('dialog');
     await expect(modal).toBeVisible();
-
-    await page.getByLabel('Nombre de la campaña').fill('Draft');
+    
+    await page.getByLabel('Nombre').fill('Draft');
     await modal.getByRole('button', { name: 'Cancelar' }).click();
     await expect(modal).not.toBeVisible();
 
     // Reabrir: form reseteado
     await page.getByRole('button', { name: 'Crear nueva campaña' }).click();
     await expect(modal).toBeVisible();
-    await expect(page.getByLabel('Nombre de la campaña')).toHaveValue('');
+    await expect(page.getByLabel('Nombre')).toHaveValue('');
   });
 
   test('TC-06: click en tarjeta navega a detalle de campaña', async ({ page, request }) => {

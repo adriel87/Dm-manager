@@ -36,10 +36,10 @@ test.describe('Campaign Detail (/campaigns/[id])', () => {
     const modal = page.getByRole('dialog');
     await expect(modal).toBeVisible();
 
-    await page.getByLabel('Título de la sesión').fill('Sesión E2E');
+    await page.getByLabel('Título').fill('Sesión E2E');
     await page.getByLabel('Número de sesión').fill('1');
-    await page.getByLabel('Fecha de la sesión').fill('2025-06-15');
-    await page.getByLabel('Notas de la sesión').fill('Notas de prueba E2E');
+    await page.getByLabel('Fecha').fill('2025-06-15');
+    await page.getByLabel('Notas').fill('Notas de prueba E2E');
 
     await modal.getByRole('button', { name: 'Crear sesión' }).click();
     await expect(modal).not.toBeVisible();
@@ -71,7 +71,7 @@ test.describe('Campaign Detail (/campaigns/[id])', () => {
     await page.goto(`/campaigns/${campaignId}`);
     await page.getByRole('link', { name: 'Volver a la lista de campañas' }).click();
     await expect(page).toHaveURL('/');
-    await expect(page.getByRole('heading', { name: 'Campañas' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Campañas', exact: true })).toBeVisible();
   });
 
   test('TC-12: cambiar de tab cambia el contenido visible', async ({ page }) => {

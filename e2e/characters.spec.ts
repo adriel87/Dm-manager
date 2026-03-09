@@ -5,7 +5,7 @@ test.describe('Characters Page (/characters)', () => {
 
   test('TC-13: muestra el heading Personajes', async ({ page }) => {
     await page.goto('/characters');
-    await expect(page.getByRole('heading', { name: 'Personajes' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Personajes', exact: true })).toBeVisible();
   });
 
   test('TC-14: muestra botones de filtro PC/NPC', async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('Characters Page (/characters)', () => {
     const modal = page.getByRole('dialog');
     await expect(modal).toBeVisible();
 
-    await page.getByLabel('Nombre del personaje').fill('Gandalf E2E');
+    await page.getByLabel('Nombre').fill('Gandalf E2E');
 
     await modal.getByRole('button', { name: 'Crear personaje' }).click();
     await expect(modal).not.toBeVisible();
