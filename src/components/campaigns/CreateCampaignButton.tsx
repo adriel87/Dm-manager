@@ -167,6 +167,7 @@ export function CreateCampaignButton() {
                     label: 'text-zinc-300',
                     value: 'text-white',
                     trigger: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
+                    popoverContent: 'bg-zinc-800 text-white',
                   }}
                   aria-label="Estado de la campaña"
                 >
