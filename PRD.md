@@ -154,7 +154,7 @@ Todos los endpoints siguen el patrón REST con respuestas JSON.
 | Character | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Mission | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Session | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Group | ⚠️ Sin rutas API aún | — | — | — | — |
+| Group | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 > La API está completa para el MVP excepto por los endpoints de `Group`.
 
@@ -171,6 +171,7 @@ Todos los endpoints siguen el patrón REST con respuestas JSON.
 | UI Components | HeroUI + Tailwind CSS 4 |
 | Animaciones | Framer Motion |
 | Tests | Vitest 3 + Testing Library |
+| E2E Tests | Playwright |
 | Arquitectura | Hexagonal (Ports & Adapters) |
 | Infraestructura local | Docker Compose (MongoDB) |
 
@@ -183,6 +184,7 @@ Todos los endpoints siguen el patrón REST con respuestas JSON.
 - [ ] Los formularios validan los datos antes de enviar
 - [ ] Los errores de API se muestran de forma comprensible al usuario
 - [ ] Los tests unitarios cubren los use cases principales
+- [ ] Los tests E2E cubren los flujos principales de usuario
 - [ ] La aplicación corre en local con un solo comando (`npm run dev` + `npm run dockerstart`)
 
 ---
@@ -191,9 +193,8 @@ Todos los endpoints siguen el patrón REST con respuestas JSON.
 
 | Fase | Funcionalidades |
 |------|----------------|
-| v1.1 | API de Groups + UI completa de grupos |
-| v1.2 | Dashboard con estadísticas de campaña |
-| v1.3 | Búsqueda y filtros avanzados |
+| v1.1 | Dashboard con estadísticas de campaña |
+| v1.2 | Búsqueda y filtros avanzados |
 | v2.0 | Autenticación + multi-DM |
 | v2.1 | Acceso limitado para jugadores |
 | v3.0 | Exportación de campaña (PDF / Markdown) |
