@@ -17,7 +17,8 @@ export const characterMapper = {
             doc.updatedAt,
             doc.description,
             doc.location,
-            doc.isNPC
+            doc.isNPC,
+            doc.playerName
         );
     }
 }

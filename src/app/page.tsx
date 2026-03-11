@@ -1,56 +1,54 @@
 import type { Metadata } from 'next';
-import { CampaignCard, type Campaign } from '@/components/campaigns/CampaignCard';
-import { CreateCampaignButton } from '@/components/campaigns/CreateCampaignButton';
 import { fetchApi } from '@/lib/api';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { DashboardStats } from '@/components/dashboard/DashboardStats';
+import { RecentCampaigns } from '@/components/dashboard/RecentCampaigns';
+import { RecentGroups } from '@/components/dashboard/RecentGroups';
+import { DashboardStats as DashboardStatsType, DashboardCampaign, DashboardGroup } from '@/domain/dashboard/dashboard';
 
 export const metadata: Metadata = {
-  title: 'Campañas | DM Manager',
-  description: 'Gestiona todas tus campañas de rol desde un solo lugar.',
+  title: 'Dashboard | DM Manager',
+  description: 'Panel de control para gestionar tus campañas de rol.',
 };
 
-/**
- * Campaign Dashboard — Server Component.
- * Data is fetched server-side; no client-side fetch or useEffect needed.
- */
-export default async function CampaignDashboard() {
-  const campaigns = (await fetchApi<Campaign[]>('/api/campaign')) ?? [];
+async function getDashboardData() {
+    const [stats, campaigns, groups] = await Promise.all([
+        fetchApi<DashboardStatsType>('/api/dashboard/stats'),
+        fetchApi<DashboardCampaign[]>('/api/dashboard/recent-campaigns'),
+        fetchApi<DashboardGroup[]>('/api/dashboard/recent-groups'),
+    ]);
 
-  return (
-    <section aria-labelledby="campaigns-heading">
-      {/* Page header */}
-      <PageHeader
-        title="Campañas"
-        subtitle={
-          campaigns.length === 0
-            ? 'Crea tu primera campaña para empezar.'
-            : `${campaigns.length} ${campaigns.length === 1 ? 'campaña' : 'campañas'}`
-        }
-        action={<CreateCampaignButton />}
-      />
-
-      {/* Campaign grid */}
-      {campaigns.length > 0 ? (
-        <ul
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          role="list"
-          aria-label="Lista de campañas"
-        >
-          {campaigns.map((campaign) => (
-            <li key={campaign.id}>
-              <CampaignCard campaign={campaign} />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <EmptyState
-          emoji="🎲"
-          title="No hay campañas todavía"
-          message={'Pulsa \u201c+ Nueva campaña\u201d para empezar a gestionar tus aventuras.'}
-        />
-      )}
-    </section>
-  );
+    return {
+        stats: stats ?? { totalCampaigns: 0, activeCampaigns: 0, totalGroups: 0, totalPlayers: 0, nextSessionAt: null },
+        campaigns: campaigns ?? [],
+        groups: groups ?? []
+    };
 }
 
+export default async function Dashboard() {
+    const { stats, campaigns, groups } = await getDashboardData();
+
+    return (
+        <section aria-labelledby="dashboard-heading">
+            <PageHeader title="Dashboard" subtitle="Resumen de tu mesa de juego" />
+
+            <div className="space-y-6">
+                <section aria-label="Estadísticas">
+                    <DashboardStats initialData={stats} />
+                </section>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <section aria-label="Campañas recientes">
+                        <h2 className="text-lg font-semibold text-white mb-3">Campañas Recientes</h2>
+                        <RecentCampaigns initialData={campaigns} />
+                    </section>
+
+                    <section aria-label="Grupos recientes">
+                        <h2 className="text-lg font-semibold text-white mb-3">Grupos Recientes</h2>
+                        <RecentGroups initialData={groups} />
+                    </section>
+                </div>
+            </div>
+        </section>
+    );
+}

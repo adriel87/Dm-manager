@@ -1,0 +1,32 @@
+change: dashboard-homepage
+status: tasks_completed
+created: 2026-03-11
+proposal: openspec/changes/dashboard-homepage/proposal.md
+
+artifacts:
+  - id: character-delta-spec
+    path: openspec/specs/character/delta-spec.md
+    type: spec
+  - id: campaign-delta-spec
+    path: openspec/specs/campaign/delta-spec.md
+    type: spec
+  - id: group-delta-spec
+    path: openspec/specs/group/delta-spec.md
+    type: spec
+  - id: dashboard-delta-spec
+    path: openspec/specs/dashboard/delta-spec.md
+    type: spec
+  - id: design
+    path: openspec/changes/dashboard-homepage/design.md
+    type: design
+  - id: tasks
+    path: openspec/changes/dashboard-homepage/tasks.md
+    type: tasks
+
+affected_domains:
+  - character (modified - add playerName field)
+  - campaign (modified - dashboard query support)
+  - group (modified - dashboard query support)
+  - dashboard (new - stats and recent items)
+
+next_recommended: sdd-apply

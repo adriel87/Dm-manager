@@ -4,7 +4,7 @@ export interface Character {
     id: string;
     name: string;
     age: AgeType;
-    classType: DnDClassEnum;
+    classType: DnDClassType;
     level: number;
     hitPoints: number;
     createdAt: Date;
@@ -12,6 +12,7 @@ export interface Character {
     description?: string;
     location?: string;
     isNPC?: boolean; // Non-Player Character
+    playerName?: string; // Real player's name for non-NPC characters
      // Add more properties as needed
 }
 
@@ -25,7 +26,7 @@ export class CharacterEntity implements Character {
     id: string; 
     name: string;
     age: AgeType;
-    classType: DnDClassEnum;
+    classType: DnDClassType;
     level: number;
     hitPoints: number;
     createdAt: Date;
@@ -33,18 +34,20 @@ export class CharacterEntity implements Character {
     description?: string;
     location?: string;
     isNPC?: boolean;
+    playerName?: string;
     constructor(
         id: string,
         name: string,
         age: AgeType,
-        classType: DnDClassEnum,
+        classType: DnDClassType,
         level: number,
         hitPoints: number,
         createdAt: Date,
         updatedAt?: Date,
         description?: string,
         location?: string,
-        isNPC?: boolean
+        isNPC?: boolean,
+        playerName?: string
     ) {
         if (!name || !age || !classType || level < 1 || hitPoints < 0) {
             throw new Error("Invalid character data");
@@ -60,6 +63,7 @@ export class CharacterEntity implements Character {
         this.description = description
         this.location = location;
         this.isNPC = isNPC;
+        this.playerName = playerName;
     }
     // Add methods for business logic if needed
     updateCharacter(partial: Partial<Character>) {
@@ -71,6 +75,7 @@ export class CharacterEntity implements Character {
         if (partial.description) this.description = partial.description;
         if (partial.location) this.location = partial.location;
         if (partial.isNPC !== undefined) this.isNPC = partial.isNPC;
+        if (partial.playerName !== undefined) this.playerName = partial.playerName;
         this.updatedAt = new Date();
     }
 }
@@ -107,3 +112,6 @@ export enum DnDClassEnum {
     Normal = 'Normal', // For non-DnD characters
     Other = 'Other', // For characters not fitting into the above categories
 }
+
+// Type alias using keyof typeof - works well with z.enum()
+export type DnDClassType = keyof typeof DnDClassEnum;
