@@ -1,3 +1,4 @@
+'use client'
 import { Card, CardBody, CardHeader, Chip } from "@heroui/react";
 import { CalendarIcon, BookIcon } from "@/components/icons";
 import { DashboardCampaign } from "@/domain/dashboard/dashboard";
