@@ -30,3 +30,11 @@ export const PRIORITY_COLOR: Record<string, 'danger' | 'warning' | 'default'> = 
   Media: 'warning',
   Baja: 'default',
 };
+
+// Shared Select classNames for HeroUI dark-mode forms
+export const SELECT_CLASSES = {
+  label: 'text-zinc-300',
+  value: 'text-white',
+  trigger: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
+  popoverContent: 'bg-zinc-800 text-white',
+} as const;

@@ -3,7 +3,7 @@ import { fetchApi } from '@/lib/api';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { CreateGroupButton } from '@/components/groups/CreateGroupButton';
 import { GroupFilters } from '@/components/groups/GroupFilters';
-import type { Group } from '@/components/groups/GroupCard';
+import type { Group } from '@/domain/group/group';
 
 export const metadata: Metadata = {
   title: 'Grupos | DM Manager',

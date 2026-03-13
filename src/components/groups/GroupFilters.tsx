@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { GroupCard, type Group } from './GroupCard';
+import { GroupCard } from './GroupCard';
+import type { Group } from '@/domain/group/group';
 import { EmptyState } from '@/components/ui/EmptyState';
 
 interface Campaign {

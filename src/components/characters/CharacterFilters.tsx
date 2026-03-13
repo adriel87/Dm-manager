@@ -88,7 +88,7 @@ export function CharacterFilters({ characters }: CharacterFiltersProps) {
 /** Contextual empty state message based on the active filter. */
 function FilteredEmptyState({ filter }: { filter: FilterKey }) {
   const messages: Record<FilterKey, string> = {
-    all: 'Crea tu primer personaje pulsando &ldquo;+ Nuevo personaje&rdquo;.',
+    all: 'Crea tu primer personaje pulsando \u201c+ Nuevo personaje\u201d.',
     pc: 'No hay personajes jugadores (PC) todavía.',
     npc: 'No hay NPCs en esta lista.',
   };
@@ -96,15 +96,14 @@ function FilteredEmptyState({ filter }: { filter: FilterKey }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <span className="text-5xl mb-4" role="img" aria-label="Personaje">
-        &#x1F9DD;
+        🧝
       </span>
       <h2 className="text-white text-lg font-semibold mb-2">
         Sin personajes
       </h2>
-      <p
-        className="text-zinc-400 text-sm max-w-sm"
-        dangerouslySetInnerHTML={{ __html: messages[filter] }}
-      />
+      <p className="text-zinc-400 text-sm max-w-sm">
+        {messages[filter]}
+      </p>
     </div>
   );
 }

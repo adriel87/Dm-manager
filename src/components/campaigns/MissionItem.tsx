@@ -3,6 +3,8 @@
 import { Card, CardBody, CardHeader, CardFooter, Chip } from '@heroui/react';
 import { STATUS_COLOR, PRIORITY_COLOR } from '@/constants/ui';
 import { formatDate } from '@/utils/formatDate';
+import { EditMissionButton } from '@/components/missions/EditMissionButton';
+import { AssignCharactersButton } from '@/components/missions/AssignCharactersButton';
 
 export interface Mission {
   id: string;
@@ -12,7 +14,7 @@ export interface Mission {
   missionPriority: string;
   status: 'Activa' | 'Pausada' | 'Finalizada';
   missionEvents?: { name: string; difficult: string }[];
-  relatedCharacters?: { id: string; name: string }[];
+  relatedCharacters?: { id: string; name: string }[] | null;
   rewards?: string;
   startDate?: string;
   endDate?: string;
@@ -20,13 +22,14 @@ export interface Mission {
 
 interface MissionItemProps {
   mission: Mission;
+  onUpdated?: () => void;
 }
 
 /**
- * Pure Server Component — displays a single mission card.
- * No interactivity required; all data is passed as props.
+ * Mission card with edit and assign actions.
+ * Provides interactivity for updating and assigning characters to missions.
  */
-export function MissionItem({ mission }: MissionItemProps) {
+export function MissionItem({ mission, onUpdated }: MissionItemProps) {
   const statusColor = STATUS_COLOR[mission.status] ?? STATUS_COLOR['Finalizada'];
   const priorityLabel = mission.missionPriority ?? 'Baja';
   const priorityColor = PRIORITY_COLOR[priorityLabel] ?? PRIORITY_COLOR['Baja'];
@@ -74,6 +77,14 @@ export function MissionItem({ mission }: MissionItemProps) {
           )}
         </CardFooter>
       )}
+
+      <CardFooter className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-700">
+        <EditMissionButton mission={mission} onUpdated={onUpdated ?? (() => {})} />
+        <AssignCharactersButton
+          mission={{ id: mission.id, relatedCharacters: mission.relatedCharacters ?? null }}
+          onAssigned={onUpdated ?? (() => {})}
+        />
+      </CardFooter>
     </Card>
   );
 }

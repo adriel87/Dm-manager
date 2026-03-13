@@ -16,63 +16,37 @@ import {
   Switch,
   useDisclosure,
 } from '@heroui/react';
-import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES } from '@/constants/ui';
+import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES, SELECT_CLASSES } from '@/constants/ui';
+import { apiPost } from '@/lib/api';
+import { DnDClassEnum, AgeTypeEnum, type AgeType, type DnDClassType } from '@/domain/character/character';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants (derived from domain enums — single source of truth) ───────────
 
-type Age = 'child' | 'teenager' | 'adult' | 'elderly';
-type ClassType =
-  | 'Barbarian'
-  | 'Bard'
-  | 'Cleric'
-  | 'Druid'
-  | 'Fighter'
-  | 'Monk'
-  | 'Paladin'
-  | 'Ranger'
-  | 'Rogue'
-  | 'Sorcerer'
-  | 'Warlock'
-  | 'Wizard'
-  | 'Artificer'
-  | 'Blood Hunter'
-  | 'Normal'
-  | 'Other';
+const CLASS_OPTIONS = Object.entries(DnDClassEnum).map(([key, label]) => ({
+  key: key as DnDClassType,
+  label,
+}));
 
-const CLASS_OPTIONS: { key: ClassType; label: string }[] = [
-  { key: 'Normal', label: 'Normal' },
-  { key: 'Barbarian', label: 'Barbarian' },
-  { key: 'Bard', label: 'Bard' },
-  { key: 'Cleric', label: 'Cleric' },
-  { key: 'Druid', label: 'Druid' },
-  { key: 'Fighter', label: 'Fighter' },
-  { key: 'Monk', label: 'Monk' },
-  { key: 'Paladin', label: 'Paladin' },
-  { key: 'Ranger', label: 'Ranger' },
-  { key: 'Rogue', label: 'Rogue' },
-  { key: 'Sorcerer', label: 'Sorcerer' },
-  { key: 'Warlock', label: 'Warlock' },
-  { key: 'Wizard', label: 'Wizard' },
-  { key: 'Artificer', label: 'Artificer' },
-  { key: 'Blood Hunter', label: 'Blood Hunter' },
-  { key: 'Other', label: 'Other' },
-];
+const AGE_LABELS: Record<AgeType, string> = {
+  child: 'Niño',
+  teenager: 'Joven',
+  adult: 'Adulto',
+  elderly: 'Anciano',
+};
 
-const AGE_OPTIONS: { key: Age; label: string }[] = [
-  { key: 'child', label: 'Niño' },
-  { key: 'teenager', label: 'Joven' },
-  { key: 'adult', label: 'Adulto' },
-  { key: 'elderly', label: 'Anciano' },
-];
+const AGE_OPTIONS = Object.keys(AgeTypeEnum).map((key) => ({
+  key: key as AgeType,
+  label: AGE_LABELS[key as AgeType],
+}));
 
 // ─── Form State ───────────────────────────────────────────────────────────────
 
 interface FormState {
   name: string;
-  classType: ClassType;
+  classType: DnDClassType;
   level: string;
   hitPoints: string;
-  age: Age;
+  age: AgeType;
   isNPC: boolean;
   description: string;
   location: string;
@@ -128,42 +102,27 @@ export function CreateCharacterButton() {
     }
 
     startTransition(async () => {
-      try {
-        const body: Record<string, unknown> = {
-          name: form.name.trim(),
-          classType: form.classType,
-          level: Number(form.level),
-          hitPoints: Number(form.hitPoints),
-          age: form.age,
-          isNPC: form.isNPC,
-        };
+      const body: Record<string, unknown> = {
+        name: form.name.trim(),
+        classType: form.classType,
+        level: Number(form.level),
+        hitPoints: Number(form.hitPoints),
+        age: form.age,
+        isNPC: form.isNPC,
+      };
 
-        if (form.description.trim()) body.description = form.description.trim();
-        if (form.location.trim()) body.location = form.location.trim();
+      if (form.description.trim()) body.description = form.description.trim();
+      if (form.location.trim()) body.location = form.location.trim();
 
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/character`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-          }
-        );
+      const { error: apiError } = await apiPost('/api/character', body);
 
-        if (!res.ok) {
-          const data: unknown = await res.json().catch(() => ({}));
-          setError(
-            (data as { message?: string }).message ??
-              'Error al crear el personaje. Inténtalo de nuevo.'
-          );
-          return;
-        }
-
-        router.refresh();
-        handleClose();
-      } catch {
-        setError('Error de red. Verifica tu conexión e inténtalo de nuevo.');
+      if (apiError) {
+        setError(apiError);
+        return;
       }
+
+      router.refresh();
+      handleClose();
     });
   }
 
@@ -216,16 +175,11 @@ export function CreateCharacterButton() {
                     label="Clase"
                     selectedKeys={[form.classType]}
                     onSelectionChange={(keys) => {
-                      const selected = Array.from(keys)[0] as ClassType;
+                      const selected = Array.from(keys)[0] as DnDClassType;
                       if (selected) setField('classType', selected);
                     }}
                     isDisabled={isPending}
-                    classNames={{
-                      label: 'text-zinc-300',
-                      value: 'text-white',
-                      trigger: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
-                      popoverContent: 'bg-zinc-800 text-white',
-                    }}
+                    classNames={SELECT_CLASSES}
                     aria-label="Clase del personaje"
                   >
                     {CLASS_OPTIONS.map((opt) => (
@@ -262,16 +216,11 @@ export function CreateCharacterButton() {
                     label="Edad"
                     selectedKeys={[form.age]}
                     onSelectionChange={(keys) => {
-                      const selected = Array.from(keys)[0] as Age;
+                      const selected = Array.from(keys)[0] as AgeType;
                       if (selected) setField('age', selected);
                     }}
                     isDisabled={isPending}
-                    classNames={{
-                      label: 'text-zinc-300',
-                      value: 'text-white',
-                      trigger: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
-                      popoverContent: 'bg-zinc-800 text-white',
-                    }}
+                    classNames={SELECT_CLASSES}
                     aria-label="Edad del personaje"
                   >
                     {AGE_OPTIONS.map((opt) => (

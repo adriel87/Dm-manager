@@ -15,12 +15,15 @@ import {
   SelectItem,
   useDisclosure,
 } from '@heroui/react';
-import { fetchApi } from '@/lib/api';
-import type { Character } from '@/components/characters/CharacterCard';
+import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES, SELECT_CLASSES } from '@/constants/ui';
+import { fetchApi, apiPost, apiPut } from '@/lib/api';
+import type { Character } from '@/domain/character/character';
+import type { Group } from '@/domain/group/group';
 
 interface Campaign {
   id: string;
   name: string;
+  groups?: Pick<Group, 'id' | 'name'>[];
 }
 
 interface FormState {
@@ -28,10 +31,6 @@ interface FormState {
   description: string;
   memberIds: string[];
   campaignId: string | null;
-}
-
-interface FormError {
-  message: string;
 }
 
 interface CreateGroupButtonProps {
@@ -45,25 +44,18 @@ const EMPTY_FORM: FormState = {
   campaignId: null,
 };
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
-
 export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
-  const [characters, setCharacters] = useState<Character[]>([]);
-  const [error, setError] = useState<FormError | null>(null);
+  const [characters, setCharacters] = useState<Pick<Character, 'id' | 'name' | 'classType'>[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  // Load characters when modal opens
   const handleOpen = async () => {
     onOpen();
-    try {
-      const chars = await fetchApi<Character[]>('/api/character');
-      setCharacters(chars ?? []);
-    } catch {
-      // Silent - characters will be empty
-    }
+    const chars = await fetchApi<Pick<Character, 'id' | 'name' | 'classType'>[]>('/api/character');
+    setCharacters(chars ?? []);
   };
 
   function handleClose() {
@@ -82,65 +74,42 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
     e.preventDefault();
 
     if (!form.name.trim()) {
-      setError({ message: 'El nombre del grupo es obligatorio.' });
+      setError('El nombre del grupo es obligatorio.');
       return;
     }
 
     startTransition(async () => {
-      try {
-        // Get full character objects from selected IDs
-        const members = form.memberIds
-          .map((id) => {
-            const char = characters.find((c) => c.id === id);
-            return char ? { id: char.id, name: char.name, classType: char.classType } : null;
-          })
-          .filter(Boolean) as { id: string; name: string; classType: string }[];
+      const members = form.memberIds
+        .map((id) => {
+          const char = characters.find((c) => c.id === id);
+          return char ? { id: char.id, name: char.name, classType: char.classType } : null;
+        })
+        .filter(Boolean) as { id: string; name: string; classType: string }[];
 
-        const res = await fetch(`${BASE}/api/group`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: form.name.trim(),
-            description: form.description.trim(),
-            members,
-          }),
-        });
+      const { data: createdGroup, error: createError } = await apiPost<Group>('/api/group', {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        members,
+      });
 
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          setError({
-            message:
-              (data as { message?: string }).message ??
-              'Error al crear el grupo. Inténtalo de nuevo.',
-          });
-          return;
-        }
-
-        const createdGroup = await res.json();
-
-        // If campaign selected, assign group to campaign
-        if (form.campaignId) {
-          const campaignRes = await fetch(`${BASE}/api/campaign/${form.campaignId}`);
-          if (campaignRes.ok) {
-            const campaign = await campaignRes.json();
-            const currentGroups = campaign.groups ?? [];
-            await fetch(`${BASE}/api/campaign/${form.campaignId}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                groups: [...currentGroups, { id: createdGroup.id, name: createdGroup.name }],
-              }),
-            });
-          }
-        }
-
-        router.refresh();
-        handleClose();
-      } catch {
-        setError({
-          message: 'Error de red. Verifica tu conexión e inténtalo de nuevo.',
-        });
+      if (createError || !createdGroup) {
+        setError(createError ?? 'Error al crear el grupo. Inténtalo de nuevo.');
+        return;
       }
+
+      // If campaign selected, assign group to campaign
+      if (form.campaignId) {
+        const campaign = await fetchApi<Campaign>(`/api/campaign/${form.campaignId}`);
+        if (campaign) {
+          const currentGroups = campaign.groups ?? [];
+          await apiPut(`/api/campaign/${form.campaignId}`, {
+            groups: [...currentGroups, { id: createdGroup.id, name: createdGroup.name }],
+          });
+        }
+      }
+
+      router.refresh();
+      handleClose();
     });
   }
 
@@ -163,12 +132,7 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
         onClose={handleClose}
         placement="center"
         size="lg"
-        classNames={{
-          base: 'bg-zinc-900 border border-zinc-700',
-          header: 'border-b border-zinc-800',
-          body: 'py-5',
-          footer: 'border-t border-zinc-800',
-        }}
+        classNames={MODAL_CLASSES}
       >
         <ModalContent>
           {() => (
@@ -177,7 +141,7 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
                 Nuevo grupo
               </ModalHeader>
 
-              <ModalBody className="gap-4">
+              <ModalBody className="gap-4 py-5">
                 <Input
                   label="Nombre"
                   placeholder="El nombre de tu grupo"
@@ -186,11 +150,7 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
                   isRequired
                   isDisabled={isPending}
                   autoFocus
-                  classNames={{
-                    label: 'text-zinc-300',
-                    input: 'text-white',
-                    inputWrapper: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
-                  }}
+                  classNames={INPUT_CLASSES}
                   aria-label="Nombre del grupo"
                 />
 
@@ -202,11 +162,7 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
                   isDisabled={isPending}
                   minRows={2}
                   maxRows={4}
-                  classNames={{
-                    label: 'text-zinc-300',
-                    input: 'text-white',
-                    inputWrapper: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
-                  }}
+                  classNames={INPUT_CLASSES}
                   aria-label="Descripción del grupo"
                 />
 
@@ -221,11 +177,7 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
                   }}
                   isDisabled={isPending}
                   aria-label="Miembros del grupo"
-                  classNames={{
-                    label: 'text-zinc-300',
-                    trigger: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
-                    popoverContent: 'bg-zinc-800 text-white',
-                  }}
+                  classNames={SELECT_CLASSES}
                 >
                   {characters.map((char) => (
                     <SelectItem key={char.id} textValue={char.name}>
@@ -243,12 +195,7 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
                     handleFieldChange('campaignId', selected ?? '');
                   }}
                   isDisabled={isPending}
-                  classNames={{
-                    label: 'text-zinc-300',
-                    value: 'text-white',
-                    trigger: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
-                    popoverContent: 'bg-zinc-800 text-white',
-                  }}
+                  classNames={SELECT_CLASSES}
                   aria-label="Campaña"
                   placeholder="Selecciona una campaña (opcional)"
                 >
@@ -258,8 +205,8 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
                 </Select>
 
                 {error && (
-                  <p role="alert" className="text-red-400 text-sm">
-                    {error.message}
+                  <p role="alert" className={ERROR_CLASSES}>
+                    {error}
                   </p>
                 )}
               </ModalBody>

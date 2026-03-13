@@ -1,11 +1,11 @@
 import { DashboardRepository } from "@/domain/dashboard/dashboardRepository";
-import { DashboardStats, DashboardCampaign, DashboardGroup, DashboardGroupMember } from "@/domain/dashboard/dashboard";
+import { DashboardStatsData, DashboardCampaign, DashboardGroup, DashboardGroupMember } from "@/domain/dashboard/dashboard";
 import { getCollection } from "@/infrastructure/config/mongodb";
 
 const LIMIT = 5;
 
 export const dashboardRepository: DashboardRepository = {
-    async getStats(): Promise<DashboardStats> {
+    async getStats(): Promise<DashboardStatsData> {
         const campaignCollection = await getCollection("campaigns");
         const groupCollection = await getCollection("groups");
         const characterCollection = await getCollection("characters");

@@ -1,9 +1,9 @@
-import { DashboardStats } from "@/domain/dashboard/dashboard";
+import { DashboardStatsData } from "@/domain/dashboard/dashboard";
 import { DashboardRepository } from "@/domain/dashboard/dashboardRepository";
 
 export const getDashboardStats = async (
     repository: DashboardRepository
-): Promise<DashboardStats> => {
+): Promise<DashboardStatsData> => {
     try {
         return await repository.getStats();
     } catch (error) {

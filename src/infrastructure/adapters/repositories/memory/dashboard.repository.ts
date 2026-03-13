@@ -1,8 +1,8 @@
-import { DashboardStats, DashboardCampaign, DashboardGroup } from "@/domain/dashboard/dashboard";
+import { DashboardStatsData, DashboardCampaign, DashboardGroup } from "@/domain/dashboard/dashboard";
 import { DashboardRepository } from "@/domain/dashboard/dashboardRepository";
 
 // In-memory store for dashboard data
-let stats: DashboardStats = {
+let stats: DashboardStatsData = {
     totalCampaigns: 0,
     activeCampaigns: 0,
     totalGroups: 0,
@@ -26,7 +26,7 @@ export const dashboardMemoryRepository: DashboardRepository = {
 };
 
 // Helper functions to set data (for testing/seeding)
-export const setDashboardStats = (newStats: DashboardStats) => {
+export const setDashboardStats = (newStats: DashboardStatsData) => {
     stats = { ...newStats };
 };
 

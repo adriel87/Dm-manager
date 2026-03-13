@@ -11,48 +11,54 @@ export interface Mission {
   relatedCharacters: Pick<Character, "id" | "name">[] | null;
   startDate?: Date;
   endDate?: Date;
-  status: MissionStatusType
+  status: MissionStatusType;
 }
 
 type TypeEvent = {
   name: string;
   difficult: string;
-}
+};
 
 export enum MissionStatus {
-  Activa = 'Activa',
-  Pausada = 'Pausada',
-  Finalizada = 'Finalizada',
+  Activa = "Activa",
+  Pausada = "Pausada",
+  Finalizada = "Finalizada",
 }
 
-export const updateMissionParams = (missionToUpdate: Mission, updateParams : Partial<Mission>) : void => {
-  missionToUpdate.description = updateParams.description ?? missionToUpdate.description
-  missionToUpdate.name = updateParams.name ?? missionToUpdate.name
-  missionToUpdate.status = updateParams.status ?? missionToUpdate.status
-  missionToUpdate.endDate = updateParams.endDate ?? missionToUpdate.endDate
-}
+export const updateMissionParams = (
+  missionToUpdate: Mission,
+  updateParams: Partial<Mission>,
+): void => {
+  missionToUpdate.description =
+    updateParams.description ?? missionToUpdate.description;
+  missionToUpdate.name = updateParams.name ?? missionToUpdate.name;
+  missionToUpdate.status = updateParams.status ?? missionToUpdate.status;
+  missionToUpdate.endDate = updateParams.endDate ?? missionToUpdate.endDate;
+};
 
-export const createNewMission = (newMision : Partial<Mission>) : Omit<Mission,"id"> =>({
+export const createNewMission = (
+  newMision: Partial<Mission>,
+): Omit<Mission, "id"> => ({
   description: newMision.description ?? "",
   name: newMision.name ?? "name",
-  status: newMision.status ?? 'Activa',
+  status: newMision.status ?? "Activa",
   startDate: newMision.startDate ?? undefined,
   endDate: undefined,
-  missionEvents: [{
-    name: '',
-    difficult: ''
-  }],
-  missionGuide:'',
-  missionPriority:'',
-  relatedCharacters:null,
-  rewards: null
-})
+  missionEvents: [
+    {
+      name: "",
+      difficult: "",
+    },
+  ],
+  missionGuide: "",
+  missionPriority: "",
+  relatedCharacters: null,
+  rewards: null,
+});
 
 export type MissionStatusType = keyof typeof MissionStatus;
 
-
 export const validateMission = (mission: Partial<Mission>): boolean => {
-
   if (!mission.name || mission.name.trim() === "") {
     throw new Error("Mission name is required");
   }
@@ -67,9 +73,8 @@ export const validateMission = (mission: Partial<Mission>): boolean => {
   }
 
   return true;
-}
+};
 
-
-export function validateMissions(missions: Mission[]){
-    missions.forEach(mission => validateMission(mission))
+export function validateMissions(missions: Mission[]) {
+  missions.forEach((mission) => validateMission(mission));
 }

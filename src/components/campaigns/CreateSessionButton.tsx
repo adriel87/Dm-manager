@@ -13,6 +13,7 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES } from '@/constants/ui';
+import { apiPost } from '@/lib/api';
 
 interface CreateSessionButtonProps {
   campaignId: string;
@@ -73,36 +74,21 @@ export function CreateSessionButton({ campaignId, onCreated }: CreateSessionButt
     }
 
     startTransition(async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/session`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              campaignId,
-              title: form.title.trim(),
-              notes: form.notes.trim(),
-              sessionNumber: sessionNum,
-              date: form.date,
-            }),
-          }
-        );
+      const { error: apiError } = await apiPost('/api/session', {
+        campaignId,
+        title: form.title.trim(),
+        notes: form.notes.trim(),
+        sessionNumber: sessionNum,
+        date: form.date,
+      });
 
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          setError(
-            (data as { message?: string }).message ??
-              'Error al crear la sesión. Inténtalo de nuevo.'
-          );
-          return;
-        }
-
-        onCreated();
-        handleClose();
-      } catch {
-        setError('Error de red. Verifica tu conexión e inténtalo de nuevo.');
+      if (apiError) {
+        setError(apiError);
+        return;
       }
+
+      onCreated();
+      handleClose();
     });
   }
 

@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Tabs, Tab } from '@heroui/react';
 import { MissionItem, type Mission } from '@/components/campaigns/MissionItem';
 import { SessionItem, type Session } from '@/components/campaigns/SessionItem';
-import { GroupItem, type Group } from '@/components/campaigns/GroupItem';
+import { GroupItem } from '@/components/campaigns/GroupItem';
+import type { Group } from '@/domain/group/group';
 import { CreateMissionButton } from '@/components/campaigns/CreateMissionButton';
 import { CreateSessionButton } from '@/components/campaigns/CreateSessionButton';
 import type { Campaign } from '@/components/campaigns/CampaignCard';
@@ -235,7 +236,7 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
               <ul className="flex flex-col gap-3" role="list" aria-label="Lista de misiones">
                 {data.missions.map((mission) => (
                   <li key={mission.id}>
-                    <MissionItem mission={mission} />
+                    <MissionItem mission={mission} onUpdated={refreshMissions} />
                   </li>
                 ))}
               </ul>

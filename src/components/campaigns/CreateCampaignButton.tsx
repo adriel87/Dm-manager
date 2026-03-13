@@ -15,23 +15,15 @@ import {
   SelectItem,
   useDisclosure,
 } from '@heroui/react';
-import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES } from '@/constants/ui';
+import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES, SELECT_CLASSES } from '@/constants/ui';
+import { STATUS_OPTIONS } from '@/constants/domain';
+import { apiPost } from '@/lib/api';
 
 interface FormState {
   name: string;
   description: string;
   status: 'Activa' | 'Pausada' | 'Finalizada';
 }
-
-interface FormError {
-  message: string;
-}
-
-const STATUS_OPTIONS = [
-  { key: 'Activa', label: 'Activa' },
-  { key: 'Pausada', label: 'Pausada' },
-  { key: 'Finalizada', label: 'Finalizada' },
-] as const;
 
 const EMPTY_FORM: FormState = {
   name: '',
@@ -42,7 +34,7 @@ const EMPTY_FORM: FormState = {
 export function CreateCampaignButton() {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
-  const [error, setError] = useState<FormError | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -54,7 +46,6 @@ export function CreateCampaignButton() {
 
   function handleFieldChange(field: keyof FormState, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
-    // Clear error on any change so the user gets fresh feedback
     if (error) setError(null);
   }
 
@@ -62,43 +53,24 @@ export function CreateCampaignButton() {
     e.preventDefault();
 
     if (!form.name.trim()) {
-      setError({ message: 'El nombre de la campaña es obligatorio.' });
+      setError('El nombre de la campaña es obligatorio.');
       return;
     }
 
     startTransition(async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/campaign`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: form.name.trim(),
-              description: form.description.trim(),
-              status: form.status,
-            }),
-          }
-        );
+      const { error: apiError } = await apiPost('/api/campaign', {
+        name: form.name.trim(),
+        description: form.description.trim(),
+        status: form.status,
+      });
 
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          setError({
-            message:
-              (data as { message?: string }).message ??
-              'Error al crear la campaña. Inténtalo de nuevo.',
-          });
-          return;
-        }
-
-        // Refresh the Server Component tree to show the new campaign
-        router.refresh();
-        handleClose();
-      } catch {
-        setError({
-          message: 'Error de red. Verifica tu conexión e inténtalo de nuevo.',
-        });
+      if (apiError) {
+        setError(apiError);
+        return;
       }
+
+      router.refresh();
+      handleClose();
     });
   }
 
@@ -163,12 +135,7 @@ export function CreateCampaignButton() {
                     if (selected) handleFieldChange('status', selected);
                   }}
                   isDisabled={isPending}
-                  classNames={{
-                    label: 'text-zinc-300',
-                    value: 'text-white',
-                    trigger: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
-                    popoverContent: 'bg-zinc-800 text-white',
-                  }}
+                  classNames={SELECT_CLASSES}
                   aria-label="Estado de la campaña"
                 >
                   {STATUS_OPTIONS.map((opt) => (
@@ -178,10 +145,9 @@ export function CreateCampaignButton() {
                   ))}
                 </Select>
 
-                {/* Error feedback */}
                 {error && (
                   <p role="alert" className={ERROR_CLASSES}>
-                    {error.message}
+                    {error}
                   </p>
                 )}
               </ModalBody>

@@ -1,13 +1,5 @@
 import { Card, CardBody, CardHeader, CardFooter, Chip } from '@heroui/react';
-
-export interface Group {
-  id: string;
-  name: string;
-  description: string;
-  members: { id: string; name: string; classType: string }[];
-  createdAt?: string;
-  updatedAt?: string;
-}
+import type { Group } from '@/domain/group/group';
 
 interface GroupCardProps {
   group: Group;

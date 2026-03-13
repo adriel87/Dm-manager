@@ -16,10 +16,14 @@ import {
 } from '@heroui/react';
 import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES, SELECT_CLASSES } from '@/constants/ui';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '@/constants/domain';
-import { apiPost } from '@/lib/api';
+import { apiPut } from '@/lib/api';
+import type { Mission } from '@/domain/mission/mission';
 
-interface CreateMissionButtonProps {
-  onCreated: () => void;
+type MissionFields = Pick<Mission, 'id' | 'name' | 'description' | 'missionGuide' | 'missionPriority' | 'status'>;
+
+interface EditMissionButtonProps {
+  mission: MissionFields;
+  onUpdated: () => void;
 }
 
 interface FormState {
@@ -30,26 +34,29 @@ interface FormState {
   status: 'Activa' | 'Pausada' | 'Finalizada';
 }
 
-const EMPTY_FORM: FormState = {
-  name: '',
-  description: '',
-  missionGuide: '',
-  missionPriority: 'Media',
-  status: 'Activa',
-};
+function formFromMission(mission: MissionFields): FormState {
+  return {
+    name: mission.name,
+    description: mission.description,
+    missionGuide: mission.missionGuide,
+    missionPriority: (mission.missionPriority as FormState['missionPriority']) || 'Media',
+    status: mission.status as FormState['status'],
+  };
+}
 
-/**
- * Client Component island — renders a button that opens a modal form.
- * Calls `onCreated()` after a successful POST so the parent can refresh its list.
- */
-export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
+export function EditMissionButton({ mission, onUpdated }: EditMissionButtonProps) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [form, setForm] = useState<FormState>(formFromMission(mission));
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  function handleOpen() {
+    setForm(formFromMission(mission));
+    setError(null);
+    onOpen();
+  }
+
   function handleClose() {
-    setForm(EMPTY_FORM);
     setError(null);
     onClose();
   }
@@ -72,12 +79,15 @@ export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
     }
 
     startTransition(async () => {
-      const { error: apiError } = await apiPost('/api/mission', {
+      const { error: apiError } = await apiPut(`/api/mission/${mission.id}`, {
         name: form.name.trim(),
         description: form.description.trim(),
         missionGuide: form.missionGuide.trim(),
         missionPriority: form.missionPriority,
         status: form.status,
+        missionEvents: null,
+        rewards: null,
+        relatedCharacters: null,
       });
 
       if (apiError) {
@@ -85,7 +95,7 @@ export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
         return;
       }
 
-      onCreated();
+      onUpdated();
       handleClose();
     });
   }
@@ -93,14 +103,13 @@ export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
   return (
     <>
       <Button
-        onPress={onOpen}
-        color="primary"
-        variant="solid"
+        onPress={handleOpen}
+        variant="flat"
         size="sm"
-        className="font-medium"
-        aria-label="Crear nueva misión"
+        className="text-zinc-400 hover:text-white"
+        aria-label="Editar misión"
       >
-        + Nueva misión
+        Editar
       </Button>
 
       <Modal
@@ -115,7 +124,7 @@ export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
           {() => (
             <form onSubmit={handleSubmit} noValidate>
               <ModalHeader className="text-white text-lg font-semibold">
-                Nueva misión
+                Editar misión
               </ModalHeader>
 
               <ModalBody className="gap-4 py-5">
@@ -215,7 +224,7 @@ export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
                   isDisabled={isPending}
                   className="font-medium"
                 >
-                  {isPending ? 'Creando...' : 'Crear misión'}
+                  {isPending ? 'Guardando...' : 'Guardar cambios'}
                 </Button>
               </ModalFooter>
             </form>
