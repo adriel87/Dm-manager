@@ -1,8 +1,8 @@
 # Product Requirements Document — DM Manager
 
-**Version**: 1.0
-**Fecha**: 2026-03-08
-**Estado**: MVP en definición
+**Version**: 1.1
+**Fecha**: 2026-03-14
+**Estado**: MVP en progreso
 **Autor**: Adriel
 
 ---
@@ -148,6 +148,8 @@ Registro de una sesión de juego dentro de una campaña.
 
 Todos los endpoints siguen el patrón REST con respuestas JSON.
 
+### 6.1 Endpoints CRUD por entidad
+
 | Entidad | GET lista | POST | GET por ID | PUT | DELETE |
 |---------|-----------|------|-----------|-----|--------|
 | Campaign | ✅ | ✅ | ✅ | ✅ | ✅ |
@@ -156,36 +158,60 @@ Todos los endpoints siguen el patrón REST con respuestas JSON.
 | Session | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Group | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-> La API está completa para el MVP excepto por los endpoints de `Group`.
+### 6.2 Endpoints de Dashboard
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/dashboard/stats` | GET | Estadísticas globales (totales de campañas, personajes, misiones, sesiones) |
+| `/api/dashboard/recent-campaigns` | GET | Campañas más recientes (param: `?limit=n`, default 5) |
+| `/api/dashboard/recent-groups` | GET | Grupos más recientes (param: `?limit=n`, default 5) |
+
+> La API REST está completa para todas las entidades del MVP. Adicionalmente cuenta con endpoints de Dashboard para alimentar la vista de inicio.
 
 ---
 
 ## 7. Stack Técnico
 
-| Capa | Tecnología |
-|------|-----------|
-| Framework | Next.js 15 (App Router) |
-| Lenguaje | TypeScript 5 |
-| Base de datos | MongoDB 6 |
-| Validación de entrada | Zod 4 |
-| UI Components | HeroUI + Tailwind CSS 4 |
-| Animaciones | Framer Motion |
-| Tests | Vitest 3 + Testing Library |
-| E2E Tests | Playwright |
-| Arquitectura | Hexagonal (Ports & Adapters) |
-| Infraestructura local | Docker Compose (MongoDB) |
+| Capa | Tecnología | Versión |
+|------|-----------|---------|
+| Framework | Next.js (App Router) | ^16.1.6 |
+| Runtime UI | React | 19.1.0 |
+| Lenguaje | TypeScript | ^5 |
+| Base de datos | MongoDB | ^6.18.0 |
+| Validación de entrada | Zod | ^4.0.10 |
+| UI Components | HeroUI | ^2.8.2 |
+| Estilos | Tailwind CSS | ^4.1.11 |
+| Animaciones | Framer Motion | ^12.23.12 |
+| Tests unitarios | Vitest + Testing Library | ^3.2.4 |
+| Tests E2E | Playwright | ^1.58.2 |
+| Arquitectura | Hexagonal (Ports & Adapters) | — |
+| Infraestructura local | Docker Compose (MongoDB) | — |
 
 ---
 
 ## 8. Criterios de Aceptación del MVP
 
-- [ ] El DM puede crear, ver y actualizar cada entidad (campaña, grupo, personaje, misión, sesión)
-- [ ] La interfaz gráfica permite navegar desde una campaña hacia todos sus recursos
-- [ ] Los formularios validan los datos antes de enviar
+### 8.1 Funcionalidad CRUD
+- [x] El DM puede crear, ver y actualizar campañas
+- [x] El DM puede crear, ver y actualizar personajes (PC y NPC)
+- [x] El DM puede crear, ver y actualizar misiones
+- [x] El DM puede crear, ver y actualizar sesiones
+- [x] El DM puede crear, ver y actualizar grupos
+
+### 8.2 Interfaz Gráfica
+- [x] Dashboard con estadísticas globales y accesos rápidos
+- [x] Vista de listado de campañas
+- [x] Vista de detalle de campaña mostrando grupos, misiones y sesiones asociadas
+- [x] Vista de listado de personajes con filtro PC/NPC
+- [x] Vista de listado de grupos
+- [ ] Formularios de edición con validación en el cliente antes de enviar
 - [ ] Los errores de API se muestran de forma comprensible al usuario
-- [ ] Los tests unitarios cubren los use cases principales
-- [ ] Los tests E2E cubren los flujos principales de usuario
-- [ ] La aplicación corre en local con un solo comando (`npm run dev` + `npm run dockerstart`)
+
+### 8.3 Calidad y Tests
+- [x] Tests unitarios de use cases para todas las entidades (campaign, character, mission, session, group, dashboard)
+- [x] Tests unitarios de entidades de dominio (campaign, character, group)
+- [ ] Tests E2E cubren los flujos principales de usuario (campaigns, characters, campaign-detail)
+- [x] La aplicación corre en local con `npm run dev` + `npm run dockerstart`
 
 ---
 
