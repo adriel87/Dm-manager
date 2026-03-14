@@ -4,5 +4,24 @@
     "docs/architecture.md",
     "docs/commands.md",
     "docs/conventions.md"
-  ]
+  ],
+  "watcher": {
+    "ignore": [
+      ".next/**",
+      "node_modules/**",
+      "test-results/**",
+      "playwright-report/**",
+      ".git/**",
+      "coverage/**"
+    ]
+  },
+  "formatter": {
+    "prettier": {
+      "disabled": true
+    }
+  },
+  "permission": {
+    "bash": "ask",
+    "edit": "allow"
+  }
 }
