@@ -1,41 +1,46 @@
 import { test, expect } from '@playwright/test';
 import { createCampaign, deleteCampaign } from './helpers/api';
+import { CampaignsPage } from './pages/campaigns.page';
 
-test.describe('Campaign Dashboard (/)', () => {
+/**
+ * E2E — Campaigns list page (/campaigns)
+ *
+ * Covers: listing, creation modal (happy path, validation, cancel), navigation.
+ * Data isolation: each test that creates a campaign cleans it up via API.
+ */
+test.describe('Campaigns page (/campaigns)', () => {
 
+  // ── TC-01: Page renders correctly ─────────────────────────────────────────
   test('TC-01: muestra el heading Campañas', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'Campañas', exact: true })).toBeVisible();
+    const campaignsPage = new CampaignsPage(page);
+    await campaignsPage.goto();
+    await expect(campaignsPage.heading).toBeVisible();
   });
 
+  // ── TC-02: Campaign seeded via API is visible in the list ──────────────────
   test('TC-02: muestra tarjeta de campaña creada vía API', async ({ page, request }) => {
     const campaign = await createCampaign(request, 'Dashboard Smoke Test');
     try {
-      await page.goto('/');
-      await expect(
-        page.getByRole('link', { name: /Abrir campaña: Dashboard Smoke Test/ })
-      ).toBeVisible();
+      const campaignsPage = new CampaignsPage(page);
+      await campaignsPage.goto();
+      await expect(campaignsPage.campaignCard('Dashboard Smoke Test')).toBeVisible();
     } finally {
       await deleteCampaign(request, campaign.id);
     }
   });
 
+  // ── TC-03: Create campaign — happy path ────────────────────────────────────
   test('TC-03: crea una campaña vía modal (happy path)', async ({ page, request }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Crear nueva campaña' }).click();
+    const campaignsPage = new CampaignsPage(page);
+    await campaignsPage.goto();
 
-    const modal = page.getByRole('dialog');
-    await expect(modal).toBeVisible();
+    await campaignsPage.openCreateModal();
+    await campaignsPage.fillForm('Mi Campaña E2E', 'Campaña de prueba automatizada');
+    await campaignsPage.submit();
 
-    await page.getByLabel('Nombre').fill('Mi Campaña E2E');
-    await page.getByLabel('Descripción').fill('Campaña de prueba automatizada');
-
-    await modal.getByRole('button', { name: 'Crear campaña' }).click();
-
-    await expect(modal).not.toBeVisible();
-    await expect(
-      page.getByRole('link', { name: /Abrir campaña: Mi Campaña E2E/ })
-    ).toBeVisible();
+    // Modal closes and campaign appears in the list
+    await expect(campaignsPage.modal).not.toBeVisible();
+    await expect(campaignsPage.campaignCard('Mi Campaña E2E')).toBeVisible();
 
     // Cleanup
     const res = await request.get('/api/campaign');
@@ -44,41 +49,43 @@ test.describe('Campaign Dashboard (/)', () => {
     if (created) await deleteCampaign(request, created.id);
   });
 
+  // ── TC-04: Validation — empty name shows error ─────────────────────────────
   test('TC-04: muestra error de validación cuando el nombre está vacío', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Crear nueva campaña' }).click();
+    const campaignsPage = new CampaignsPage(page);
+    await campaignsPage.goto();
 
-    const modal = page.getByRole('dialog');
-    await expect(modal).toBeVisible();
+    await campaignsPage.openCreateModal();
+    await campaignsPage.submit();
 
-    await modal.getByRole('button', { name: 'Crear campaña' }).click();
-
-    await expect(page.getByRole('alert')).toBeVisible();
-    await expect(modal).toBeVisible();
+    // Error alert is visible and modal stays open
+    await expect(campaignsPage.errorAlert).toBeVisible();
+    await expect(campaignsPage.modal).toBeVisible();
   });
 
+  // ── TC-05: Cancel closes modal and resets form ─────────────────────────────
   test('TC-05: cancelar cierra el modal y resetea el formulario', async ({ page }) => {
-    await page.goto('/');
-    await page.getByRole('button', { name: 'Crear nueva campaña' }).click();
+    const campaignsPage = new CampaignsPage(page);
+    await campaignsPage.goto();
 
-    const modal = page.getByRole('dialog');
-    await expect(modal).toBeVisible();
-    
-    await page.getByLabel('Nombre').fill('Draft');
-    await modal.getByRole('button', { name: 'Cancelar' }).click();
-    await expect(modal).not.toBeVisible();
+    await campaignsPage.openCreateModal();
+    await campaignsPage.fillForm('Draft');
+    await campaignsPage.cancel();
+    await expect(campaignsPage.modal).not.toBeVisible();
 
-    // Reabrir: form reseteado
-    await page.getByRole('button', { name: 'Crear nueva campaña' }).click();
-    await expect(modal).toBeVisible();
-    await expect(page.getByLabel('Nombre')).toHaveValue('');
+    // Reopen: form should be reset
+    await campaignsPage.openCreateModal();
+    await expect(campaignsPage.nameInput).toHaveValue('');
   });
 
+  // ── TC-06: Clicking campaign card navigates to detail ──────────────────────
   test('TC-06: click en tarjeta navega a detalle de campaña', async ({ page, request }) => {
     const campaign = await createCampaign(request, 'Navigation Test Campaign');
     try {
-      await page.goto('/');
-      await page.getByRole('link', { name: /Abrir campaña: Navigation Test Campaign/ }).click();
+      const campaignsPage = new CampaignsPage(page);
+      await campaignsPage.goto();
+
+      await campaignsPage.campaignCard('Navigation Test Campaign').click();
+
       await expect(page).toHaveURL(new RegExp(`/campaigns/${campaign.id}`));
       await expect(
         page.getByRole('heading', { name: 'Navigation Test Campaign' })
