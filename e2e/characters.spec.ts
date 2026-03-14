@@ -1,32 +1,44 @@
 import { test, expect } from '@playwright/test';
 import { createCharacter, deleteCharacter } from './helpers/api';
+import { CharactersPage } from './pages/characters.page';
 
-test.describe('Characters Page (/characters)', () => {
+/**
+ * E2E — Characters page (/characters)
+ *
+ * Covers: page render, filter buttons (Todos/PC/NPC), creation modal
+ * (happy path, validation), filter behaviour.
+ * Data isolation: all characters created in tests are deleted after use.
+ */
+test.describe('Characters page (/characters)', () => {
 
+  // ── TC-13: Page renders correctly ─────────────────────────────────────────
   test('TC-13: muestra el heading Personajes', async ({ page }) => {
-    await page.goto('/characters');
-    await expect(page.getByRole('heading', { name: 'Personajes', exact: true })).toBeVisible();
+    const charactersPage = new CharactersPage(page);
+    await charactersPage.goto();
+    await expect(charactersPage.heading).toBeVisible();
   });
 
-  test('TC-14: muestra botones de filtro PC/NPC', async ({ page }) => {
-    await page.goto('/characters');
-    await expect(page.getByRole('button', { name: 'Todos' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Personajes (PC)' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'NPCs' })).toBeVisible();
+  // ── TC-14: Filter buttons are visible ─────────────────────────────────────
+  test('TC-14: muestra los botones de filtro Todos / PC / NPC', async ({ page }) => {
+    const charactersPage = new CharactersPage(page);
+    await charactersPage.goto();
+    await expect(charactersPage.filterAll).toBeVisible();
+    await expect(charactersPage.filterPC).toBeVisible();
+    await expect(charactersPage.filterNPC).toBeVisible();
   });
 
+  // ── TC-15: Create a PC character — happy path ──────────────────────────────
   test('TC-15: crea un personaje PC vía modal (happy path)', async ({ page, request }) => {
-    await page.goto('/characters');
-    await page.getByRole('button', { name: 'Crear nuevo personaje' }).click();
+    const charactersPage = new CharactersPage(page);
+    await charactersPage.goto();
 
-    const modal = page.getByRole('dialog');
-    await expect(modal).toBeVisible();
+    await charactersPage.openCreateModal();
+    await charactersPage.fillName('Gandalf E2E');
+    await charactersPage.submit();
 
-    await page.getByLabel('Nombre').fill('Gandalf E2E');
-
-    await modal.getByRole('button', { name: 'Crear personaje' }).click();
-    await expect(modal).not.toBeVisible();
-    await expect(page.getByText('Gandalf E2E')).toBeVisible();
+    // Modal closes and character appears in the list
+    await expect(charactersPage.modal).not.toBeVisible();
+    await expect(charactersPage.characterCard('Gandalf E2E')).toBeVisible();
 
     // Cleanup
     const res = await request.get('/api/character');
@@ -35,49 +47,55 @@ test.describe('Characters Page (/characters)', () => {
     if (created) await deleteCharacter(request, created.id);
   });
 
+  // ── TC-16: NPC appears in NPC filter and NOT in PC filter ─────────────────
   test('TC-16: NPC aparece en filtro NPCs y no en filtro PC', async ({ page, request }) => {
     const npc = await createCharacter(request, { name: 'Goblin King E2E', isNPC: true });
     try {
-      await page.goto('/characters');
+      const charactersPage = new CharactersPage(page);
+      await charactersPage.goto();
 
-      // Filtro "Todos": aparece
-      await expect(page.getByText('Goblin King E2E')).toBeVisible();
+      // "Todos" filter — NPC is visible
+      await expect(charactersPage.characterCard('Goblin King E2E')).toBeVisible();
 
-      // Filtro "NPCs": aparece
-      await page.getByRole('button', { name: 'NPCs' }).click();
-      await expect(page.getByText('Goblin King E2E')).toBeVisible();
+      // "NPCs" filter — still visible
+      await charactersPage.filterNPC.click();
+      await expect(charactersPage.characterCard('Goblin King E2E')).toBeVisible();
 
-      // Filtro "PC": no aparece
-      await page.getByRole('button', { name: 'Personajes (PC)' }).click();
-      await expect(page.getByText('Goblin King E2E')).not.toBeVisible();
+      // "PC" filter — hidden
+      await charactersPage.filterPC.click();
+      await expect(charactersPage.characterCard('Goblin King E2E')).not.toBeVisible();
     } finally {
       await deleteCharacter(request, npc.id);
     }
   });
 
-  test('TC-17: filtro PC oculta NPCs y muestra PCs', async ({ page, request }) => {
+  // ── TC-17: PC filter shows PCs and hides NPCs ──────────────────────────────
+  test('TC-17: filtro PC muestra PCs y oculta NPCs', async ({ page, request }) => {
     const pc = await createCharacter(request, { name: 'Aragorn E2E', isNPC: false });
     const npc = await createCharacter(request, { name: 'Orc E2E', isNPC: true });
     try {
-      await page.goto('/characters');
-      await page.getByRole('button', { name: 'Personajes (PC)' }).click();
-      await expect(page.getByText('Aragorn E2E')).toBeVisible();
-      await expect(page.getByText('Orc E2E')).not.toBeVisible();
+      const charactersPage = new CharactersPage(page);
+      await charactersPage.goto();
+
+      await charactersPage.filterPC.click();
+      await expect(charactersPage.characterCard('Aragorn E2E')).toBeVisible();
+      await expect(charactersPage.characterCard('Orc E2E')).not.toBeVisible();
     } finally {
       await deleteCharacter(request, pc.id);
       await deleteCharacter(request, npc.id);
     }
   });
 
+  // ── TC-18: Validation — empty name shows error ─────────────────────────────
   test('TC-18: validación — nombre vacío muestra error', async ({ page }) => {
-    await page.goto('/characters');
-    await page.getByRole('button', { name: 'Crear nuevo personaje' }).click();
+    const charactersPage = new CharactersPage(page);
+    await charactersPage.goto();
 
-    const modal = page.getByRole('dialog');
-    await expect(modal).toBeVisible();
-    await modal.getByRole('button', { name: 'Crear personaje' }).click();
+    await charactersPage.openCreateModal();
+    await charactersPage.submit();
 
-    await expect(page.getByRole('alert')).toBeVisible();
-    await expect(modal).toBeVisible();
+    // Error alert visible and modal stays open
+    await expect(charactersPage.errorAlert).toBeVisible();
+    await expect(charactersPage.modal).toBeVisible();
   });
 });

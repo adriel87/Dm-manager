@@ -210,7 +210,11 @@ Todos los endpoints siguen el patrón REST con respuestas JSON.
 ### 8.3 Calidad y Tests
 - [x] Tests unitarios de use cases para todas las entidades (campaign, character, mission, session, group, dashboard)
 - [x] Tests unitarios de entidades de dominio (campaign, character, group)
-- [ ] Tests E2E cubren los flujos principales de usuario (campaigns, characters, campaign-detail)
+- [x] Tests E2E cubren los flujos principales de usuario (campaigns, characters, campaign-detail)
+  - `campaigns.spec.ts` — TC-01 a TC-06: listado, creación, validación, cancelar, navegación
+  - `characters.spec.ts` — TC-13 a TC-18: listado, filtros PC/NPC, creación, validación
+  - `campaign-detail.spec.ts` — TC-07 a TC-12: header, tabs, sesión CRUD, validación, navegación
+- [x] Tests E2E siguen buenas prácticas: Page Object Model, API helpers para aislamiento de datos, locators semánticos (`getByRole`, `getByLabel`)
 - [x] La aplicación corre en local con `npm run dev` + `npm run dockerstart`
 
 ---
