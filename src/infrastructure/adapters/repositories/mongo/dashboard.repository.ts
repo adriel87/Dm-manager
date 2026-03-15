@@ -20,6 +20,11 @@ export const dashboardRepository: DashboardRepository = {
             })
         ]);
 
+        // Compute totalMissions and totalSessions from aggregate campaign data
+        const campaigns = await campaignCollection.find({}).toArray();
+        const totalMissions = campaigns.reduce((sum, c) => sum + (c.missions?.length || 0), 0);
+        const totalSessions = campaigns.reduce((sum, c) => sum + (c.sessions?.length || 0), 0);
+
         const nextSession = await campaignCollection
             .find({ status: 'Activa', nextSessionAt: { $exists: true } })
             .sort({ nextSessionAt: 1 })
@@ -48,8 +53,8 @@ export const dashboardRepository: DashboardRepository = {
             id: c._id.toString(),
             name: c.name,
             status: c.status,
-            sessions: c.sessions || 0,
-            groupName: c.groups?.[0]?.name ?? 'Sin grupo',
+            sessions: c.sessions?.length || 0,  // sessions is now an array (aggregate)
+            groupName: c.group?.name ?? 'Sin grupo',  // group is now a single GroupSnapshot
             nextSessionAt: c.nextSessionAt ?? null,
             lastSessionAt: c.lastSessionAt ?? null
         }));

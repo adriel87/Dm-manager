@@ -6,6 +6,10 @@ export const createCampaign = async (repository: CampaignRepository, campaignDat
         validateCampaign(campaignData)
         const campaign = {
             ...campaignData,
+            missions: [],
+            sessions: [],
+            characters: [],
+            group: null,
             createdAt: new Date()
         }
         const newCampaign = await repository.createCampaign(campaign);

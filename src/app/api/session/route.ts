@@ -1,16 +1,27 @@
-import { createSession } from "@/application/useCases/session";
-import { repositories } from "@/infrastructure/config/repositories";
-import { sessionSchema } from "@/infrastructure/adapters/schemas/session.schema";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
+/**
+ * DEPRECATED: Sessions are now managed as embedded entities within Campaign aggregate.
+ * Use /api/campaign/[campaignId]/sessions instead.
+ * 
+ * FR-19: Return 410 Gone to indicate this endpoint is permanently deprecated.
+ */
 export async function GET() {
-  const sessions = await repositories.session.getAllSessions();
-  return NextResponse.json(sessions);
+    return NextResponse.json(
+        {
+            error: "Sessions are now managed via /api/campaign/[campaignId]/sessions",
+            movedTo: "/api/campaign/{campaignId}/sessions"
+        },
+        { status: 410 }
+    );
 }
 
-export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const session = sessionSchema.parse(body);
-  const created = await createSession(repositories.session, session);
-  return NextResponse.json(created, { status: 201 });
+export async function POST() {
+    return NextResponse.json(
+        {
+            error: "Sessions are now managed via /api/campaign/[campaignId]/sessions",
+            movedTo: "/api/campaign/{campaignId}/sessions"
+        },
+        { status: 410 }
+    );
 }

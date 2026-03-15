@@ -1,16 +1,27 @@
-import { createMission, getAllMissions } from "@/application/useCases/mission";
-import { repositories } from "@/infrastructure/config/repositories";
-import { missionSchema } from "@/infrastructure/adapters/schemas/mission.schema";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
+/**
+ * DEPRECATED: Missions are now managed as embedded entities within Campaign aggregate.
+ * Use /api/campaign/[campaignId]/missions instead.
+ * 
+ * FR-18: Return 410 Gone to indicate this endpoint is permanently deprecated.
+ */
 export async function GET() {
-    const missions = await getAllMissions(repositories.mission);
-    return NextResponse.json(missions);
+    return NextResponse.json(
+        {
+            error: "Missions are now managed via /api/campaign/[campaignId]/missions",
+            movedTo: "/api/campaign/{campaignId}/missions"
+        },
+        { status: 410 }
+    );
 }
 
-export async function POST(req: NextRequest) {
-    const body = await req.json();
-    const mission = missionSchema.parse(body);
-    const createdMission = await createMission(repositories.mission, mission);
-    return NextResponse.json(createdMission, { status: 201 });
+export async function POST() {
+    return NextResponse.json(
+        {
+            error: "Missions are now managed via /api/campaign/[campaignId]/missions",
+            movedTo: "/api/campaign/{campaignId}/missions"
+        },
+        { status: 410 }
+    );
 }

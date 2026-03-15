@@ -58,6 +58,7 @@ describe("Dashboard use cases", () => {
             const result = await getRecentCampaigns(mockDashboardRepository);
             
             expect(result).toEqual(mockCampaigns);
+            expect(result[0].groupName).toBe("Group 1");
             expect(mockDashboardRepository.getRecentCampaigns).toHaveBeenCalledWith(5);
         });
 
