@@ -7,7 +7,7 @@ export async function createCampaign(
   name = 'E2E Test Campaign'
 ) {
   const res = await request.post(`${BASE}/api/campaign`, {
-    data: { name, description: 'Created by E2E test', status: 'Activa', sessions: 0 },
+    data: { name, description: 'Created by E2E test', status: 'Activa' },
   });
   const body = await res.json();
   return body as { id: string; name: string };
@@ -51,12 +51,10 @@ export async function createSession(
   request: APIRequestContext,
   campaignId: string
 ) {
-  const res = await request.post(`${BASE}/api/session`, {
+  const res = await request.post(`${BASE}/api/campaign/${campaignId}/sessions`, {
     data: {
-      campaignId,
       title: 'E2E Session',
       notes: 'Notes for E2E session',
-      sessionNumber: 1,
       date: '2025-01-01',
     },
   });
@@ -64,12 +62,12 @@ export async function createSession(
   return body as { id: string };
 }
 
-export async function deleteSession(request: APIRequestContext, id: string) {
-  await request.delete(`${BASE}/api/session/${id}`);
+export async function deleteSession(request: APIRequestContext, campaignId: string, id: string) {
+  await request.delete(`${BASE}/api/campaign/${campaignId}/sessions/${id}`);
 }
 
-export async function createMission(request: APIRequestContext) {
-  const res = await request.post(`${BASE}/api/mission`, {
+export async function createMission(request: APIRequestContext, campaignId: string) {
+  const res = await request.post(`${BASE}/api/campaign/${campaignId}/missions`, {
     data: {
       name: 'E2E Mission',
       description: 'Description for E2E mission test',
@@ -85,6 +83,6 @@ export async function createMission(request: APIRequestContext) {
   return body as { id: string };
 }
 
-export async function deleteMission(request: APIRequestContext, id: string) {
-  await request.delete(`${BASE}/api/mission/${id}`);
+export async function deleteMission(request: APIRequestContext, campaignId: string, id: string) {
+  await request.delete(`${BASE}/api/campaign/${campaignId}/missions/${id}`);
 }

@@ -39,7 +39,7 @@ export class CharactersPage {
     this.createButton = page.getByRole('button', { name: 'Crear nuevo personaje' });
 
     this.modal = page.getByRole('dialog');
-    this.nameInput = page.getByLabel('Nombre del personaje');
+    this.nameInput = page.getByLabel('Nombre');
     this.submitButton = this.modal.getByRole('button', { name: 'Crear personaje' });
     this.cancelButton = this.modal.getByRole('button', { name: 'Cancelar' });
     this.errorAlert = page.getByRole('alert');

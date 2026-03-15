@@ -54,7 +54,6 @@ test.describe('Campaign Detail page (/campaigns/[id])', () => {
 
     await detailPage.fillSessionForm({
       title: 'Sesión E2E',
-      sessionNumber: '1',
       date: '2025-06-15',
       notes: 'Notas de prueba E2E',
     });
@@ -66,12 +65,10 @@ test.describe('Campaign Detail page (/campaigns/[id])', () => {
     await expect(page.getByText('Sesión E2E')).toBeVisible();
 
     // Cleanup: find and delete the created session
-    const res = await request.get('/api/session');
-    const sessions: { id: string; title: string; campaignId: string }[] = await res.json();
-    const created = sessions.find(
-      (s) => s.title === 'Sesión E2E' && s.campaignId === campaignId
-    );
-    if (created) await deleteSession(request, created.id);
+    const res = await request.get(`/api/campaign/${campaignId}`);
+    const campaign: { sessions: { id: string; title: string }[] } = await res.json();
+    const created = campaign.sessions.find((s) => s.title === 'Sesión E2E');
+    if (created) await deleteSession(request, campaignId, created.id);
   });
 
   // ── TC-10: Session validation — empty title shows error ───────────────────

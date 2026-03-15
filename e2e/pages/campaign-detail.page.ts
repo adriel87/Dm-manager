@@ -21,7 +21,6 @@ export class CampaignDetailPage {
   readonly createSessionButton: Locator;
   readonly modal: Locator;
   readonly sessionTitleInput: Locator;
-  readonly sessionNumberInput: Locator;
   readonly sessionDateInput: Locator;
   readonly sessionNotesInput: Locator;
   readonly sessionSubmitButton: Locator;
@@ -45,7 +44,6 @@ export class CampaignDetailPage {
     this.modal = page.getByRole('dialog');
     this.createSessionButton = page.getByRole('button', { name: 'Crear nueva sesión' });
     this.sessionTitleInput = page.getByLabel('Título');
-    this.sessionNumberInput = page.getByLabel('Número de sesión');
     this.sessionDateInput = page.getByLabel('Fecha');
     this.sessionNotesInput = page.getByLabel('Notas');
     this.sessionSubmitButton = this.modal.getByRole('button', { name: 'Crear sesión' });
@@ -82,12 +80,10 @@ export class CampaignDetailPage {
 
   async fillSessionForm(opts: {
     title: string;
-    sessionNumber: string;
     date: string;
     notes?: string;
   }) {
     await this.sessionTitleInput.fill(opts.title);
-    await this.sessionNumberInput.fill(opts.sessionNumber);
     await this.sessionDateInput.fill(opts.date);
     if (opts.notes) await this.sessionNotesInput.fill(opts.notes);
   }

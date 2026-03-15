@@ -30,8 +30,8 @@ export class CampaignsPage {
     this.createButton = page.getByRole('button', { name: 'Crear nueva campaña' });
 
     this.modal = page.getByRole('dialog');
-    this.nameInput = page.getByLabel('Nombre de la campaña');
-    this.descriptionInput = page.getByLabel('Descripción de la campaña');
+    this.nameInput = page.getByLabel('Nombre');
+    this.descriptionInput = page.getByLabel('Descripción');
     this.submitButton = this.modal.getByRole('button', { name: 'Crear campaña' });
     this.cancelButton = this.modal.getByRole('button', { name: 'Cancelar' });
     this.errorAlert = page.getByRole('alert');
