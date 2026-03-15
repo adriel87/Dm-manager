@@ -64,10 +64,10 @@ export function CampaignDetailHeader({ campaign }: CampaignDetailHeaderProps) {
         {/* Sessions count */}
         <span className="flex items-center gap-2 text-zinc-400 text-sm">
           <BookIcon size={15} aria-hidden="true" />
-          <span>
+          {/* <span>
             <span className="text-white font-semibold">{campaign.sessions}</span>{' '}
             {campaign.sessions === 1 ? 'sesión' : 'sesiones'}
-          </span>
+          </span> */}
         </span>
 
         {/* Last session */}

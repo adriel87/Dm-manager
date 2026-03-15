@@ -23,20 +23,18 @@ interface CreateSessionButtonProps {
 interface FormState {
   title: string;
   notes: string;
-  sessionNumber: string;
   date: string;
 }
 
 const EMPTY_FORM: FormState = {
   title: '',
   notes: '',
-  sessionNumber: '',
   date: '',
 };
 
 /**
  * Client Component island — button that opens a modal to create a session.
- * Includes the `campaignId` in the POST body automatically.
+ * The sessionNumber is auto-calculated by the backend.
  * Calls `onCreated()` after success so the parent can refresh the list.
  */
 export function CreateSessionButton({ campaignId, onCreated }: CreateSessionButtonProps) {
@@ -63,22 +61,15 @@ export function CreateSessionButton({ campaignId, onCreated }: CreateSessionButt
       setError('El título de la sesión es obligatorio.');
       return;
     }
-    const sessionNum = parseInt(form.sessionNumber, 10);
-    if (isNaN(sessionNum) || sessionNum < 1) {
-      setError('El número de sesión debe ser un número positivo.');
-      return;
-    }
     if (!form.date) {
       setError('La fecha de la sesión es obligatoria.');
       return;
     }
 
     startTransition(async () => {
-      const { error: apiError } = await apiPost('/api/session', {
-        campaignId,
+      const { error: apiError } = await apiPost(`/api/campaign/${campaignId}/sessions`, {
         title: form.title.trim(),
         notes: form.notes.trim(),
-        sessionNumber: sessionNum,
         date: form.date,
       });
 
@@ -133,31 +124,16 @@ export function CreateSessionButton({ campaignId, onCreated }: CreateSessionButt
                   aria-label="Título de la sesión"
                 />
 
-                <div className="flex gap-3">
-                  <Input
-                    label="Número de sesión"
-                    placeholder="Ej: 3"
-                    type="number"
-                    min={1}
-                    value={form.sessionNumber}
-                    onValueChange={(val) => handleFieldChange('sessionNumber', val)}
-                    isRequired
-                    isDisabled={isPending}
-                    classNames={INPUT_CLASSES}
-                    aria-label="Número de sesión"
-                  />
-
-                  <Input
-                    label="Fecha"
-                    type="date"
-                    value={form.date}
-                    onValueChange={(val) => handleFieldChange('date', val)}
-                    isRequired
-                    isDisabled={isPending}
-                    classNames={INPUT_CLASSES}
-                    aria-label="Fecha de la sesión"
-                  />
-                </div>
+                <Input
+                  label="Fecha"
+                  type="date"
+                  value={form.date}
+                  onValueChange={(val) => handleFieldChange('date', val)}
+                  isRequired
+                  isDisabled={isPending}
+                  classNames={INPUT_CLASSES}
+                  aria-label="Fecha de la sesión"
+                />
 
                 <Textarea
                   label="Notas"

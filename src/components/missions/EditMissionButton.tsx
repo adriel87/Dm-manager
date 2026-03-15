@@ -22,6 +22,7 @@ import type { Mission } from '@/domain/mission/mission';
 type MissionFields = Pick<Mission, 'id' | 'name' | 'description' | 'missionGuide' | 'missionPriority' | 'status'>;
 
 interface EditMissionButtonProps {
+  campaignId: string;
   mission: MissionFields;
   onUpdated: () => void;
 }
@@ -44,7 +45,7 @@ function formFromMission(mission: MissionFields): FormState {
   };
 }
 
-export function EditMissionButton({ mission, onUpdated }: EditMissionButtonProps) {
+export function EditMissionButton({ campaignId, mission, onUpdated }: EditMissionButtonProps) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [form, setForm] = useState<FormState>(formFromMission(mission));
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +80,8 @@ export function EditMissionButton({ mission, onUpdated }: EditMissionButtonProps
     }
 
     startTransition(async () => {
-      const { error: apiError } = await apiPut(`/api/mission/${mission.id}`, {
+      const { error: apiError } = await apiPut(`/api/campaign/${campaignId}/missions/${mission.id}`, {
+        id: mission.id,
         name: form.name.trim(),
         description: form.description.trim(),
         missionGuide: form.missionGuide.trim(),

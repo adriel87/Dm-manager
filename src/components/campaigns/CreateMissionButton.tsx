@@ -19,6 +19,7 @@ import { STATUS_OPTIONS, PRIORITY_OPTIONS } from '@/constants/domain';
 import { apiPost } from '@/lib/api';
 
 interface CreateMissionButtonProps {
+  campaignId: string;
   onCreated: () => void;
 }
 
@@ -42,7 +43,7 @@ const EMPTY_FORM: FormState = {
  * Client Component island — renders a button that opens a modal form.
  * Calls `onCreated()` after a successful POST so the parent can refresh its list.
  */
-export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
+export function CreateMissionButton({ campaignId, onCreated }: CreateMissionButtonProps) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +73,7 @@ export function CreateMissionButton({ onCreated }: CreateMissionButtonProps) {
     }
 
     startTransition(async () => {
-      const { error: apiError } = await apiPost('/api/mission', {
+      const { error: apiError } = await apiPost(`/api/campaign/${campaignId}/missions`, {
         name: form.name.trim(),
         description: form.description.trim(),
         missionGuide: form.missionGuide.trim(),

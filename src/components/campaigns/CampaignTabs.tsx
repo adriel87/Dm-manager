@@ -125,23 +125,14 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
   const loadAll = useCallback(async () => {
     setLoadingState('loading');
     try {
-      const [rawMissions, rawSessions, rawGroups] = await Promise.all([
-        fetchJson<Mission[] | { data: Mission[] }>(`${BASE}/api/mission`),
-        fetchJson<Session[] | { data: Session[] }>(`${BASE}/api/session`),
+      // Fetch campaign aggregate (includes missions and sessions)
+      const [campaignData, rawGroups] = await Promise.all([
+        fetchJson<{ missions: Mission[]; sessions: Session[] }>(`${BASE}/api/campaign/${campaignId}`),
         fetchJson<Group[] | { data: Group[] }>(`${BASE}/api/group`),
       ]);
 
-      // Normalise — API may return plain array or { data: [...] }
-      const missions = Array.isArray(rawMissions)
-        ? rawMissions
-        : (rawMissions as { data: Mission[] }).data ?? [];
-
-      const sessions = (
-        Array.isArray(rawSessions)
-          ? rawSessions
-          : (rawSessions as { data: Session[] }).data ?? []
-      )
-        .filter((s) => s.campaignId === campaignId)
+      const missions = campaignData.missions ?? [];
+      const sessions = (campaignData.sessions ?? [])
         .sort((a, b) => b.sessionNumber - a.sessionNumber);
 
       const groups = (
@@ -164,21 +155,18 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
 
   const refreshMissions = useCallback(async () => {
     try {
-      const raw = await fetchJson<Mission[] | { data: Mission[] }>(`${BASE}/api/mission`);
-      const missions = Array.isArray(raw) ? raw : (raw as { data: Mission[] }).data ?? [];
+      const campaignData = await fetchJson<{ missions: Mission[] }>(`${BASE}/api/campaign/${campaignId}`);
+      const missions = campaignData.missions ?? [];
       setData((prev) => ({ ...prev, missions }));
     } catch {
       // Silent — list keeps stale data; user can still see what was there
     }
-  }, []);
+  }, [campaignId]);
 
   const refreshSessions = useCallback(async () => {
     try {
-      const raw = await fetchJson<Session[] | { data: Session[] }>(`${BASE}/api/session`);
-      const sessions = (
-        Array.isArray(raw) ? raw : (raw as { data: Session[] }).data ?? []
-      )
-        .filter((s) => s.campaignId === campaignId)
+      const campaignData = await fetchJson<{ sessions: Session[] }>(`${BASE}/api/campaign/${campaignId}`);
+      const sessions = (campaignData.sessions ?? [])
         .sort((a, b) => b.sessionNumber - a.sessionNumber);
       setData((prev) => ({ ...prev, sessions }));
     } catch {
@@ -218,7 +206,7 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
                   </span>
                 )}
               </h2>
-              <CreateMissionButton onCreated={refreshMissions} />
+              <CreateMissionButton campaignId={campaignId} onCreated={refreshMissions} />
             </div>
 
             {isLoading && <SkeletonList />}
@@ -236,7 +224,7 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
               <ul className="flex flex-col gap-3" role="list" aria-label="Lista de misiones">
                 {data.missions.map((mission) => (
                   <li key={mission.id}>
-                    <MissionItem mission={mission} onUpdated={refreshMissions} />
+                    <MissionItem campaignId={campaignId} mission={mission} onUpdated={refreshMissions} />
                   </li>
                 ))}
               </ul>
