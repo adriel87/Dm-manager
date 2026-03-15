@@ -8,12 +8,19 @@ export const campaignMappers = {
         }
 
         return {
-            id: doc._id,
+            id: doc._id.toString(),  // Fix: convert ObjectId to string
             description: doc.description,
             name: doc.name,
-            sessions:doc.sessions,
             status: doc.status,
-            createdAt:new Date(doc.createdAt),
+            
+            // Aggregate collections with defaults
+            missions: doc.missions ?? [],
+            sessions: doc.sessions ?? [],
+            characters: doc.characters ?? [],
+            group: doc.group ?? null,
+            
+            // Metadata
+            createdAt: new Date(doc.createdAt),
             lastSessionAt: doc.lastSessionAt ? new Date(doc.lastSessionAt) : undefined,
             nextSessionAt: doc.nextSessionAt ? new Date(doc.nextSessionAt): undefined,
             updatedAt: doc.updatedAt ? new Date(doc.updatedAt): undefined

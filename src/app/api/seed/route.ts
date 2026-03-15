@@ -28,8 +28,42 @@ const characterData: Omit<Character, 'id'> = {
 const campaign :Omit<CampaignI, "id"> = {
     description: 'campaña test',
     name: 'la tesita',
-    sessions: 0,
-    status: "Activa",
+    characters: [
+        {
+            classType: 'Cleric',
+            id:'id1',
+            level: 1,
+            name:'Uzzuk'
+        },
+    ],
+    group: null,
+    missions: [{
+        description: 'la mision seedeada',
+        id:'missionid',
+        missionEvents: [{
+            difficult: 'high',
+            name: 'resolver puzzle',
+        }],
+        missionGuide: 'la guia de la misiones',
+        missionPriority: 'high',
+        name: 'el puzzle del mal',
+        relatedCharacters: [{
+            id: 'id1',
+            name: 'otro char'
+        }],
+        rewards: 'gloria',
+        status: 'Activa'
+    }],
+    sessions:[
+        {
+            date: new Date(),
+            id: 'id3',
+            notes: 'pues pasaron cosas en esta sesion',
+            sessionNumber: 1,
+            title: 'comienza la aventura'
+        }
+    ],
+    status:"Activa",
 
 }
 const misision : Omit<Mission, "id"> = {
