@@ -62,6 +62,30 @@ export interface EmbeddedSession {
 }
 
 /**
+ * Predefined color keys for note border styling.
+ * Maps to Tailwind border-l classes in the UI.
+ */
+export type NoteColorType = "yellow" | "blue" | "green" | "red" | "purple" | "gray";
+
+/**
+ * Valid note color keys — used by domain validation.
+ */
+export const VALID_NOTE_COLORS: NoteColorType[] = [
+  "yellow", "blue", "green", "red", "purple", "gray"
+];
+
+/**
+ * EmbeddedNote — Lightweight note embedded within Campaign aggregate.
+ * ID is generated via crypto.randomUUID() at creation.
+ */
+export interface EmbeddedNote {
+  id: string; // crypto.randomUUID()
+  comment: string;
+  color: NoteColorType;
+  createdAt: Date;
+}
+
+/**
  * CharacterRef — Lightweight reference to a Character entity.
  * Denormalized snapshot for quick access without joins.
  */
@@ -104,6 +128,7 @@ export interface CampaignI {
   // Aggregate collections (embedded sub-entities)
   missions: EmbeddedMission[];
   sessions: EmbeddedSession[];
+  notes: EmbeddedNote[];
   characters: CharacterRef[];
   group: GroupSnapshot | null;
   
@@ -131,6 +156,7 @@ export class Campaign implements CampaignI {
   // Aggregate collections
   missions: EmbeddedMission[];
   sessions: EmbeddedSession[];
+  notes: EmbeddedNote[];
   characters: CharacterRef[];
   group: GroupSnapshot | null;
   
@@ -149,6 +175,7 @@ export class Campaign implements CampaignI {
     // Initialize aggregate collections
     this.missions = campaign.missions ?? [];
     this.sessions = campaign.sessions ?? [];
+    this.notes = campaign.notes ?? [];
     this.characters = campaign.characters ?? [];
     this.group = campaign.group ?? null;
     
@@ -279,6 +306,26 @@ export const validateEmbeddedSession = (
   }
   if (errors.length > 0) {
     throw new Error(`Errores en la sesión:\n${errors.join("\n")}`);
+  }
+  return true;
+};
+
+/**
+ * validateEmbeddedNote — Validates an embedded note.
+ * Throws on validation failure.
+ */
+export const validateEmbeddedNote = (
+  note: Partial<EmbeddedNote>,
+): boolean => {
+  const errors: Array<string> = [];
+  if (!note.comment || note.comment.trim().length < 1) {
+    errors.push("El comentario de la nota no puede estar vacío");
+  }
+  if (!note.color || !VALID_NOTE_COLORS.includes(note.color as NoteColorType)) {
+    errors.push("El color de la nota no es válido");
+  }
+  if (errors.length > 0) {
+    throw new Error(`Errores en la nota:\n${errors.join("\n")}`);
   }
   return true;
 };

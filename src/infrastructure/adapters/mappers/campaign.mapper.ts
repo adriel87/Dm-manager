@@ -16,6 +16,7 @@ export const campaignMappers = {
             // Aggregate collections with defaults
             missions: doc.missions ?? [],
             sessions: doc.sessions ?? [],
+            notes: doc.notes ?? [],
             characters: doc.characters ?? [],
             group: doc.group ?? null,
             

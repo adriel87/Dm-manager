@@ -1,4 +1,4 @@
-import { assertNotFinalizada, assertUniqueMissionName, Campaign, CampaignI, CharacterRef, EmbeddedMission, EmbeddedSession, GroupSnapshot, MissionStatusType, validateCampaign, validateCharacterRef, validateEmbeddedMission, validateEmbeddedSession, validateGroupSnapshot } from "@/domain/campaign/campaign";
+import { assertNotFinalizada, assertUniqueMissionName, Campaign, CampaignI, CharacterRef, EmbeddedMission, EmbeddedNote, EmbeddedSession, GroupSnapshot, MissionStatusType, validateCampaign, validateCharacterRef, validateEmbeddedMission, validateEmbeddedNote, validateEmbeddedSession, validateGroupSnapshot } from "@/domain/campaign/campaign";
 import { DnDClassType } from "@/domain/character/character";
 import { describe, expect, it } from "vitest";
 
@@ -58,7 +58,8 @@ describe("Campaign domain", () => {
         characters: [validCharacter],
         group: validGroup,
         missions: [validMission],
-        sessions: [validSession]
+        sessions: [validSession],
+        notes: [],
     };
 
     describe("validateCampaign", () => {
@@ -523,6 +524,55 @@ describe("Campaign domain", () => {
             const dataWithoutCharacters = { ...validCampaignData, characters: [] };
             const campaign = new Campaign(dataWithoutCharacters);
             expect(campaign.characters).toEqual([]);
+        })
+
+        it("should initialize empty notes array when not provided", () => {
+            const campaign = new Campaign(validCampaignData);
+            expect(campaign.notes).toEqual([]);
+        })
+    })
+
+    // ========================================
+    // validateEmbeddedNote
+    // ========================================
+
+    describe("validateEmbeddedNote", () => {
+        const validNote: EmbeddedNote = {
+            id: 'note-1',
+            comment: 'Remember NPC Thornwick',
+            color: 'yellow',
+            createdAt: new Date(),
+        };
+
+        it("should return true for a valid note", () => {
+            expect(validateEmbeddedNote(validNote)).toBe(true);
+        })
+
+        it("should throw when comment is empty", () => {
+            const invalid = { ...validNote, comment: '' };
+            expect(() => validateEmbeddedNote(invalid)).toThrow("El comentario de la nota no puede estar vacío");
+        })
+
+        it("should throw when comment is missing", () => {
+            const invalid = { ...validNote, comment: undefined as any };
+            expect(() => validateEmbeddedNote(invalid)).toThrow("El comentario de la nota no puede estar vacío");
+        })
+
+        it("should throw when color is invalid", () => {
+            const invalid = { ...validNote, color: 'neon-pink' as any };
+            expect(() => validateEmbeddedNote(invalid)).toThrow("El color de la nota no es válido");
+        })
+
+        it("should throw when color is missing", () => {
+            const invalid = { ...validNote, color: undefined as any };
+            expect(() => validateEmbeddedNote(invalid)).toThrow("El color de la nota no es válido");
+        })
+
+        it("should accept all valid colors", () => {
+            const colors = ['yellow', 'blue', 'green', 'red', 'purple', 'gray'] as const;
+            for (const color of colors) {
+                expect(validateEmbeddedNote({ ...validNote, color })).toBe(true);
+            }
         })
     })
 })

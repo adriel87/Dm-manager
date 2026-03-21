@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { fetchApi } from '@/lib/api';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { CreateGroupButton } from '@/components/groups/CreateGroupButton';
-import { GroupFilters } from '@/components/groups/GroupFilters';
+import { PageHeader } from '@/infrastructure/presentation/components/ui/PageHeader';
+import { CreateGroupButton } from '@/infrastructure/presentation/components/groups/CreateGroupButton';
+import { GroupFilters } from '@/infrastructure/presentation/components/groups/GroupFilters';
 import type { Group } from '@/domain/group/group';
 
 export const metadata: Metadata = {

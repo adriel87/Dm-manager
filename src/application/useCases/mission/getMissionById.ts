@@ -1,7 +1,7 @@
 import { Mission } from "@/domain/mission/mission";
-import { MissionRespository } from "@/domain/mission/MissionRepository";
+import { MissionRepository } from "@/domain/mission/MissionRepository";
 
-export const getMissionById = async (repository: MissionRespository, id: string): Promise<Mission | null> => {
+export const getMissionById = async (repository: MissionRepository, id: string): Promise<Mission | null> => {
 
     if (id === null || id === undefined || id === '') throw new Error('Invalid group id');
 

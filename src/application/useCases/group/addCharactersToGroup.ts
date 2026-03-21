@@ -1,22 +1,15 @@
 import { Character } from "@/domain/character/character";
 import { GroupRepository } from "@/domain/group/groupRepository";
-import { getGroupById } from "./getGroup";
 import { validateMembers } from "@/domain/group/group";
-import { updatedGroup } from "./updateGroup";
 
-export const addMenberToGroup = async (groupRepository : GroupRepository,groupId: string, characters:Pick<Character, "id" | "name" | "classType">[])=>{
+export const addMemberToGroup = async (groupRepository : GroupRepository, groupId: string, characters: Pick<Character, "id" | "name" | "classType">[]) => {
+    if (!groupId) throw new Error("Invalid ID")
     validateMembers(characters)
-    let group = await getGroupById(groupRepository, groupId)
+    const group = await groupRepository.getGroupById(groupId)
     if (!group) {
         throw new Error("El id del grupo es invalido")
     }
-    group = {
-        ...group,
-        members: [
-            ...group.members,
-            ...characters
-        ]
-    }
-    const result = await updatedGroup(groupRepository, groupId, group)
+    const updated = { ...group, members: [...group.members, ...characters] }
+    const result = await groupRepository.updateGroup(groupId, updated)
     return Boolean(result)
 }

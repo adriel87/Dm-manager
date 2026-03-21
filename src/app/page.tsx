@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { fetchApi } from "@/lib/api";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { DashboardStats } from "@/components/dashboard/DashboardStats";
-import { RecentCampaigns } from "@/components/dashboard/RecentCampaigns";
-import { RecentGroups } from "@/components/dashboard/RecentGroups";
+import { PageHeader } from "@/infrastructure/presentation/components/ui/PageHeader";
+import { DashboardStats } from "@/infrastructure/presentation/components/dashboard/DashboardStats";
+import { RecentCampaigns } from "@/infrastructure/presentation/components/dashboard/RecentCampaigns";
+import { RecentGroups } from "@/infrastructure/presentation/components/dashboard/RecentGroups";
 import {
   DashboardStatsData,
   DashboardCampaign,

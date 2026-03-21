@@ -1,7 +1,7 @@
 import { Mission, validateMission } from "@/domain/mission/mission";
-import { MissionRespository } from "@/domain/mission/MissionRepository";
+import { MissionRepository } from "@/domain/mission/MissionRepository";
 
-export const createMission = async (repository: MissionRespository, mission: Omit<Mission, "id">): Promise<Mission> => {
+export const createMission = async (repository: MissionRepository, mission: Omit<Mission, "id">): Promise<Mission> => {
     
     validateMission(mission);
 

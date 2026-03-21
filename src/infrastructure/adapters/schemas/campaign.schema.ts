@@ -63,6 +63,18 @@ export const embeddedSessionSchema = z.object({
 export type EmbeddedSession = z.infer<typeof embeddedSessionSchema>;
 
 // ========================================
+// Embedded Note Schema
+// ========================================
+const noteColorEnum = z.enum(["yellow", "blue", "green", "red", "purple", "gray"]);
+
+export const embeddedNoteSchema = z.object({
+  comment: z.string().min(1, "El comentario de la nota es requerido"),
+  color: noteColorEnum.default("yellow"),
+});
+
+export type EmbeddedNoteInput = z.infer<typeof embeddedNoteSchema>;
+
+// ========================================
 // Character Reference Schema
 // ========================================
 const dndClassEnum = z.enum([

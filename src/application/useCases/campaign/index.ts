@@ -1,6 +1,6 @@
 // Root campaign operations
 export * from './getCampaignById';
-export * from './getCampaigns';
+export * from './getAllCampaigns';
 export * from './createCampaign';
 export * from './updateCampaign';
 export * from './deleteCampaign';
@@ -23,3 +23,8 @@ export * from './removeCharacter';
 // Group operations
 export * from './assignGroup';
 export * from './removeGroup';
+
+// Note operations
+export * from './addNote';
+export * from './removeNote';
+export * from './getNotes';

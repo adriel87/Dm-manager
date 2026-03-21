@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { CampaignCard, type Campaign } from '@/components/campaigns/CampaignCard';
-import { CreateCampaignButton } from '@/components/campaigns/CreateCampaignButton';
+import { CampaignCard, type Campaign } from '@/infrastructure/presentation/components/campaigns/CampaignCard';
+import { CreateCampaignButton } from '@/infrastructure/presentation/components/campaigns/CreateCampaignButton';
 import { fetchApi } from '@/lib/api';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { EmptyState } from '@/components/ui/EmptyState';
+import { PageHeader } from '@/infrastructure/presentation/components/ui/PageHeader';
+import { EmptyState } from '@/infrastructure/presentation/components/ui/EmptyState';
 
 export const metadata: Metadata = {
   title: 'Campañas | DM Manager',

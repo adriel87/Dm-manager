@@ -7,7 +7,7 @@ export const characterMapper = {
             throw new Error("Document is null or undefined");
         }
         return new CharacterEntity(
-            doc._id,
+            doc._id.toString(),
             doc.name,
             doc.age,
             doc.classType,

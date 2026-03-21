@@ -2,6 +2,7 @@ import {
   CampaignI,
   CharacterRef,
   EmbeddedMission,
+  EmbeddedNote,
   EmbeddedSession,
   GroupSnapshot,
 } from "@/domain/campaign/campaign";
@@ -24,6 +25,7 @@ export const campaignMemoryRepository: CampaignRepository = {
       id: String(nextId++),
       missions: [],
       sessions: [],
+      notes: [],
       characters: [],
       group: null,
       createdAt: new Date(),
@@ -166,6 +168,27 @@ export const campaignMemoryRepository: CampaignRepository = {
     if (!campaign) return null;
 
     campaign.group = null;
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  // ========================================
+  // Note Sub-Document Operations
+  // ========================================
+  addNote: async (campaignId: string, note: EmbeddedNote) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.notes.push(note);
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  removeNote: async (campaignId: string, noteId: string) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.notes = campaign.notes.filter((n) => n.id !== noteId);
     campaign.updatedAt = new Date();
     return campaign;
   },

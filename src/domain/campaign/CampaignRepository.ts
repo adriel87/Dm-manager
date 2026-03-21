@@ -2,6 +2,7 @@ import {
   CampaignI,
   CharacterRef,
   EmbeddedMission,
+  EmbeddedNote,
   EmbeddedSession,
   GroupSnapshot,
 } from "./campaign";
@@ -120,4 +121,25 @@ export interface CampaignRepository {
    * Returns the updated campaign, or null if campaign not found.
    */
   removeGroup(campaignId: string): Promise<CampaignI | null>;
+
+  // ========================================
+  // Note Sub-Document Operations
+  // ========================================
+  /**
+   * addNote — Adds a new note to the campaign's notes array.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  addNote(
+    campaignId: string,
+    note: EmbeddedNote,
+  ): Promise<CampaignI | null>;
+
+  /**
+   * removeNote — Removes a note from the campaign's notes array.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  removeNote(
+    campaignId: string,
+    noteId: string,
+  ): Promise<CampaignI | null>;
 }

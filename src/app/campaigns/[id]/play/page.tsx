@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { fetchApi } from '@/lib/api';
-import { PlayModeView } from '@/components/play/PlayModeView';
+import { PlayModeView } from '@/infrastructure/presentation/components/play/PlayModeView';
+import type { CharacterRef } from '@/domain/campaign/campaign';
+import type { Note } from '@/infrastructure/presentation/components/campaigns/NoteItem';
 
 interface PlayModePageProps {
   params: Promise<{ id: string }>;
@@ -32,6 +34,8 @@ interface CampaignAggregate {
     sessionNumber: number;
     date: string;
   }>;
+  characters: CharacterRef[];
+  notes: Note[];
 }
 
 export async function generateMetadata({ params }: PlayModePageProps): Promise<Metadata> {
@@ -51,7 +55,7 @@ export async function generateMetadata({ params }: PlayModePageProps): Promise<M
 /**
  * Play Mode Page — Server Component.
  *
- * Fetches the full Campaign Aggregate (with embedded missions and sessions)
+ * Fetches the full Campaign Aggregate (with embedded missions, sessions and characters)
  * server-side, then delegates all interactivity to the PlayModeView client island.
  *
  * Route: /campaigns/[id]/play
@@ -79,6 +83,8 @@ export default async function PlayModePage({ params }: PlayModePageProps) {
         campaignName={campaign.name}
         missions={campaign.missions ?? []}
         sessions={sortedSessions}
+        characters={campaign.characters ?? []}
+        notes={campaign.notes ?? []}
       />
     </main>
   );

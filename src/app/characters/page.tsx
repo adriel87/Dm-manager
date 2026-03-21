@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { type Character } from '@/components/characters/CharacterCard';
-import { CharacterFilters } from '@/components/characters/CharacterFilters';
-import { CreateCharacterButton } from '@/components/characters/CreateCharacterButton';
+import { type Character } from '@/infrastructure/presentation/components/characters/CharacterCard';
+import { CharacterFilters } from '@/infrastructure/presentation/components/characters/CharacterFilters';
+import { CreateCharacterButton } from '@/infrastructure/presentation/components/characters/CreateCharacterButton';
 import { fetchApi } from '@/lib/api';
-import { PageHeader } from '@/components/ui/PageHeader';
+import { PageHeader } from '@/infrastructure/presentation/components/ui/PageHeader';
 
 export const metadata: Metadata = {
   title: 'Personajes | DM Manager',

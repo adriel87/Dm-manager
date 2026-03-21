@@ -63,6 +63,7 @@ const campaign :Omit<CampaignI, "id"> = {
             title: 'comienza la aventura'
         }
     ],
+    notes: [],
     status:"Activa",
 
 }

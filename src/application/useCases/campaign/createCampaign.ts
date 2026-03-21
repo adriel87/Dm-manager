@@ -8,6 +8,7 @@ export const createCampaign = async (repository: CampaignRepository, campaignDat
             ...campaignData,
             missions: [],
             sessions: [],
+            notes: [],
             characters: [],
             group: null,
             createdAt: new Date()
