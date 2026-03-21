@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Chip } from '@heroui/react';
+import { Chip, Button } from '@heroui/react';
 import type { Campaign } from '@/components/campaigns/CampaignCard';
 import { BookIcon, CalendarIcon, ArrowLeftIcon } from '@/components/icons';
 import { STATUS_COLOR } from '@/constants/ui';
@@ -42,14 +42,27 @@ export function CampaignDetailHeader({ campaign }: CampaignDetailHeaderProps) {
         >
           {campaign.name}
         </h1>
-        <Chip
-          color={color}
-          variant="flat"
-          size="md"
-          className="mt-1 shrink-0 font-medium"
-        >
-          {campaign.status}
-        </Chip>
+        <div className="flex items-center gap-2 mt-1 shrink-0">
+          <Chip
+            color={color}
+            variant="flat"
+            size="md"
+            className="font-medium"
+          >
+            {campaign.status}
+          </Chip>
+          <Link href={`/campaigns/${campaign.id}/play`}>
+            <Button
+              color="primary"
+              variant="solid"
+              size="sm"
+              className="font-medium"
+              aria-label="Entrar al modo juego"
+            >
+              ⚔️ Modo Juego
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Description */}
