@@ -7,6 +7,7 @@ import {
   GroupSnapshot,
 } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
+import { SpeakerMapping } from "@/domain/recording/recording";
 
 let store: CampaignI[] = [];
 let nextId = 1;
@@ -28,6 +29,7 @@ export const campaignMemoryRepository: CampaignRepository = {
       notes: [],
       characters: [],
       group: null,
+      discordSpeakerMappings: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -189,6 +191,18 @@ export const campaignMemoryRepository: CampaignRepository = {
     if (!campaign) return null;
 
     campaign.notes = campaign.notes.filter((n) => n.id !== noteId);
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  // ========================================
+  // Discord Speaker Mapping Operations
+  // ========================================
+  setSpeakerMappings: async (campaignId: string, mappings: SpeakerMapping[]) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.discordSpeakerMappings = mappings;
     campaign.updatedAt = new Date();
     return campaign;
   },

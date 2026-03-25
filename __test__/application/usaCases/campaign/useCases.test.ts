@@ -37,6 +37,9 @@ describe("Campaign use cases", () => {
         // Note operations (2 methods)
         addNote: vi.fn(),
         removeNote: vi.fn(),
+
+        // Discord speaker mapping operations (1 method)
+        setSpeakerMappings: vi.fn(),
     };
 
     const mockCharacterRepository: CharacterRepository = {
@@ -104,6 +107,7 @@ describe("Campaign use cases", () => {
         notes: [],
         characters: [],
         group: null,
+        discordSpeakerMappings: [],
     };
 
     const validNote: EmbeddedNote = {

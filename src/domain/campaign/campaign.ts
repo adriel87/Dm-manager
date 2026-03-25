@@ -1,3 +1,4 @@
+import { SpeakerMapping } from "@/domain/recording/recording";
 
 // ========================================
 // Embedded Sub-Entity Types (Aggregate Components)
@@ -131,6 +132,7 @@ export interface CampaignI {
   notes: EmbeddedNote[];
   characters: CharacterRef[];
   group: GroupSnapshot | null;
+  discordSpeakerMappings: SpeakerMapping[];
   
   // Metadata
   nextSessionAt?: Date;
@@ -159,6 +161,7 @@ export class Campaign implements CampaignI {
   notes: EmbeddedNote[];
   characters: CharacterRef[];
   group: GroupSnapshot | null;
+  discordSpeakerMappings: SpeakerMapping[];
   
   // Metadata
   nextSessionAt?: Date | undefined;
@@ -178,6 +181,7 @@ export class Campaign implements CampaignI {
     this.notes = campaign.notes ?? [];
     this.characters = campaign.characters ?? [];
     this.group = campaign.group ?? null;
+    this.discordSpeakerMappings = campaign.discordSpeakerMappings ?? [];
     
     this.nextSessionAt = campaign.nextSessionAt ?? undefined;
     this.lastSessionAt = campaign.lastSessionAt ?? undefined;

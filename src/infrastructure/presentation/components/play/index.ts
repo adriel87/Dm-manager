@@ -13,6 +13,10 @@ export { EditSessionButton } from './EditSessionButton';
 export { MissionPanel } from './MissionPanel';
 export { SessionPanel } from './SessionPanel';
 export { CharacterPanel } from './CharacterPanel';
+export { NotesPanel } from './NotesPanel';
+export { RecordingPanel } from './RecordingPanel';
+export { TranscriptionView } from './TranscriptionView';
+export { SpeakerMappingModal } from './SpeakerMappingModal';
 
 // Action menu (hamburger)
 export { PlayModeActionMenu } from './PlayModeActionMenu';

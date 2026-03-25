@@ -21,7 +21,7 @@ import {
 import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES, SELECT_CLASSES, NOTE_SWATCH_BG } from '@/constants/ui';
 import type { NoteColorKey } from '@/constants/ui';
 import { STATUS_OPTIONS, PRIORITY_OPTIONS, NOTE_COLOR_OPTIONS } from '@/constants/domain';
-import { MenuIcon, CalendarIcon, FileTextIcon, UserIcon, EditIcon } from '@/infrastructure/presentation/components/icons';
+import { MenuIcon, CalendarIcon, FileTextIcon, UserIcon, EditIcon, SlidersIcon } from '@/infrastructure/presentation/components/icons';
 import { CreateCharacterInPlayModal } from './CreateCharacterInPlayModal';
 import { AddExistingCharacterModal } from './AddExistingCharacterModal';
 import { apiPost } from '@/lib/api';
@@ -33,6 +33,7 @@ interface PlayModeActionMenuProps {
   onMissionCreated: () => void;
   onCharacterAdded: () => void;
   onNoteCreated: () => void;
+  onSpeakerMappingOpen?: () => void;
 }
 
 // ─── Session form ─────────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export function PlayModeActionMenu({
   onMissionCreated,
   onCharacterAdded,
   onNoteCreated,
+  onSpeakerMappingOpen,
 }: PlayModeActionMenuProps) {
   // Session modal
   const sessionModal = useDisclosure();
@@ -277,6 +279,15 @@ export function PlayModeActionMenu({
             aria-label="Nueva nota"
           >
             Nueva nota
+          </DropdownItem>
+
+          <DropdownItem
+            key="speaker-mapping"
+            startContent={<SlidersIcon size={14} className="text-zinc-400" />}
+            onPress={onSpeakerMappingOpen}
+            aria-label="Configurar speaker mapping"
+          >
+            Speaker Mapping
           </DropdownItem>
 
           <DropdownItem

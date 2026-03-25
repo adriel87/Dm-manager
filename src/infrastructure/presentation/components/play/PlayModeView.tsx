@@ -2,13 +2,16 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDisclosure } from '@heroui/react';
 import { MissionPanel } from './MissionPanel';
 import { SessionPanel } from './SessionPanel';
 import { CharacterPanel } from './CharacterPanel';
 import { NotesPanel } from './NotesPanel';
+import { RecordingPanel } from './RecordingPanel';
+import { SpeakerMappingModal } from './SpeakerMappingModal';
 import { PlayModeActionMenu } from './PlayModeActionMenu';
 import { useBeforeUnload } from './useBeforeUnload';
-import { ChevronLeftIcon, DotFilledIcon, UsersIcon, FileTextIcon } from '@/infrastructure/presentation/components/icons';
+import { ChevronLeftIcon, DotFilledIcon, UsersIcon, FileTextIcon, MicIcon } from '@/infrastructure/presentation/components/icons';
 import type { CharacterRef } from '@/domain/campaign/campaign';
 import type { Note } from '@/infrastructure/presentation/components/campaigns/NoteItem';
 
@@ -100,12 +103,15 @@ export function PlayModeView({
   const [hasUnsavedNotes, setHasUnsavedNotes] = useState(false);
   const [showCharacterPanel, setShowCharacterPanel] = useState(false);
   const [showNotesPanel, setShowNotesPanel] = useState(false);
+  const [showRecordingPanel, setShowRecordingPanel] = useState(false);
+  const speakerMappingModal = useDisclosure();
 
   // Block navigation if there are unsaved session notes
   useBeforeUnload(hasUnsavedNotes);
 
   // Number of extra panels visible (for grid column calculation)
-  const extraPanels = (showCharacterPanel ? 1 : 0) + (showNotesPanel ? 1 : 0);
+  const extraPanels =
+    (showCharacterPanel ? 1 : 0) + (showNotesPanel ? 1 : 0) + (showRecordingPanel ? 1 : 0);
 
   // Re-fetch full campaign aggregate and update local state
   const refreshData = useCallback(async () => {
@@ -209,6 +215,21 @@ export function PlayModeView({
             <span className="hidden sm:inline">Notas</span>
           </button>
 
+          {/* Recording panel toggle */}
+          <button
+            onClick={() => setShowRecordingPanel((prev) => !prev)}
+            className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ${
+              showRecordingPanel
+                ? 'bg-primary-500/20 border-primary-500/40 text-primary-300'
+                : 'bg-zinc-800 border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-600'
+            }`}
+            aria-label={showRecordingPanel ? 'Ocultar panel de grabaciones' : 'Mostrar panel de grabaciones'}
+            aria-pressed={showRecordingPanel}
+          >
+            <MicIcon size={14} />
+            <span className="hidden sm:inline">Grabaciones</span>
+          </button>
+
           {/* Hamburger action menu */}
           <PlayModeActionMenu
             campaignId={campaignId}
@@ -217,6 +238,7 @@ export function PlayModeView({
             onMissionCreated={refreshData}
             onCharacterAdded={handleCharacterAdded}
             onNoteCreated={refreshData}
+            onSpeakerMappingOpen={speakerMappingModal.onOpen}
           />
         </div>
       </header>
@@ -226,7 +248,8 @@ export function PlayModeView({
         className={`grid gap-6 flex-1 min-h-0 grid-cols-1 ${
           extraPanels === 0 ? 'lg:grid-cols-2' :
           extraPanels === 1 ? 'lg:grid-cols-3' :
-          'lg:grid-cols-4'
+          extraPanels === 2 ? 'lg:grid-cols-4' :
+          'lg:grid-cols-5'
         }`}
       >
         <MissionPanel
@@ -259,7 +282,29 @@ export function PlayModeView({
             onNoteDeleted={refreshData}
           />
         )}
+
+        {showRecordingPanel && (
+          <RecordingPanel
+            campaignId={campaignId}
+            sessionId={sessions[sessions.length - 1]?.id ?? ''}
+            onRecordingUpdated={refreshData}
+          />
+        )}
       </div>
+
+      {/* ── Speaker Mapping Modal ── */}
+      <SpeakerMappingModal
+        campaignId={campaignId}
+        characters={characters.map((c) => ({
+          id: c.id,
+          name: c.name,
+          classType: c.classType,
+          level: c.level,
+        }))}
+        isOpen={speakerMappingModal.isOpen}
+        onOpenChange={speakerMappingModal.onOpenChange}
+        onSaved={refreshData}
+      />
     </div>
   );
 }

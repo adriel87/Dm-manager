@@ -28,3 +28,6 @@ export * from './removeGroup';
 export * from './addNote';
 export * from './removeNote';
 export * from './getNotes';
+
+// Discord speaker mapping operations
+export * from './setSpeakerMappings';

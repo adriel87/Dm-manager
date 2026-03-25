@@ -60,6 +60,7 @@ describe("Campaign domain", () => {
         missions: [validMission],
         sessions: [validSession],
         notes: [],
+        discordSpeakerMappings: [],
     };
 
     describe("validateCampaign", () => {

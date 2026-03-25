@@ -19,6 +19,7 @@ export const campaignMappers = {
             notes: doc.notes ?? [],
             characters: doc.characters ?? [],
             group: doc.group ?? null,
+            discordSpeakerMappings: doc.discordSpeakerMappings ?? [],
             
             // Metadata
             createdAt: new Date(doc.createdAt),

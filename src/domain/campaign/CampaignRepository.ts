@@ -6,6 +6,7 @@ import {
   EmbeddedSession,
   GroupSnapshot,
 } from "./campaign";
+import { SpeakerMapping } from "@/domain/recording/recording";
 
 /**
  * CampaignRepository — Port for Campaign aggregate persistence.
@@ -141,5 +142,17 @@ export interface CampaignRepository {
   removeNote(
     campaignId: string,
     noteId: string,
+  ): Promise<CampaignI | null>;
+
+  // ========================================
+  // Discord Speaker Mapping Operations
+  // ========================================
+  /**
+   * setSpeakerMappings — Replaces the full discordSpeakerMappings array on the campaign.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  setSpeakerMappings(
+    campaignId: string,
+    mappings: SpeakerMapping[],
   ): Promise<CampaignI | null>;
 }

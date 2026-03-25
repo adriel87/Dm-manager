@@ -64,6 +64,7 @@ const campaign :Omit<CampaignI, "id"> = {
         }
     ],
     notes: [],
+    discordSpeakerMappings: [],
     status:"Activa",
 
 }

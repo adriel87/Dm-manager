@@ -7,6 +7,7 @@ import {
   GroupSnapshot,
 } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
+import { SpeakerMapping } from "@/domain/recording/recording";
 import { getCollection } from "@/infrastructure/config/mongodb";
 import { ObjectId } from "mongodb";
 import { campaignMappers } from "../../mappers/campaign.mapper";
@@ -49,6 +50,7 @@ export const campaignRepository: CampaignRepository = {
       notes: [],
       characters: [],
       group: null,
+      discordSpeakerMappings: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -62,7 +64,7 @@ export const campaignRepository: CampaignRepository = {
 
   updateCampaign: async (campaign: CampaignI) => {
     const collection = await getCollection("campaigns");
-    const { id, missions, sessions, notes, characters, group, ...rootFields } = campaign;
+    const { id, missions, sessions, notes, characters, group, discordSpeakerMappings, ...rootFields } = campaign;
     
     // Only update root-level fields, exclude aggregate collections
     const result = await collection.findOneAndUpdate(
@@ -333,6 +335,30 @@ export const campaignRepository: CampaignRepository = {
       {
         $pull: { notes: { id: noteId } as any } as any,
         $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(
+          result,
+          campaignMappers.fromMongoDocumentToEntity,
+        )
+      : null;
+  },
+
+  // ========================================
+  // Discord Speaker Mapping Operations
+  // ========================================
+  setSpeakerMappings: async (campaignId: string, mappings: SpeakerMapping[]) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId) },
+      {
+        $set: {
+          discordSpeakerMappings: mappings,
+          updatedAt: new Date(),
+        },
       },
       { returnDocument: "after" }
     );
