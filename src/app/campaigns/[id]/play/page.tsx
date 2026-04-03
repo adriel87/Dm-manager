@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { fetchApi } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 import { PlayModeView } from '@/infrastructure/presentation/components/play/PlayModeView';
 import type { CharacterRef } from '@/domain/campaign/campaign';
 import type { Note } from '@/infrastructure/presentation/components/campaigns/NoteItem';
@@ -40,7 +40,7 @@ interface CampaignAggregate {
 
 export async function generateMetadata({ params }: PlayModePageProps): Promise<Metadata> {
   const { id } = await params;
-  const campaign = await fetchApi<CampaignAggregate>(`/api/campaign/${id}`);
+  const campaign = await apiGet<CampaignAggregate>(`/api/campaign/${id}`);
 
   if (!campaign) {
     return { title: 'Campaña no encontrada | DM Manager' };
@@ -62,7 +62,7 @@ export async function generateMetadata({ params }: PlayModePageProps): Promise<M
  */
 export default async function PlayModePage({ params }: PlayModePageProps) {
   const { id } = await params;
-  const campaign = await fetchApi<CampaignAggregate>(`/api/campaign/${id}`);
+  const campaign = await apiGet<CampaignAggregate>(`/api/campaign/${id}`);
 
   if (!campaign) {
     notFound();

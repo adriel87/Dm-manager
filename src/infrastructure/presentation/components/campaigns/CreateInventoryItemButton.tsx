@@ -16,7 +16,7 @@ import {
 import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES } from '@/constants/ui';
 import { TAG_OPTIONS } from '@/constants/domain';
 import { apiPost } from '@/lib/api';
-import type { TagType } from '@/components/campaigns/InventoryItem';
+import type { TagType } from '@/infrastructure/presentation/components/campaigns/InventoryItem';
 
 interface CreateInventoryItemButtonProps {
   campaignId: string;

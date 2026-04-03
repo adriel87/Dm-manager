@@ -34,10 +34,11 @@ describe("Campaign use cases", () => {
         assignGroup: vi.fn(),
         removeGroup: vi.fn(),
 
-        // Inventory operations (3 methods)
+        // Inventory operations (4 methods)
         addInventoryItem: vi.fn(),
         updateInventoryItem: vi.fn(),
         removeInventoryItem: vi.fn(),
+        incrementInventoryMoney: vi.fn(),
 
         // Note operations (2 methods)
         addNote: vi.fn(),

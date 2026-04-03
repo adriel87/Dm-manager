@@ -6,26 +6,20 @@ import { MissionItem, type Mission } from '@/infrastructure/presentation/compone
 import { CreateMissionButton } from '@/infrastructure/presentation/components/campaigns/CreateMissionButton';
 import { InfoCircleIcon } from '@/infrastructure/presentation/components/icons';
 import { EmbeddedMission } from '@/domain/campaign/campaign';
+import { apiGet } from '@/lib/api';
 
 interface MissionsTabProps {
   campaignId: string;
   initialMissions: EmbeddedMission[];
 }
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
-
 export function MissionsTab({ campaignId, initialMissions }: MissionsTabProps) {
   const [missions, setMissions] = useState<EmbeddedMission[]>(initialMissions);
 
   const refresh = useCallback(async () => {
-    try {
-      const res = await fetch(`${BASE}/api/campaign/${campaignId}`, { cache: 'no-store' });
-      if (!res.ok) return;
-      const data = await res.json();
-      setMissions(data.missions ?? []);
-    } catch {
-      // Silent — list keeps stale data; user can retry via next action
-    }
+    const data = await apiGet<{ missions: EmbeddedMission[] }>(`/api/campaign/${campaignId}`);
+    if (!data) return;
+    setMissions(data.missions ?? []);
   }, [campaignId]);
 
   return (

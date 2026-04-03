@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { CampaignCard, type Campaign } from '@/infrastructure/presentation/components/campaigns/CampaignCard';
 import { CreateCampaignButton } from '@/infrastructure/presentation/components/campaigns/CreateCampaignButton';
-import { fetchApi } from '@/lib/api';
+import { apiGet } from '@/lib/api';
 import { PageHeader } from '@/infrastructure/presentation/components/ui/PageHeader';
 import { EmptyState } from '@/infrastructure/presentation/components/ui/EmptyState';
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
  * Data is fetched server-side and renders the campaign grid.
  */
 export default async function CampaignsPage() {
-  const campaigns = (await fetchApi<Campaign[]>('/api/campaign')) ?? [];
+  const campaigns = (await apiGet<Campaign[]>('/api/campaign')) ?? [];
 
   return (
     <section aria-labelledby="campaigns-heading">

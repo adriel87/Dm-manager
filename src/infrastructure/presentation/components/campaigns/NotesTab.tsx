@@ -5,29 +5,22 @@ import { Tab } from '@heroui/react';
 import { NoteItem, type Note } from '@/infrastructure/presentation/components/campaigns/NoteItem';
 import { CreateNoteButton } from '@/infrastructure/presentation/components/campaigns/CreateNoteButton';
 import { InfoCircleIcon } from '@/infrastructure/presentation/components/icons';
+import { apiGet } from '@/lib/api';
 
 interface NotesTabProps {
   campaignId: string;
   initialNotes: Note[];
 }
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
-
 export function NotesTab({ campaignId, initialNotes }: NotesTabProps) {
   const [notes, setNotes] = useState<Note[]>(initialNotes);
 
   const refresh = useCallback(async () => {
-    try {
-      const res = await fetch(`${BASE}/api/campaign/${campaignId}`, { cache: 'no-store' });
-      if (!res.ok) return;
-      const data = await res.json();
-      const sorted = (data.notes ?? []).sort(
-        (a: Note, b: Note) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      setNotes(sorted);
-    } catch {
-      // Silent — list keeps stale data; user can retry via next action
-    }
+    const data = await apiGet<{ notes: Note[] }>(`/api/campaign/${campaignId}`);
+    if (!data) return;
+    setNotes((data.notes ?? []).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ));
   }, [campaignId]);
 
   return (

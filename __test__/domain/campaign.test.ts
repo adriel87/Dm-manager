@@ -59,7 +59,7 @@ describe("Campaign domain", () => {
         group: validGroup,
         missions: [validMission],
         sessions: [validSession],
-        inventory: { items: [], capacity: 100, money: 0 },,
+        inventory: { items: [], capacity: 100, money: 0 },
         notes: [],
         discordSpeakerMappings: [],
     };

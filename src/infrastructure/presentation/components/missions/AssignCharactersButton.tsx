@@ -13,7 +13,7 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import { MODAL_CLASSES, ERROR_CLASSES } from '@/constants/ui';
-import { apiPut, fetchApi } from '@/lib/api';
+import { apiPut, apiGet } from '@/lib/api';
 import type { Character } from '@/domain/character/character';
 import type { Mission } from '@/domain/mission/mission';
 
@@ -36,7 +36,7 @@ export function AssignCharactersButton({ mission, onAssigned }: AssignCharacters
       setIsLoading(true);
       setError(null);
       try {
-        const data = await fetchApi<Pick<Character, 'id' | 'name'>[]>('/api/character');
+        const data = await apiGet<Pick<Character, 'id' | 'name'>[]>('/api/character');
         if (data) {
           setCharacters(data);
           const currentIds = (mission.relatedCharacters ?? []).map((c) => c.id);

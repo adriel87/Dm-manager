@@ -16,7 +16,7 @@ import {
   useDisclosure,
 } from '@heroui/react';
 import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES, SELECT_CLASSES } from '@/constants/ui';
-import { fetchApi, apiPost, apiPut } from '@/lib/api';
+import { apiGet, apiPost, apiPut } from '@/lib/api';
 import type { Character } from '@/domain/character/character';
 import type { Group } from '@/domain/group/group';
 
@@ -53,7 +53,7 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
 
   const handleOpen = async () => {
     onOpen();
-    const chars = await fetchApi<Pick<Character, 'id' | 'name' | 'classType'>[]>('/api/character');
+    const chars = await apiGet<Pick<Character, 'id' | 'name' | 'classType'>[]>('/api/character');
     setCharacters(chars ?? []);
   };
 

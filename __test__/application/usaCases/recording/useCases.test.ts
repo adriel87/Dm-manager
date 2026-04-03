@@ -44,6 +44,10 @@ const mockCampaignRepository: CampaignRepository = {
   removeCharacter: vi.fn(),
   assignGroup: vi.fn(),
   removeGroup: vi.fn(),
+  addInventoryItem: vi.fn(),
+  updateInventoryItem: vi.fn(),
+  removeInventoryItem: vi.fn(),
+  incrementInventoryMoney: vi.fn(),
   addNote: vi.fn(),
   removeNote: vi.fn(),
   setSpeakerMappings: vi.fn(),
@@ -102,6 +106,7 @@ const validCampaign: CampaignI = {
   notes: [],
   characters: [],
   group: null,
+  inventory: { items: [], capacity: 100, money: 0 },
   discordSpeakerMappings: validSpeakerMappings,
 };
 

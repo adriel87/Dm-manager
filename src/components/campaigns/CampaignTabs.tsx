@@ -2,16 +2,18 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Tabs, Tab } from '@heroui/react';
-import { MissionItem, type Mission } from '@/components/campaigns/MissionItem';
-import { SessionItem, type Session } from '@/components/campaigns/SessionItem';
-import { GroupItem } from '@/components/campaigns/GroupItem';
-import type { Group } from '@/domain/group/group';
-import { CreateMissionButton } from '@/components/campaigns/CreateMissionButton';
-import { CreateSessionButton } from '@/components/campaigns/CreateSessionButton';
-import { InventoryItem, type EmbeddedItem } from '@/components/campaigns/InventoryItem';
-import { CreateInventoryItemButton } from '@/components/campaigns/CreateInventoryItemButton';
-import { TransferMoneyButton } from '@/components/campaigns/TransferMoneyButton';
-import type { Campaign } from '@/components/campaigns/CampaignCard';
+import { apiGet } from '@/lib/api';
+import type { EmbeddedItem, GroupSnapshot } from '@/domain/campaign/campaign';
+import { Mission } from '@/domain/mission/mission';
+import { Session } from '@/domain/session/session';
+import { CreateMissionButton } from '@/infrastructure/presentation/components/campaigns/CreateMissionButton';
+import { MissionItem } from '@/infrastructure/presentation/components/campaigns/MissionItem';
+import { CreateSessionButton } from '@/infrastructure/presentation/components/campaigns/CreateSessionButton';
+import { SessionItem } from '@/infrastructure/presentation/components/campaigns/SessionItem';
+import { GroupItem } from '@/infrastructure/presentation/components/campaigns/GroupItem';
+import { TransferMoneyButton } from '@/infrastructure/presentation/components/campaigns/TransferMoneyButton';
+import { CreateInventoryItemButton } from '@/infrastructure/presentation/components/campaigns/CreateInventoryItemButton';
+import { InventoryItem } from '@/infrastructure/presentation/components/campaigns/InventoryItem';
 
 interface Inventory {
   items: EmbeddedItem[];
@@ -21,13 +23,19 @@ interface Inventory {
 
 interface CampaignTabsProps {
   campaignId: string;
-  campaign: Campaign;
+}
+
+interface CampaignData {
+  missions: Mission[];
+  sessions: Session[];
+  inventory: Inventory;
+  group: GroupSnapshot | null;
 }
 
 interface TabData {
   missions: Mission[];
   sessions: Session[];
-  groups: Group[];
+  group: GroupSnapshot | null;
   inventory: Inventory;
 }
 
@@ -108,56 +116,33 @@ function ErrorTabState({ onRetry }: ErrorTabStateProps) {
   );
 }
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
-
-async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { cache: 'no-store' });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.json() as Promise<T>;
-}
-
 /**
  * Client Component island — handles tab navigation + lazy data fetching.
  *
- * Architecture note: data is fetched client-side here because:
- * 1. Tabs create natural lazy-loading boundaries (avoid fetching all data upfront)
- * 2. The Create buttons need to refresh only the relevant list, not the whole page
- *
- * All three datasets are fetched in parallel on mount to keep the UX fast,
- * and each tab can be independently refreshed after a create action.
+ * Architecture note: a single GET /api/campaign/:id returns the full aggregate
+ * (missions, sessions, inventory, group). Each tab refreshes by re-fetching
+ * that single endpoint and extracting its slice.
  */
-export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
-  const [data, setData] = useState<TabData>({ missions: [], sessions: [], groups: [], inventory: { items: [], capacity: 0, money: 0 } });
+export function CampaignTabs({ campaignId }: CampaignTabsProps) {
+  const [data, setData] = useState<TabData>({ missions: [], sessions: [], group: null, inventory: { items: [], capacity: 0, money: 0 } });
   const [loadingState, setLoadingState] = useState<LoadingState>('idle');
-
-  const campaignGroupIds = new Set(campaign.groups?.map((g) => g.id) ?? []);
 
   const loadAll = useCallback(async () => {
     setLoadingState('loading');
     try {
-      // Fetch campaign aggregate (includes missions and sessions) + groups + inventory in parallel
-      const [campaignData, rawGroups, inventory] = await Promise.all([
-        fetchJson<{ missions: Mission[]; sessions: Session[] }>(`${BASE}/api/campaign/${campaignId}`),
-        fetchJson<Group[] | { data: Group[] }>(`${BASE}/api/group`),
-        fetchJson<Inventory>(`${BASE}/api/campaign/${campaignId}/inventory`),
-      ]);
+      const campaign = await apiGet<CampaignData>(`/api/campaign/${campaignId}`);
+      if (!campaign) throw new Error('Failed to load');
 
-      const missions = campaignData.missions ?? [];
-      const sessions = (campaignData.sessions ?? [])
-        .sort((a, b) => b.sessionNumber - a.sessionNumber);
-
-      const groups = (
-        Array.isArray(rawGroups)
-          ? rawGroups
-          : (rawGroups as { data: Group[] }).data ?? []
-      ).filter((g) => campaignGroupIds.has(g.id));
-
-      setData({ missions, sessions, groups, inventory: inventory ?? { items: [], capacity: 0, money: 0 } });
+      setData({
+        missions: campaign.missions ?? [],
+        sessions: (campaign.sessions ?? []).sort((a, b) => b.sessionNumber - a.sessionNumber),
+        group: campaign.group ?? null,
+        inventory: campaign.inventory ?? { items: [], capacity: 0, money: 0 },
+      });
       setLoadingState('done');
     } catch {
       setLoadingState('error');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaignId]);
 
   useEffect(() => {
@@ -165,33 +150,22 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
   }, [loadAll]);
 
   const refreshMissions = useCallback(async () => {
-    try {
-      const campaignData = await fetchJson<{ missions: Mission[] }>(`${BASE}/api/campaign/${campaignId}`);
-      const missions = campaignData.missions ?? [];
-      setData((prev) => ({ ...prev, missions }));
-    } catch {
-      // Silent — list keeps stale data; user can still see what was there
-    }
+    const campaign = await apiGet<CampaignData>(`/api/campaign/${campaignId}`);
+    if (!campaign) return;
+    setData((prev) => ({ ...prev, missions: campaign.missions ?? [] }));
   }, [campaignId]);
 
   const refreshSessions = useCallback(async () => {
-    try {
-      const campaignData = await fetchJson<{ sessions: Session[] }>(`${BASE}/api/campaign/${campaignId}`);
-      const sessions = (campaignData.sessions ?? [])
-        .sort((a, b) => b.sessionNumber - a.sessionNumber);
-      setData((prev) => ({ ...prev, sessions }));
-    } catch {
-      // Silent
-    }
+    const campaign = await apiGet<CampaignData>(`/api/campaign/${campaignId}`);
+    if (!campaign) return;
+    const sessions = (campaign.sessions ?? []).sort((a, b) => b.sessionNumber - a.sessionNumber);
+    setData((prev) => ({ ...prev, sessions }));
   }, [campaignId]);
 
   const refreshInventory = useCallback(async () => {
-    try {
-      const inventory = await fetchJson<Inventory>(`${BASE}/api/campaign/${campaignId}/inventory`);
-      setData((prev) => ({ ...prev, inventory: inventory ?? { items: [], capacity: 0, money: 0 } }));
-    } catch {
-      // Silent
-    }
+    const campaign = await apiGet<CampaignData>(`/api/campaign/${campaignId}`);
+    if (!campaign) return;
+    setData((prev) => ({ ...prev, inventory: campaign.inventory ?? prev.inventory }));
   }, [campaignId]);
 
   const isLoading = loadingState === 'loading' || loadingState === 'idle';
@@ -293,42 +267,26 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
           </section>
         </Tab>
 
-        {/* ── Grupos ── */}
-        <Tab key="groups" title="Grupos">
+        {/* ── Grupo ── */}
+        <Tab key="groups" title="Grupo">
           <section aria-labelledby="groups-heading">
-            <div className="flex items-center justify-between mb-4">
-              <h2
-                id="groups-heading"
-                className="text-white text-lg font-semibold"
-              >
-                Grupos
-                {!isLoading && !isError && (
-                  <span className="text-zinc-500 text-sm font-normal ml-2">
-                    ({data.groups.length})
-                  </span>
-                )}
-              </h2>
-            </div>
+            <h2 id="groups-heading" className="text-white text-lg font-semibold mb-4">
+              Grupo
+            </h2>
 
             {isLoading && <SkeletonList />}
 
             {isError && <ErrorTabState onRetry={loadAll} />}
 
-            {!isLoading && !isError && data.groups.length === 0 && (
+            {!isLoading && !isError && !data.group && (
               <EmptyTabState
-                label="Sin grupos asignados"
+                label="Sin grupo asignado"
                 hint="Los grupos se asignan a la campaña desde la pantalla de gestión de grupos."
               />
             )}
 
-            {!isLoading && !isError && data.groups.length > 0 && (
-              <ul className="flex flex-col gap-3" role="list" aria-label="Lista de grupos">
-                {data.groups.map((group) => (
-                  <li key={group.id}>
-                    <GroupItem group={group} />
-                  </li>
-                ))}
-              </ul>
+            {!isLoading && !isError && data.group && (
+              <GroupItem group={data.group} />
             )}
           </section>
         </Tab>

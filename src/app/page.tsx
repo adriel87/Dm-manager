@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fetchApi } from "@/lib/api";
+import { apiGet } from "@/lib/api";
 import { PageHeader } from "@/infrastructure/presentation/components/ui/PageHeader";
 import { DashboardStats } from "@/infrastructure/presentation/components/dashboard/DashboardStats";
 import { RecentCampaigns } from "@/infrastructure/presentation/components/dashboard/RecentCampaigns";
@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 
 async function getDashboardData() {
   const [stats, campaigns, groups] = await Promise.all([
-    fetchApi<DashboardStatsData>("/api/dashboard/stats"),
-    fetchApi<DashboardCampaign[]>("/api/dashboard/recent-campaigns"),
-    fetchApi<DashboardGroup[]>("/api/dashboard/recent-groups"),
+    apiGet<DashboardStatsData>("/api/dashboard/stats"),
+    apiGet<DashboardCampaign[]>("/api/dashboard/recent-campaigns"),
+    apiGet<DashboardGroup[]>("/api/dashboard/recent-groups"),
   ]);
 
   return {

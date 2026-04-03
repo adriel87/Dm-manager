@@ -6,29 +6,20 @@ import { SessionItem, type Session } from '@/infrastructure/presentation/compone
 import { CreateSessionButton } from '@/infrastructure/presentation/components/campaigns/CreateSessionButton';
 import { InfoCircleIcon } from '@/infrastructure/presentation/components/icons';
 import { EmbeddedSession } from '@/domain/campaign/campaign';
+import { apiGet } from '@/lib/api';
 
 interface SessionsTabProps {
   campaignId: string;
   initialSessions: EmbeddedSession[];
 }
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
-
 export function SessionsTab({ campaignId, initialSessions }: SessionsTabProps) {
   const [sessions, setSessions] = useState<EmbeddedSession[]>(initialSessions);
 
   const refresh = useCallback(async () => {
-    try {
-      const res = await fetch(`${BASE}/api/campaign/${campaignId}`, { cache: 'no-store' });
-      if (!res.ok) return;
-      const data = await res.json();
-      const sorted = (data.sessions ?? []).sort(
-        (a: Session, b: Session) => b.sessionNumber - a.sessionNumber
-      );
-      setSessions(sorted);
-    } catch {
-      // Silent — list keeps stale data; user can retry via next action
-    }
+    const data = await apiGet<{ sessions: EmbeddedSession[] }>(`/api/campaign/${campaignId}`);
+    if (!data) return;
+    setSessions((data.sessions ?? []).sort((a, b) => b.sessionNumber - a.sessionNumber));
   }, [campaignId]);
 
   return (

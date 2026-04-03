@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { Card, CardBody, CardHeader, CardFooter, Chip } from '@heroui/react';
 import { apiDelete } from '@/lib/api';
-import { EditInventoryItemButton } from '@/components/campaigns/EditInventoryItemButton';
+import { EditInventoryItemButton } from '@/infrastructure/presentation/components/campaigns/EditInventoryItemButton';
 
 export type TagType = 'common' | 'rare' | 'unique' | 'mission';
 

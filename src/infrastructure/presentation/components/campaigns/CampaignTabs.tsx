@@ -21,14 +21,14 @@ export function CampaignTabs({ campaign }: CampaignTabsProps) {
   const sortedNotes = [...campaign.notes].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
-  console.log({group:campaign.group})
   return (
-    <TabGroupCampaign 
-      campaignId={campaign.id} 
+    <TabGroupCampaign
+      campaignId={campaign.id}
       initialMissions={campaign.missions ?? []}
       initialSessions={sortedSessions ?? []}
       initialNotes={sortedNotes as unknown as Note[]}
+      initialInventory={campaign.inventory}
       group={campaign.group}
-      />
+    />
   );
 }

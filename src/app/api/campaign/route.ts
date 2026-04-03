@@ -36,6 +36,8 @@ export async function POST(req: NextRequest) {
         characters: [],
         group: null,
         inventory: { items: [], capacity: 100, money: 0 },
+        notes: [],
+        discordSpeakerMappings: [],
     });
     return NextResponse.json(createdCampaign, { status: 201 });
 }

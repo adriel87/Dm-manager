@@ -209,6 +209,15 @@ export const campaignMemoryRepository: CampaignRepository = {
     return campaign;
   },
 
+  incrementInventoryMoney: async (campaignId: string, delta: number) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.inventory.money += delta;
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
   // ========================================
   // Note Sub-Document Operations
   // ========================================
