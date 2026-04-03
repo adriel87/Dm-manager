@@ -142,4 +142,10 @@ export interface CampaignRepository {
    * Returns the updated campaign, or null if campaign not found.
    */
   removeInventoryItem(campaignId: string, itemId: string): Promise<CampaignI | null>;
+
+  /**
+   * incrementInventoryMoney — Increments (or decrements if negative) the inventory money field atomically.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  incrementInventoryMoney(campaignId: string, delta: number): Promise<CampaignI | null>;
 }

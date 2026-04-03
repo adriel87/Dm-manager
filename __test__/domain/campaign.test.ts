@@ -467,6 +467,7 @@ describe("Campaign domain", () => {
         title: 'Sword of Destiny',
         description: 'A legendary sword',
         quantity: 1,
+        value: 50,
         tags: ['common'],
     };
 

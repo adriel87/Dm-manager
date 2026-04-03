@@ -86,3 +86,11 @@ export async function createMission(request: APIRequestContext, campaignId: stri
 export async function deleteMission(request: APIRequestContext, campaignId: string, id: string) {
   await request.delete(`${BASE}/api/campaign/${campaignId}/missions/${id}`);
 }
+
+export async function deleteInventoryItem(
+  request: APIRequestContext,
+  campaignId: string,
+  itemId: string
+) {
+  await request.delete(`${BASE}/api/campaign/${campaignId}/inventory/${itemId}`);
+}

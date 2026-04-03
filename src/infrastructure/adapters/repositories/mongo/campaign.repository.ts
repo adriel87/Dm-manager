@@ -356,5 +356,21 @@ export const campaignRepository: CampaignRepository = {
       ? MapperUtils.fromMongoDocumentToEntity(result, campaignMappers.fromMongoDocumentToEntity)
       : null;
   },
+
+  incrementInventoryMoney: async (campaignId: string, delta: number) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId) },
+      {
+        $inc: { "inventory.money": delta } as any,
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(result, campaignMappers.fromMongoDocumentToEntity)
+      : null;
+  },
 };
 

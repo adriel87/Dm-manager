@@ -8,7 +8,16 @@ import { GroupItem } from '@/components/campaigns/GroupItem';
 import type { Group } from '@/domain/group/group';
 import { CreateMissionButton } from '@/components/campaigns/CreateMissionButton';
 import { CreateSessionButton } from '@/components/campaigns/CreateSessionButton';
+import { InventoryItem, type EmbeddedItem } from '@/components/campaigns/InventoryItem';
+import { CreateInventoryItemButton } from '@/components/campaigns/CreateInventoryItemButton';
+import { TransferMoneyButton } from '@/components/campaigns/TransferMoneyButton';
 import type { Campaign } from '@/components/campaigns/CampaignCard';
+
+interface Inventory {
+  items: EmbeddedItem[];
+  capacity: number;
+  money: number;
+}
 
 interface CampaignTabsProps {
   campaignId: string;
@@ -19,6 +28,7 @@ interface TabData {
   missions: Mission[];
   sessions: Session[];
   groups: Group[];
+  inventory: Inventory;
 }
 
 type LoadingState = 'idle' | 'loading' | 'error' | 'done';
@@ -117,7 +127,7 @@ async function fetchJson<T>(url: string): Promise<T> {
  * and each tab can be independently refreshed after a create action.
  */
 export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
-  const [data, setData] = useState<TabData>({ missions: [], sessions: [], groups: [] });
+  const [data, setData] = useState<TabData>({ missions: [], sessions: [], groups: [], inventory: { items: [], capacity: 0, money: 0 } });
   const [loadingState, setLoadingState] = useState<LoadingState>('idle');
 
   const campaignGroupIds = new Set(campaign.groups?.map((g) => g.id) ?? []);
@@ -125,10 +135,11 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
   const loadAll = useCallback(async () => {
     setLoadingState('loading');
     try {
-      // Fetch campaign aggregate (includes missions and sessions)
-      const [campaignData, rawGroups] = await Promise.all([
+      // Fetch campaign aggregate (includes missions and sessions) + groups + inventory in parallel
+      const [campaignData, rawGroups, inventory] = await Promise.all([
         fetchJson<{ missions: Mission[]; sessions: Session[] }>(`${BASE}/api/campaign/${campaignId}`),
         fetchJson<Group[] | { data: Group[] }>(`${BASE}/api/group`),
+        fetchJson<Inventory>(`${BASE}/api/campaign/${campaignId}/inventory`),
       ]);
 
       const missions = campaignData.missions ?? [];
@@ -141,7 +152,7 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
           : (rawGroups as { data: Group[] }).data ?? []
       ).filter((g) => campaignGroupIds.has(g.id));
 
-      setData({ missions, sessions, groups });
+      setData({ missions, sessions, groups, inventory: inventory ?? { items: [], capacity: 0, money: 0 } });
       setLoadingState('done');
     } catch {
       setLoadingState('error');
@@ -169,6 +180,15 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
       const sessions = (campaignData.sessions ?? [])
         .sort((a, b) => b.sessionNumber - a.sessionNumber);
       setData((prev) => ({ ...prev, sessions }));
+    } catch {
+      // Silent
+    }
+  }, [campaignId]);
+
+  const refreshInventory = useCallback(async () => {
+    try {
+      const inventory = await fetchJson<Inventory>(`${BASE}/api/campaign/${campaignId}/inventory`);
+      setData((prev) => ({ ...prev, inventory: inventory ?? { items: [], capacity: 0, money: 0 } }));
     } catch {
       // Silent
     }
@@ -306,6 +326,66 @@ export function CampaignTabs({ campaignId, campaign }: CampaignTabsProps) {
                 {data.groups.map((group) => (
                   <li key={group.id}>
                     <GroupItem group={group} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </Tab>
+
+        {/* ── Inventario ── */}
+        <Tab key="inventory" title="Inventario">
+          <section aria-labelledby="inventory-heading">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h2
+                  id="inventory-heading"
+                  className="text-white text-lg font-semibold"
+                >
+                  Inventario
+                  {!isLoading && !isError && (
+                    <span className="text-zinc-500 text-sm font-normal ml-2">
+                      ({data.inventory.items.length})
+                    </span>
+                  )}
+                </h2>
+                {!isLoading && !isError && (
+                  <span className={`text-sm font-medium ${data.inventory.money < 0 ? 'text-danger-400' : 'text-warning-400'}`}>
+                    {data.inventory.money} gp
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <TransferMoneyButton campaignId={campaignId} onTransferred={refreshInventory} />
+                <CreateInventoryItemButton campaignId={campaignId} onCreated={refreshInventory} />
+              </div>
+            </div>
+
+            {!isLoading && !isError && data.inventory.capacity > 0 && (
+              <p className="text-zinc-500 text-xs mb-4">
+                Capacidad:{' '}
+                <span className="text-zinc-400">
+                  {data.inventory.items.length} / {data.inventory.capacity} slots
+                </span>
+              </p>
+            )}
+
+            {isLoading && <SkeletonList />}
+
+            {isError && <ErrorTabState onRetry={loadAll} />}
+
+            {!isLoading && !isError && data.inventory.items.length === 0 && (
+              <EmptyTabState
+                label="Sin objetos todavía"
+                hint='Pulsa "+ Nuevo objeto" para añadir el primer objeto al inventario.'
+              />
+            )}
+
+            {!isLoading && !isError && data.inventory.items.length > 0 && (
+              <ul className="flex flex-col gap-3" role="list" aria-label="Lista de objetos del inventario">
+                {data.inventory.items.map((item) => (
+                  <li key={item.id}>
+                    <InventoryItem campaignId={campaignId} item={item} onUpdated={refreshInventory} />
                   </li>
                 ))}
               </ul>

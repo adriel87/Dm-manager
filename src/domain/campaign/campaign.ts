@@ -72,6 +72,7 @@ export interface EmbeddedItem {
   title: string;
   description: string;
   quantity: number;
+  value: number; // monetary value in gold pieces (gp), >= 0
   tags: TagType[];
 }
 
@@ -403,7 +404,7 @@ export const validateInventory = ({ capacity, items, money }: Partial<Inventory>
  * validateEmbeddedItem — Validates an item before adding/updating it in inventory.
  * Throws on validation failure.
  */
-export const validateEmbeddedItem = ({ title, description, quantity, tags }: Partial<EmbeddedItem>): boolean => {
+export const validateEmbeddedItem = ({ title, description, quantity, value, tags }: Partial<EmbeddedItem>): boolean => {
   const errors: string[] = [];
   if (!title || title.trim().length < 1) {
     errors.push("El nombre del objeto es requerido");
@@ -413,6 +414,9 @@ export const validateEmbeddedItem = ({ title, description, quantity, tags }: Par
   }
   if (quantity === null || quantity === undefined || quantity < 0) {
     errors.push("La cantidad debe ser 0 o mayor");
+  }
+  if (value === null || value === undefined || value < 0) {
+    errors.push("El valor no puede ser negativo");
   }
   if (!tags || !Array.isArray(tags)) {
     errors.push("Las etiquetas deben ser un array");

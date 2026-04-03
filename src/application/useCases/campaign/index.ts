@@ -29,3 +29,4 @@ export * from './addInventoryItem';
 export * from './updateInventoryItem';
 export * from './removeInventoryItem';
 export * from './getInventory';
+export * from './transferInventoryMoney';
