@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
         sessions: [],
         characters: [],
         group: null,
+        inventory: { items: [], capacity: 100, money: 0 },
     });
     return NextResponse.json(createdCampaign, { status: 201 });
 }

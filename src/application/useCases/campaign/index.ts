@@ -23,3 +23,10 @@ export * from './removeCharacter';
 // Group operations
 export * from './assignGroup';
 export * from './removeGroup';
+
+// Inventory operations
+export * from './addInventoryItem';
+export * from './updateInventoryItem';
+export * from './removeInventoryItem';
+export * from './getInventory';
+export * from './transferInventoryMoney';
