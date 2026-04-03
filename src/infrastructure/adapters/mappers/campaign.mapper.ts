@@ -18,6 +18,7 @@ export const campaignMappers = {
             sessions: doc.sessions ?? [],
             characters: doc.characters ?? [],
             group: doc.group ?? null,
+            inventory: doc.inventory ?? { items: [], capacity: 100, money: 0 },
             
             // Metadata
             createdAt: new Date(doc.createdAt),

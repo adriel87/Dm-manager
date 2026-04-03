@@ -1,6 +1,7 @@
 import {
   CampaignI,
   CharacterRef,
+  EmbeddedItem,
   EmbeddedMission,
   EmbeddedSession,
   GroupSnapshot,
@@ -120,4 +121,25 @@ export interface CampaignRepository {
    * Returns the updated campaign, or null if campaign not found.
    */
   removeGroup(campaignId: string): Promise<CampaignI | null>;
+
+  // ========================================
+  // Inventory Sub-Document Operations
+  // ========================================
+  /**
+   * addInventoryItem — Adds an item to the campaign's inventory.items array.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  addInventoryItem(campaignId: string, item: EmbeddedItem): Promise<CampaignI | null>;
+
+  /**
+   * updateInventoryItem — Updates an existing item within inventory.items.
+   * Matches by item.id. Returns the updated campaign, or null if not found.
+   */
+  updateInventoryItem(campaignId: string, item: EmbeddedItem): Promise<CampaignI | null>;
+
+  /**
+   * removeInventoryItem — Removes an item from inventory.items by id.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  removeInventoryItem(campaignId: string, itemId: string): Promise<CampaignI | null>;
 }

@@ -1,6 +1,7 @@
 import {
   CampaignI,
   CharacterRef,
+  EmbeddedItem,
   EmbeddedMission,
   EmbeddedSession,
   GroupSnapshot,
@@ -26,6 +27,7 @@ export const campaignMemoryRepository: CampaignRepository = {
       sessions: [],
       characters: [],
       group: null,
+      inventory: campaign.inventory ?? { items: [], capacity: 100, money: 0 },
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -166,6 +168,39 @@ export const campaignMemoryRepository: CampaignRepository = {
     if (!campaign) return null;
 
     campaign.group = null;
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  // ========================================
+  // Inventory Sub-Document Operations
+  // ========================================
+  addInventoryItem: async (campaignId: string, item: EmbeddedItem) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.inventory.items.push(item);
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  updateInventoryItem: async (campaignId: string, item: EmbeddedItem) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    const index = campaign.inventory.items.findIndex((i) => i.id === item.id);
+    if (index === -1) return null;
+
+    campaign.inventory.items[index] = item;
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  removeInventoryItem: async (campaignId: string, itemId: string) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.inventory.items = campaign.inventory.items.filter((i) => i.id !== itemId);
     campaign.updatedAt = new Date();
     return campaign;
   },

@@ -64,6 +64,7 @@ const campaign :Omit<CampaignI, "id"> = {
         }
     ],
     status:"Activa",
+    inventory: { items: [], capacity: 100, money: 0 },
 
 }
 const misision : Omit<Mission, "id"> = {
