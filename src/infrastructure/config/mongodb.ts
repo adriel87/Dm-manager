@@ -23,24 +23,3 @@ export async function disconnectFromDatabase() {
         client = undefined as unknown as MongoClient;
     }
 }
-
-
-export class DatabaseConfig {
-  private static client: MongoClient;
-
-  static async connect(): Promise<MongoClient> {
-    if (!this.client) {
-      this.client = new MongoClient(uri, { auth: { username, password } });
-      await this.client.connect();
-      console.log('Connected to MongoDB');
-    }
-    return this.client;
-  }
-
-  static async disconnect(): Promise<void> {
-    if (this.client) {
-      await this.client.close();
-      console.log('Disconnected from MongoDB');
-    }
-  }
-}

@@ -2,6 +2,7 @@ import { createCampaign, getAllCampaigns } from '@/application/useCases/campaign
 import { repositories } from '@/infrastructure/config/repositories';
 import { campaignSchema } from '@/infrastructure/adapters/schemas/campaign.schema';
 import { NextRequest, NextResponse } from 'next/server';
+import type { CampaignI } from '@/domain/campaign/campaign';
 
 
 export async function GET() {
@@ -35,6 +36,8 @@ export async function POST(req: NextRequest) {
         characters: [],
         group: null,
         inventory: { items: [], capacity: 100, money: 0 },
+        notes: [],
+        discordSpeakerMappings: [],
     });
     return NextResponse.json(createdCampaign, { status: 201 });
 }

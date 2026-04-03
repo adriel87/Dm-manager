@@ -1,8 +1,8 @@
 import { Mission } from "@/domain/mission/mission";
-import { MissionRespository } from "@/domain/mission/MissionRepository";
+import { MissionRepository } from "@/domain/mission/MissionRepository";
 
 
-export const updateMission = async (repository: MissionRespository, missionData: Mission): Promise<Mission | null> => {
+export const updateMission = async (repository: MissionRepository, missionData: Mission): Promise<Mission | null> => {
    
         if (!missionData.id) {
             throw new Error("Invalid mission data or ID");

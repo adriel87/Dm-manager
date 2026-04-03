@@ -38,3 +38,24 @@ export const SELECT_CLASSES = {
   trigger: 'bg-zinc-800 border-zinc-600 hover:border-zinc-500',
   popoverContent: 'bg-zinc-800 text-white',
 } as const;
+
+// Note color → Tailwind border-l class (used by NoteItem)
+export type NoteColorKey = 'yellow' | 'blue' | 'green' | 'red' | 'purple' | 'gray';
+export const NOTE_BORDER_COLOR: Record<NoteColorKey, string> = {
+  yellow: 'border-l-amber-400',
+  blue: 'border-l-blue-400',
+  green: 'border-l-emerald-400',
+  red: 'border-l-rose-400',
+  purple: 'border-l-purple-400',
+  gray: 'border-l-zinc-400',
+};
+
+// Note color → swatch background (used by CreateNote color picker)
+export const NOTE_SWATCH_BG: Record<NoteColorKey, string> = {
+  yellow: 'bg-amber-400',
+  blue: 'bg-blue-400',
+  green: 'bg-emerald-400',
+  red: 'bg-rose-400',
+  purple: 'bg-purple-400',
+  gray: 'bg-zinc-400',
+};

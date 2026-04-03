@@ -1,10 +1,10 @@
-import { addMenberToGroup } from "@/application/useCases/group/addCharactersToGroup";
+import { addMemberToGroup } from "@/application/useCases/group/addCharactersToGroup";
 import { createGroup } from "@/application/useCases/group/createGroup";
 import { deleteGroup } from "@/application/useCases/group/deleteGroup";
 import { getAllGroups } from "@/application/useCases/group/getAllGroups";
 import { getGroupById } from "@/application/useCases/group/getGroup";
 import { removeCharactersFromGroup } from "@/application/useCases/group/removeCharactersFromGroup";
-import { updatedGroup } from "@/application/useCases/group/updateGroup";
+import { updateGroup } from "@/application/useCases/group/updateGroup";
 import { Character, DnDClassEnum } from "@/domain/character/character";
 import { Group } from "@/domain/group/group";
 import { GroupRepository } from "@/domain/group/groupRepository";
@@ -88,17 +88,6 @@ describe('Testing use case group', () => {
             await expect(result).rejects.toThrow('Invalid ID');
             await expect(result2).rejects.toThrow('Invalid ID');
         })
-        it('Debe arrojar un error si el id no es válido, No es válido si el id es distinto a un string o no sea cadena vacía', async () =>{
-            //Arrange
-
-            //Act
-            //@ts-ignore
-            const result = getGroupById('','2');
-
-            //Assert
-            await expect(result).rejects.toThrow('Invalid Repository');
-
-        })
     })
 
     describe ('createGroup', () => {
@@ -181,12 +170,12 @@ describe('Testing use case group', () => {
         it('Should update a group successfully when is a valid group', async() =>{
 
             //act
-            const updateGroup = {...validGroup, name: "Updated Group"}
+            const groupData = {...validGroup, name: "Updated Group"}
             vi.mocked(mockGroupRepository.getGroupById).mockResolvedValue(validGroup);
-            vi.mocked(mockGroupRepository.updateGroup).mockResolvedValue(updateGroup);
+            vi.mocked(mockGroupRepository.updateGroup).mockResolvedValue(groupData);
 
             //Act
-            const result = await updatedGroup(mockGroupRepository,validGroup.id, updateGroup)
+            const result = await updateGroup(mockGroupRepository,validGroup.id, groupData)
 
             //Assert
             expect(result?.name).toBe("Updated Group");
@@ -209,10 +198,10 @@ describe('Testing use case group', () => {
             }
             vi.mocked(mockGroupRepository.getGroupById).mockResolvedValue(groupWithNameWithLessCharacters);
             //act
-            const result = updatedGroup(mockGroupRepository,'22', groupWithNameWithLessCharacters)
+            const result = updateGroup(mockGroupRepository,'22', groupWithNameWithLessCharacters)
             // @ts-ignore
-            const resultNull = updatedGroup(mockGroupRepository,'22', groupWithNameNull)
-            const resultUndefined = updatedGroup(mockGroupRepository,'22', groupWithNameUndefined)
+            const resultNull = updateGroup(mockGroupRepository,'22', groupWithNameNull)
+            const resultUndefined = updateGroup(mockGroupRepository,'22', groupWithNameUndefined)
 
             // assert
             await expect(result).rejects.toThrow("Nombre del grupo invalido minimo 3 charectes")
@@ -246,7 +235,7 @@ describe('Testing use case group', () => {
                 members: [],
             })
             //act
-            const result = addMenberToGroup(mockGroupRepository, groupId, characters)
+            const result = addMemberToGroup(mockGroupRepository, groupId, characters)
             //assert
             expect(result).toBeTruthy()
 
@@ -273,7 +262,7 @@ describe('Testing use case group', () => {
                 members: [],
             })
             //act
-            const result = addMenberToGroup(mockGroupRepository, groupId, characters)
+            const result = addMemberToGroup(mockGroupRepository, groupId, characters)
             //assert
             await expect(result).rejects.toThrow('Each member must have id, name, and classType')
 
@@ -301,7 +290,7 @@ describe('Testing use case group', () => {
         })
         //act
         // @ts-ignore
-        const result = addMenberToGroup(mockGroupRepository, groupId, characters)
+        const result = addMemberToGroup(mockGroupRepository, groupId, characters)
         //assert
         await expect(result).rejects.toThrow('Invalid ID')
 

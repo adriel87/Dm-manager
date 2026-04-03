@@ -1,5 +1,5 @@
 import { GeneralProvider } from '@/infrastructure/presentation/providers/GeneralProvider';
-import { AppLayout } from '@/components/layout/AppLayout';
+import { AppLayout } from '@/infrastructure/presentation/components/layout/AppLayout';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';

@@ -18,5 +18,5 @@ export async function GET(){
     if (characters) {
         return new Response(JSON.stringify(characters), {status: 200})
     }
-    return new Response(null, {status: 403, statusText: "not found DM fucker"})
+    return new Response(JSON.stringify({ error: 'Characters not found' }), { status: 404 })
 }

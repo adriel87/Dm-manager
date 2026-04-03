@@ -1,10 +1,10 @@
 import { Mission } from "@/domain/mission/mission";
-import { MissionRespository } from "@/domain/mission/MissionRepository";
+import { MissionRepository } from "@/domain/mission/MissionRepository";
 
 let store: Mission[] = [];
 let nextId = 1;
 
-export const missionMemoryRepository: MissionRespository = {
+export const missionMemoryRepository: MissionRepository = {
   getAllMissions: async () => [...store],
 
   getMissionById: async (id) => store.find((m) => m.id === id) ?? null,

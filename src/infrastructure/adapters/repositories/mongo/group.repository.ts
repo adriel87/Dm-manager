@@ -23,8 +23,8 @@ export const groupRepository: GroupRepository = {
         if (!id) {
             throw new Error("Group ID is required");
         }
-        const collection = getCollection("groups");
-        const group = (await collection).findOne({ _id: new ObjectId(id) });
+        const collection = await getCollection("groups");
+        const group = await collection.findOne({ _id: new ObjectId(id) });
         return group ? mapGroupDocumentToGroup(group) : null;
 
     },

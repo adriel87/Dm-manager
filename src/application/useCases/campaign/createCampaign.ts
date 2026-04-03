@@ -8,8 +8,10 @@ export const createCampaign = async (repository: CampaignRepository, campaignDat
             ...campaignData,
             missions: [],
             sessions: [],
+            notes: [],
             characters: [],
             group: null,
+            discordSpeakerMappings: [],
             createdAt: new Date()
         }
         const newCampaign = await repository.createCampaign(campaign);

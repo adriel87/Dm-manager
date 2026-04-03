@@ -3,10 +3,12 @@ import {
   CharacterRef,
   EmbeddedItem,
   EmbeddedMission,
+  EmbeddedNote,
   EmbeddedSession,
   GroupSnapshot,
 } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
+import { SpeakerMapping } from "@/domain/recording/recording";
 
 let store: CampaignI[] = [];
 let nextId = 1;
@@ -25,9 +27,11 @@ export const campaignMemoryRepository: CampaignRepository = {
       id: String(nextId++),
       missions: [],
       sessions: [],
+      notes: [],
       characters: [],
       group: null,
       inventory: campaign.inventory ?? { items: [], capacity: 100, money: 0 },
+      discordSpeakerMappings: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -201,6 +205,48 @@ export const campaignMemoryRepository: CampaignRepository = {
     if (!campaign) return null;
 
     campaign.inventory.items = campaign.inventory.items.filter((i) => i.id !== itemId);
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  incrementInventoryMoney: async (campaignId: string, delta: number) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.inventory.money += delta;
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  // ========================================
+  // Note Sub-Document Operations
+  // ========================================
+  addNote: async (campaignId: string, note: EmbeddedNote) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.notes.push(note);
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  removeNote: async (campaignId: string, noteId: string) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.notes = campaign.notes.filter((n) => n.id !== noteId);
+    campaign.updatedAt = new Date();
+    return campaign;
+  },
+
+  // ========================================
+  // Discord Speaker Mapping Operations
+  // ========================================
+  setSpeakerMappings: async (campaignId: string, mappings: SpeakerMapping[]) => {
+    const campaign = store.find((c) => c.id === campaignId);
+    if (!campaign) return null;
+
+    campaign.discordSpeakerMappings = mappings;
     campaign.updatedAt = new Date();
     return campaign;
   },

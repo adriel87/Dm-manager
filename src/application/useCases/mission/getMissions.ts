@@ -1,7 +1,7 @@
 import { Mission } from "@/domain/mission/mission";
-import { MissionRespository } from "@/domain/mission/MissionRepository";
+import { MissionRepository } from "@/domain/mission/MissionRepository";
 
-export const getAllMissions = async (repository: MissionRespository): Promise<Mission[]> => {
+export const getAllMissions = async (repository: MissionRepository): Promise<Mission[]> => {
     try {
         const missions = await repository.getAllMissions();
         return missions;

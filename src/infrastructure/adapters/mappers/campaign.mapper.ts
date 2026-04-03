@@ -16,9 +16,11 @@ export const campaignMappers = {
             // Aggregate collections with defaults
             missions: doc.missions ?? [],
             sessions: doc.sessions ?? [],
+            notes: doc.notes ?? [],
             characters: doc.characters ?? [],
             group: doc.group ?? null,
             inventory: doc.inventory ?? { items: [], capacity: 100, money: 0 },
+            discordSpeakerMappings: doc.discordSpeakerMappings ?? [],
             
             // Metadata
             createdAt: new Date(doc.createdAt),

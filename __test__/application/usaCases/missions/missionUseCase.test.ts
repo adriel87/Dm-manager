@@ -1,10 +1,10 @@
 import { createMission, deleteMission, getAllMissions, getMissionById, updateMission } from "@/application/useCases/mission";
 import { Mission } from "@/domain/mission/mission";
-import { MissionRespository } from "@/domain/mission/MissionRepository";
+import { MissionRepository } from "@/domain/mission/MissionRepository";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe('Testing use case missions', () => {
-    const mockMissionRepository: MissionRespository = {
+    const mockMissionRepository: MissionRepository = {
         createMission: vi.fn(),
         getMissionById: vi.fn(),
         getAllMissions: vi.fn(),

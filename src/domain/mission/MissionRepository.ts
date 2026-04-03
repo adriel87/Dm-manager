@@ -1,6 +1,6 @@
 import { Mission } from "./mission";
 
-export interface MissionRespository {
+export interface MissionRepository {
   getAllMissions(): Promise<Mission[]>;
   getMissionById(id: string): Promise<Mission | null>;
   createMission(mission: Omit<Mission, "id">): Promise<Mission>;

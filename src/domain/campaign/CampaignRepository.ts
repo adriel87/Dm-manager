@@ -3,9 +3,11 @@ import {
   CharacterRef,
   EmbeddedItem,
   EmbeddedMission,
+  EmbeddedNote,
   EmbeddedSession,
   GroupSnapshot,
 } from "./campaign";
+import { SpeakerMapping } from "@/domain/recording/recording";
 
 /**
  * CampaignRepository — Port for Campaign aggregate persistence.
@@ -148,4 +150,37 @@ export interface CampaignRepository {
    * Returns the updated campaign, or null if campaign not found.
    */
   incrementInventoryMoney(campaignId: string, delta: number): Promise<CampaignI | null>;
+
+  // ========================================
+  // Note Sub-Document Operations
+  // ========================================
+  /**
+   * addNote — Adds a new note to the campaign's notes array.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  addNote(
+    campaignId: string,
+    note: EmbeddedNote,
+  ): Promise<CampaignI | null>;
+
+  /**
+   * removeNote — Removes a note from the campaign's notes array.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  removeNote(
+    campaignId: string,
+    noteId: string,
+  ): Promise<CampaignI | null>;
+
+  // ========================================
+  // Discord Speaker Mapping Operations
+  // ========================================
+  /**
+   * setSpeakerMappings — Replaces the full discordSpeakerMappings array on the campaign.
+   * Returns the updated campaign, or null if campaign not found.
+   */
+  setSpeakerMappings(
+    campaignId: string,
+    mappings: SpeakerMapping[],
+  ): Promise<CampaignI | null>;
 }

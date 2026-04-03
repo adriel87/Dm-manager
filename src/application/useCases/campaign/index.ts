@@ -1,6 +1,6 @@
 // Root campaign operations
 export * from './getCampaignById';
-export * from './getCampaigns';
+export * from './getAllCampaigns';
 export * from './createCampaign';
 export * from './updateCampaign';
 export * from './deleteCampaign';
@@ -30,3 +30,11 @@ export * from './updateInventoryItem';
 export * from './removeInventoryItem';
 export * from './getInventory';
 export * from './transferInventoryMoney';
+
+// Note operations
+export * from './addNote';
+export * from './removeNote';
+export * from './getNotes';
+
+// Discord speaker mapping operations
+export * from './setSpeakerMappings';

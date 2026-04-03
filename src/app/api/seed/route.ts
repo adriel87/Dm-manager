@@ -63,6 +63,8 @@ const campaign :Omit<CampaignI, "id"> = {
             title: 'comienza la aventura'
         }
     ],
+    notes: [],
+    discordSpeakerMappings: [],
     status:"Activa",
     inventory: { items: [], capacity: 100, money: 0 },
 

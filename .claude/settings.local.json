@@ -3,7 +3,21 @@
     "allow": [
       "mcp__plugin_engram_engram__mem_search",
       "mcp__plugin_engram_engram__mem_save",
-      "Bash(npx tsc:*)"
+      "mcp__plugin_engram_engram__mem_context",
+      "mcp__plugin_engram_engram__mem_session_summary",
+      "mcp__context7__*",
+      "Bash(npx tsc --noEmit*)",
+      "Bash(npx vitest run*)",
+      "Bash(npm run test:run*)",
+      "Bash(npm run test:coverage*)",
+      "Bash(npm run lint*)",
+      "Bash(npm run build:no-lint*)",
+      "Bash(npx playwright test*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git branch*)",
+      "Bash(npm run:*)"
     ]
   }
 }

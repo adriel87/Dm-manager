@@ -1,5 +1,5 @@
-import { addInventoryItem, addMission, addSession, assignCharacter, assignGroup, createCampaign, delelteCampaign, getAllCampaigns, getCampaignById, getInventory, getMissions, removeCharacter, removeGroup, removeInventoryItem, removeMission, removeSession, updateCampaign, updateInventoryItem, updateMission, updateSession } from "@/application/useCases/campaign";
-import { CampaignI, CharacterRef, EmbeddedItem, EmbeddedMission, EmbeddedSession, GroupSnapshot } from "@/domain/campaign/campaign";
+import { addInventoryItem, addMission, addSession, assignCharacter, assignGroup, createCampaign, deleteCampaign, getAllCampaigns, getCampaignById, getInventory, getMissions, removeCharacter, removeGroup, removeInventoryItem, removeMission, removeSession, updateCampaign, updateInventoryItem, updateMission, updateSession, addNote, removeNote, getNotes } from "@/application/useCases/campaign";
+import { CampaignI, CharacterRef, EmbeddedItem, EmbeddedMission, EmbeddedNote, EmbeddedSession, GroupSnapshot } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 import { CharacterRepository } from "@/domain/character/characterRepository";
 import { GroupRepository } from "@/domain/group/groupRepository";
@@ -34,10 +34,18 @@ describe("Campaign use cases", () => {
         assignGroup: vi.fn(),
         removeGroup: vi.fn(),
 
-        // Inventory operations (3 methods)
+        // Inventory operations (4 methods)
         addInventoryItem: vi.fn(),
         updateInventoryItem: vi.fn(),
         removeInventoryItem: vi.fn(),
+        incrementInventoryMoney: vi.fn(),
+
+        // Note operations (2 methods)
+        addNote: vi.fn(),
+        removeNote: vi.fn(),
+
+        // Discord speaker mapping operations (1 method)
+        setSpeakerMappings: vi.fn(),
     };
 
     const mockCharacterRepository: CharacterRepository = {
@@ -102,9 +110,18 @@ describe("Campaign use cases", () => {
         status: 'Activa',
         missions: [],
         sessions: [],
+        notes: [],
         characters: [],
         group: null,
         inventory: { items: [], capacity: 100, money: 0 },
+        discordSpeakerMappings: [],
+    };
+
+    const validNote: EmbeddedNote = {
+        id: 'note-1',
+        comment: 'Remember the NPC name is Thornwick',
+        color: 'yellow',
+        createdAt: new Date('2026-03-01'),
     };
 
     beforeEach(() => {
@@ -245,7 +262,7 @@ describe("Campaign use cases", () => {
             vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
             vi.mocked(mockCampaignRepository.deleteCampaign).mockResolvedValue(true);
             
-            const result = await delelteCampaign(mockCampaignRepository, validCampaign.id);
+            const result = await deleteCampaign(mockCampaignRepository, validCampaign.id);
             
             expect(result).toBe(true);
             expect(mockCampaignRepository.deleteCampaign).toHaveBeenCalledWith(validCampaign.id);
@@ -254,7 +271,7 @@ describe("Campaign use cases", () => {
         it("should throw an error if campaign does not exist", async () => {
             vi.mocked(mockCampaignRepository.deleteCampaign).mockResolvedValue(false);
             
-            await expect(delelteCampaign(mockCampaignRepository, null as any)).rejects.toThrow("Failed to delete campaign");
+            await expect(deleteCampaign(mockCampaignRepository, null as any)).rejects.toThrow("Failed to delete campaign");
         });
     });
 
@@ -893,6 +910,102 @@ describe("Campaign use cases", () => {
             await expect(
                 removeInventoryItem(mockCampaignRepository, validCampaign.id, validItem.id)
             ).rejects.toThrow("No se pueden realizar cambios en una campaña finalizada");
+        });
+    });
+
+    // ========================================
+    // Note Operations
+    // ========================================
+
+    describe("addNote", () => {
+        it("should add a note with generated UUID and createdAt", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+            vi.mocked(mockCampaignRepository.addNote).mockResolvedValue({
+                ...validCampaign, notes: [validNote]
+            });
+
+            const { id, createdAt, ...noteData } = validNote;
+            const result = await addNote(mockCampaignRepository, validCampaign.id, noteData);
+
+            expect(result.id).toBeDefined();
+            expect(result.createdAt).toBeInstanceOf(Date);
+            expect(result.comment).toBe(validNote.comment);
+            expect(result.color).toBe(validNote.color);
+        });
+
+        it("should throw when comment is empty", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+
+            await expect(addNote(mockCampaignRepository, validCampaign.id, {
+                comment: '', color: 'yellow'
+            })).rejects.toThrow();
+            expect(mockCampaignRepository.addNote).not.toHaveBeenCalled();
+        });
+
+        it("should throw when campaign is Finalizada", async () => {
+            const finishedCampaign = { ...validCampaign, status: 'Finalizada' as const };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(finishedCampaign);
+
+            const { id, createdAt, ...noteData } = validNote;
+            await expect(addNote(mockCampaignRepository, validCampaign.id, noteData)).rejects.toThrow(
+                "No se pueden realizar cambios en una campaña finalizada"
+            );
+        });
+
+        it("should throw when campaign not found", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(null);
+
+            const { id, createdAt, ...noteData } = validNote;
+            await expect(addNote(mockCampaignRepository, 'non-existent', noteData)).rejects.toThrow(
+                "Campaña no encontrada"
+            );
+        });
+    });
+
+    describe("removeNote", () => {
+        it("should remove a note successfully", async () => {
+            const campaignWithNote = { ...validCampaign, notes: [validNote] };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignWithNote);
+            vi.mocked(mockCampaignRepository.removeNote).mockResolvedValue({
+                ...validCampaign, notes: []
+            });
+
+            await removeNote(mockCampaignRepository, validCampaign.id, validNote.id);
+
+            expect(mockCampaignRepository.removeNote).toHaveBeenCalledWith(
+                validCampaign.id, validNote.id
+            );
+        });
+
+        it("should throw when campaign is Finalizada", async () => {
+            const finishedCampaign = { ...validCampaign, status: 'Finalizada' as const };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(finishedCampaign);
+
+            await expect(removeNote(mockCampaignRepository, validCampaign.id, validNote.id)).rejects.toThrow(
+                "No se pueden realizar cambios en una campaña finalizada"
+            );
+        });
+    });
+
+    describe("getNotes", () => {
+        it("should return all notes sorted by createdAt desc", async () => {
+            const olderNote = { ...validNote, id: 'note-old', createdAt: new Date('2026-01-01') };
+            const newerNote = { ...validNote, id: 'note-new', createdAt: new Date('2026-03-15') };
+            const campaignWithNotes = { ...validCampaign, notes: [olderNote, newerNote] };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignWithNotes);
+
+            const result = await getNotes(mockCampaignRepository, validCampaign.id);
+
+            expect(result[0].id).toBe('note-new');
+            expect(result[1].id).toBe('note-old');
+        });
+
+        it("should return empty array when campaign has no notes", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+
+            const result = await getNotes(mockCampaignRepository, validCampaign.id);
+
+            expect(result).toEqual([]);
         });
     });
 });

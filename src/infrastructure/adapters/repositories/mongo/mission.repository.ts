@@ -1,10 +1,10 @@
 import { Mission } from "@/domain/mission/mission";
-import { MissionRespository } from "@/domain/mission/MissionRepository";
+import { MissionRepository } from "@/domain/mission/MissionRepository";
 import { getCollection } from "@/infrastructure/config/mongodb";
-import { mapMissionFromMongoToDomain } from "../../mappers/mission.mappers";
+import { mapMissionFromMongoToDomain } from "../../mappers/mission.mapper";
 import { ObjectId } from "mongodb";
 
-export const missionRepository: MissionRespository = {
+export const missionRepository: MissionRepository = {
     getAllMissions: async () => {
         const missions = await getCollection('missions');
         const missionsList = (await missions.find({}).toArray()).map(mission => mapMissionFromMongoToDomain(mission));

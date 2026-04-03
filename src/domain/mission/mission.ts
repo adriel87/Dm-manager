@@ -1,5 +1,3 @@
-import { Character } from "../character/character";
-
 export interface Mission {
   id: string;
   name: string;
@@ -8,7 +6,7 @@ export interface Mission {
   missionEvents: TypeEvent[] | null;
   missionPriority: string;
   rewards: string | null;
-  relatedCharacters: Pick<Character, "id" | "name">[] | null;
+  relatedCharacters: { id: string; name: string }[] | null;
   startDate?: Date;
   endDate?: Date;
   status: MissionStatusType;

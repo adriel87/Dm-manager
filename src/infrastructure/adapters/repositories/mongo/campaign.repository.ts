@@ -3,10 +3,12 @@ import {
   CharacterRef,
   EmbeddedItem,
   EmbeddedMission,
+  EmbeddedNote,
   EmbeddedSession,
   GroupSnapshot,
 } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
+import { SpeakerMapping } from "@/domain/recording/recording";
 import { getCollection } from "@/infrastructure/config/mongodb";
 import { ObjectId } from "mongodb";
 import { campaignMappers } from "../../mappers/campaign.mapper";
@@ -46,9 +48,11 @@ export const campaignRepository: CampaignRepository = {
       ...campaign,
       missions: [],
       sessions: [],
+      notes: [],
       characters: [],
       group: null,
       inventory: { items: [], capacity: 100, money: 0 },
+      discordSpeakerMappings: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -62,7 +66,7 @@ export const campaignRepository: CampaignRepository = {
 
   updateCampaign: async (campaign: CampaignI) => {
     const collection = await getCollection("campaigns");
-    const { id, missions, sessions, characters, group, inventory, ...rootFields } = campaign;
+    const { id, missions, sessions, notes, characters, group, inventory, discordSpeakerMappings, ...rootFields } = campaign;
     
     // Only update root-level fields, exclude aggregate collections
     const result = await collection.findOneAndUpdate(
@@ -370,6 +374,71 @@ export const campaignRepository: CampaignRepository = {
 
     return result
       ? MapperUtils.fromMongoDocumentToEntity(result, campaignMappers.fromMongoDocumentToEntity)
+      : null;
+  },
+
+  // ========================================
+  // Note Sub-Document Operations
+  // ========================================
+  addNote: async (campaignId: string, note: EmbeddedNote) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId) },
+      {
+        $push: { notes: note } as any,
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(
+          result,
+          campaignMappers.fromMongoDocumentToEntity,
+        )
+      : null;
+  },
+
+  removeNote: async (campaignId: string, noteId: string) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId) },
+      {
+        $pull: { notes: { id: noteId } as any } as any,
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(
+          result,
+          campaignMappers.fromMongoDocumentToEntity,
+        )
+      : null;
+  },
+
+  // ========================================
+  // Discord Speaker Mapping Operations
+  // ========================================
+  setSpeakerMappings: async (campaignId: string, mappings: SpeakerMapping[]) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId) },
+      {
+        $set: {
+          discordSpeakerMappings: mappings,
+          updatedAt: new Date(),
+        },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(
+          result,
+          campaignMappers.fromMongoDocumentToEntity,
+        )
       : null;
   },
 };

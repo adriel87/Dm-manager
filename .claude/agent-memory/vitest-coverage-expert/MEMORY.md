@@ -7,11 +7,11 @@
 - Infrastructure: `src/infrastructure/adapters/`
 - Path alias: `@/*` → `src/*`
 
-## Test Run Status (as of 2026-03-08)
-- 9 test files, 109 tests — ALL PASS
-- Un-awaited `.resolves`/`.rejects` warnings FIXED in: character, group, missions, session use case tests
-- New tests added: campaign (createCampaign, getAllCampaigns, updateCampaign branches), mission (validation, getMissionById, deleteMission, getAllMissions, updateMission)
-- New domain test file: `__test__/domain/campaign.test.ts` (31 tests covering validateCampaign + Campaign class)
+## Test Run Status (as of 2026-03-21)
+- 12 test files, 268 tests — ALL PASS
+- New test file added: `__test__/application/usaCases/recording/useCases.test.ts` (35 tests)
+- Recording use cases fully covered: startRecording, stopRecording, transcribeRecording, retryTranscription, getRecording, getRecordingsBySession
+- setSpeakerMappings (campaign use case) also tested in the recording test file
 
 ## Known Code Issues Found During Review
 
@@ -54,6 +54,10 @@
 
 ### Use cases with ZERO test coverage:
 - `campaignIncrementSessions` — not exported from index, not tested
+
+### Recording domain/infra with NO tests yet:
+- `validateRecording` and `validateSpeakerMapping` — covered indirectly through use case tests
+- Recording mappers and Zod schemas (if they exist) — not tested
 
 ### Domain with ZERO test coverage:
 - `validateMission` / `validateMissions` — no domain tests (covered indirectly via createMission tests)

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { fetchApi } from '@/lib/api';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { CreateGroupButton } from '@/components/groups/CreateGroupButton';
-import { GroupFilters } from '@/components/groups/GroupFilters';
+import { apiGet } from '@/lib/api';
+import { PageHeader } from '@/infrastructure/presentation/components/ui/PageHeader';
+import { CreateGroupButton } from '@/infrastructure/presentation/components/groups/CreateGroupButton';
+import { GroupFilters } from '@/infrastructure/presentation/components/groups/GroupFilters';
 import type { Group } from '@/domain/group/group';
 
 export const metadata: Metadata = {
@@ -17,8 +17,8 @@ export const metadata: Metadata = {
  * The interactive filter island (GroupFilters) manages display state.
  */
 export default async function GroupsPage() {
-  const groups = (await fetchApi<Group[]>('/api/group')) ?? [];
-  const campaigns = (await fetchApi<{ id: string; name: string }[]>('/api/campaign')) ?? [];
+  const groups = (await apiGet<Group[]>('/api/group')) ?? [];
+  const campaigns = (await apiGet<{ id: string; name: string }[]>('/api/campaign')) ?? [];
 
   return (
     <section aria-labelledby="groups-heading">

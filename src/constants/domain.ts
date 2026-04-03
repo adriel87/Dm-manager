@@ -28,3 +28,16 @@ export const TAG_OPTIONS = [
 ] as const;
 
 export type TagOption = (typeof TAG_OPTIONS)[number]['key'];
+
+// ─── Note color options ────────────────────────────────────────────────────────
+
+export const NOTE_COLOR_OPTIONS = [
+  { key: 'yellow', label: 'Amarillo' },
+  { key: 'blue', label: 'Azul' },
+  { key: 'green', label: 'Verde' },
+  { key: 'red', label: 'Rojo' },
+  { key: 'purple', label: 'Púrpura' },
+  { key: 'gray', label: 'Gris' },
+] as const;
+
+export type NoteColorOption = (typeof NOTE_COLOR_OPTIONS)[number]['key'];
