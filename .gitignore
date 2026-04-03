@@ -41,3 +41,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# bot
+packages/bot/dist/
+packages/bot/data/guilds.json
+packages/bot/storage/
