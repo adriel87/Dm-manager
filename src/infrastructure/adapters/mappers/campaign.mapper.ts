@@ -19,6 +19,7 @@ export const campaignMappers = {
             notes: doc.notes ?? [],
             characters: doc.characters ?? [],
             group: doc.group ?? null,
+            inventory: doc.inventory ?? { items: [], capacity: 100, money: 0 },
             discordSpeakerMappings: doc.discordSpeakerMappings ?? [],
             
             // Metadata

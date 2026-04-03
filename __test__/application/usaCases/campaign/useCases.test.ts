@@ -1,5 +1,5 @@
-import { addMission, addSession, assignCharacter, assignGroup, createCampaign, deleteCampaign, getAllCampaigns, getCampaignById, getMissions, removeCharacter, removeGroup, removeMission, removeSession, updateCampaign, updateMission, updateSession, addNote, removeNote, getNotes } from "@/application/useCases/campaign";
-import { CampaignI, CharacterRef, EmbeddedMission, EmbeddedNote, EmbeddedSession, GroupSnapshot } from "@/domain/campaign/campaign";
+import { addInventoryItem, addMission, addSession, assignCharacter, assignGroup, createCampaign, deleteCampaign, getAllCampaigns, getCampaignById, getInventory, getMissions, removeCharacter, removeGroup, removeInventoryItem, removeMission, removeSession, updateCampaign, updateInventoryItem, updateMission, updateSession, addNote, removeNote, getNotes } from "@/application/useCases/campaign";
+import { CampaignI, CharacterRef, EmbeddedItem, EmbeddedMission, EmbeddedNote, EmbeddedSession, GroupSnapshot } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 import { CharacterRepository } from "@/domain/character/characterRepository";
 import { GroupRepository } from "@/domain/group/groupRepository";
@@ -33,6 +33,11 @@ describe("Campaign use cases", () => {
         // Group operations (2 methods)
         assignGroup: vi.fn(),
         removeGroup: vi.fn(),
+
+        // Inventory operations (3 methods)
+        addInventoryItem: vi.fn(),
+        updateInventoryItem: vi.fn(),
+        removeInventoryItem: vi.fn(),
 
         // Note operations (2 methods)
         addNote: vi.fn(),
@@ -107,6 +112,7 @@ describe("Campaign use cases", () => {
         notes: [],
         characters: [],
         group: null,
+        inventory: { items: [], capacity: 100, money: 0 },
         discordSpeakerMappings: [],
     };
 
@@ -731,22 +737,178 @@ describe("Campaign use cases", () => {
         it("should remove group from campaign", async () => {
             const campaignWithGroup = { ...validCampaign, group: validGroupSnapshot };
             const campaignWithoutGroup = { ...validCampaign, group: null };
-            
+
             vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignWithGroup);
             vi.mocked(mockCampaignRepository.removeGroup).mockResolvedValue(campaignWithoutGroup);
-            
+
             await removeGroup(mockCampaignRepository, validCampaign.id);
-            
+
             expect(mockCampaignRepository.removeGroup).toHaveBeenCalledWith(validCampaign.id);
         });
 
         it("should throw when campaign is Finalizada", async () => {
             const finishedCampaign = { ...validCampaign, status: 'Finalizada' as const };
             vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(finishedCampaign);
-            
+
             await expect(removeGroup(mockCampaignRepository, validCampaign.id)).rejects.toThrow(
                 "No se pueden realizar cambios en una campaña finalizada"
             );
+        });
+    });
+
+
+    // ========================================
+    // Inventory Operations
+    // ========================================
+
+    const validItem: EmbeddedItem = {
+        id: 'item-1',
+        title: 'Sword of Destiny',
+        description: 'A legendary sword',
+        quantity: 1,
+        value: 50,
+        tags: ['common'],
+    };
+
+    describe("getInventory", () => {
+        it("should return inventory for a campaign", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+
+            const result = await getInventory(mockCampaignRepository, validCampaign.id);
+
+            expect(result).toEqual(validCampaign.inventory);
+            expect(mockCampaignRepository.getCampaignById).toHaveBeenCalledWith(validCampaign.id);
+        });
+
+        it("should throw when campaign not found", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(null);
+
+            await expect(getInventory(mockCampaignRepository, validCampaign.id)).rejects.toThrow(
+                "Campaña no encontrada"
+            );
+        });
+    });
+
+    describe("addInventoryItem", () => {
+        it("should add an item with generated UUID", async () => {
+            const campaignWithItem = { ...validCampaign, inventory: { items: [validItem], capacity: 100, money: 0 } };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+            vi.mocked(mockCampaignRepository.addInventoryItem).mockResolvedValue(campaignWithItem);
+
+            const { id, ...itemData } = validItem;
+            const result = await addInventoryItem(mockCampaignRepository, validCampaign.id, itemData);
+
+            expect(result.id).toBeDefined();
+            expect(result.title).toBe(validItem.title);
+            expect(mockCampaignRepository.addInventoryItem).toHaveBeenCalledWith(
+                validCampaign.id,
+                expect.objectContaining({ ...itemData, id: expect.any(String) })
+            );
+        });
+
+        it("should validate item before adding", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+            const { id, ...itemData } = validItem;
+            const invalidItem = { ...itemData, title: "" };
+
+            await expect(addInventoryItem(mockCampaignRepository, validCampaign.id, invalidItem)).rejects.toThrow();
+            expect(mockCampaignRepository.addInventoryItem).not.toHaveBeenCalled();
+        });
+
+        it("should throw when campaign is Finalizada", async () => {
+            const finishedCampaign = { ...validCampaign, status: 'Finalizada' as const };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(finishedCampaign);
+
+            const { id, ...itemData } = validItem;
+            await expect(addInventoryItem(mockCampaignRepository, validCampaign.id, itemData)).rejects.toThrow(
+                "No se pueden realizar cambios en una campaña finalizada"
+            );
+        });
+
+        it("should throw when campaign not found", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(null);
+
+            const { id, ...itemData } = validItem;
+            await expect(addInventoryItem(mockCampaignRepository, validCampaign.id, itemData)).rejects.toThrow(
+                "Campaña no encontrada"
+            );
+        });
+    });
+
+    describe("updateInventoryItem", () => {
+        it("should update item successfully", async () => {
+            const campaignWithItem = { ...validCampaign, inventory: { items: [validItem], capacity: 100, money: 0 } };
+            const updatedItem = { ...validItem, title: 'Shield of Light' };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignWithItem);
+            vi.mocked(mockCampaignRepository.updateInventoryItem).mockResolvedValue(
+                { ...campaignWithItem, inventory: { items: [updatedItem], capacity: 100, money: 0 } }
+            );
+
+            const result = await updateInventoryItem(mockCampaignRepository, validCampaign.id, updatedItem);
+
+            expect(result.title).toBe('Shield of Light');
+            expect(result.id).toBe(validItem.id);
+            expect(mockCampaignRepository.updateInventoryItem).toHaveBeenCalledWith(validCampaign.id, updatedItem);
+        });
+
+        it("should throw when item not found in inventory", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+
+            await expect(
+                updateInventoryItem(mockCampaignRepository, validCampaign.id, validItem)
+            ).rejects.toThrow("Objeto no encontrado en el inventario");
+            expect(mockCampaignRepository.updateInventoryItem).not.toHaveBeenCalled();
+        });
+
+        it("should validate item before updating", async () => {
+            const campaignWithItem = { ...validCampaign, inventory: { items: [validItem], capacity: 100, money: 0 } };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignWithItem);
+
+            const invalidUpdate = { ...validItem, title: "" };
+            await expect(
+                updateInventoryItem(mockCampaignRepository, validCampaign.id, invalidUpdate)
+            ).rejects.toThrow();
+            expect(mockCampaignRepository.updateInventoryItem).not.toHaveBeenCalled();
+        });
+
+        it("should throw when campaign is Finalizada", async () => {
+            const finishedCampaign = { ...validCampaign, status: 'Finalizada' as const };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(finishedCampaign);
+
+            await expect(
+                updateInventoryItem(mockCampaignRepository, validCampaign.id, validItem)
+            ).rejects.toThrow("No se pueden realizar cambios en una campaña finalizada");
+        });
+    });
+
+    describe("removeInventoryItem", () => {
+        it("should remove item successfully", async () => {
+            const campaignWithItem = { ...validCampaign, inventory: { items: [validItem], capacity: 100, money: 0 } };
+            const campaignWithoutItem = { ...validCampaign, inventory: { items: [], capacity: 100, money: 0 } };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignWithItem);
+            vi.mocked(mockCampaignRepository.removeInventoryItem).mockResolvedValue(campaignWithoutItem);
+
+            await removeInventoryItem(mockCampaignRepository, validCampaign.id, validItem.id);
+
+            expect(mockCampaignRepository.removeInventoryItem).toHaveBeenCalledWith(validCampaign.id, validItem.id);
+        });
+
+        it("should throw when item not found in inventory", async () => {
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+
+            await expect(
+                removeInventoryItem(mockCampaignRepository, validCampaign.id, validItem.id)
+            ).rejects.toThrow("Objeto no encontrado en el inventario");
+            expect(mockCampaignRepository.removeInventoryItem).not.toHaveBeenCalled();
+        });
+
+        it("should throw when campaign is Finalizada", async () => {
+            const finishedCampaign = { ...validCampaign, status: 'Finalizada' as const };
+            vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(finishedCampaign);
+
+            await expect(
+                removeInventoryItem(mockCampaignRepository, validCampaign.id, validItem.id)
+            ).rejects.toThrow("No se pueden realizar cambios en una campaña finalizada");
         });
     });
 

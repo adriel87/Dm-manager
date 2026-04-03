@@ -16,6 +16,7 @@ export class CampaignDetailPage {
   readonly tabMissions: Locator;
   readonly tabSessions: Locator;
   readonly tabGroups: Locator;
+  readonly tabInventory: Locator;
 
   // Session creation
   readonly createSessionButton: Locator;
@@ -32,6 +33,13 @@ export class CampaignDetailPage {
   readonly missionNameInput: Locator;
   readonly missionSubmitButton: Locator;
 
+  // Inventory creation
+  readonly createInventoryButton: Locator;
+  readonly inventoryTitleInput: Locator;
+  readonly inventoryDescriptionInput: Locator;
+  readonly inventoryQuantityInput: Locator;
+  readonly inventorySubmitButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -40,6 +48,7 @@ export class CampaignDetailPage {
     this.tabMissions = page.getByRole('tab', { name: /Misiones/ });
     this.tabSessions = page.getByRole('tab', { name: /Sesiones/ });
     this.tabGroups = page.getByRole('tab', { name: /Grupos/ });
+    this.tabInventory = page.getByRole('tab', { name: /Inventario/ });
 
     this.modal = page.getByRole('dialog');
     this.createSessionButton = page.getByRole('button', { name: 'Crear nueva sesión' });
@@ -53,6 +62,12 @@ export class CampaignDetailPage {
     this.createMissionButton = page.getByRole('button', { name: 'Crear nueva misión' });
     this.missionNameInput = page.getByLabel('Nombre de la misión');
     this.missionSubmitButton = this.modal.getByRole('button', { name: 'Crear misión' });
+
+    this.createInventoryButton = page.getByRole('button', { name: 'Crear nuevo objeto' });
+    this.inventoryTitleInput = page.getByLabel('Título');
+    this.inventoryDescriptionInput = page.getByLabel('Descripción');
+    this.inventoryQuantityInput = page.getByLabel('Cantidad');
+    this.inventorySubmitButton = this.modal.getByRole('button', { name: 'Crear objeto' });
   }
 
   async goto(campaignId: string) {
@@ -64,11 +79,12 @@ export class CampaignDetailPage {
     await expect(this.page.getByRole('heading', { name, exact: true })).toBeVisible();
   }
 
-  async clickTab(tab: 'missions' | 'sessions' | 'groups') {
+  async clickTab(tab: 'missions' | 'sessions' | 'groups' | 'inventory') {
     const tabLocator = {
       missions: this.tabMissions,
       sessions: this.tabSessions,
       groups: this.tabGroups,
+      inventory: this.tabInventory,
     }[tab];
     await tabLocator.click();
   }
@@ -90,5 +106,25 @@ export class CampaignDetailPage {
 
   async submitSession() {
     await this.sessionSubmitButton.click();
+  }
+
+  async openCreateInventoryModal() {
+    await this.createInventoryButton.click();
+    await expect(this.modal).toBeVisible();
+  }
+
+  async fillInventoryForm(opts: {
+    title: string;
+    description?: string;
+    quantity?: number;
+  }) {
+    await this.inventoryTitleInput.fill(opts.title);
+    if (opts.description) await this.inventoryDescriptionInput.fill(opts.description);
+    if (opts.quantity !== undefined)
+      await this.inventoryQuantityInput.fill(String(opts.quantity));
+  }
+
+  async submitInventory() {
+    await this.inventorySubmitButton.click();
   }
 }

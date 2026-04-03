@@ -62,6 +62,31 @@ export interface EmbeddedSession {
   date: Date;
 }
 
+export type TagType = 'common' | 'rare' | 'unique' | 'mission';
+
+/**
+ * EmbeddedItem — item embedded within Campaign inventory.
+ * ID is generated via crypto.randomUUID() at creation.
+ */
+export interface EmbeddedItem {
+  id: string; // crypto.randomUUID()
+  title: string;
+  description: string;
+  quantity: number;
+  value: number; // monetary value in gold pieces (gp), >= 0
+  tags: TagType[];
+}
+
+/**
+ * Inventory — holds the campaign's item list and party finances.
+ */
+export interface Inventory {
+  items: EmbeddedItem[];
+  capacity: number;
+  money: number;
+}
+
+
 /**
  * Predefined color keys for note border styling.
  * Maps to Tailwind border-l classes in the UI.
@@ -132,6 +157,7 @@ export interface CampaignI {
   notes: EmbeddedNote[];
   characters: CharacterRef[];
   group: GroupSnapshot | null;
+  inventory : Inventory
   discordSpeakerMappings: SpeakerMapping[];
   
   // Metadata
@@ -161,6 +187,7 @@ export class Campaign implements CampaignI {
   notes: EmbeddedNote[];
   characters: CharacterRef[];
   group: GroupSnapshot | null;
+  inventory: Inventory;
   discordSpeakerMappings: SpeakerMapping[];
   
   // Metadata
@@ -181,8 +208,13 @@ export class Campaign implements CampaignI {
     this.notes = campaign.notes ?? [];
     this.characters = campaign.characters ?? [];
     this.group = campaign.group ?? null;
+    this.inventory = campaign.inventory ?? {
+      capacity: 100,
+      items:[],
+      money: 0
+    }
     this.discordSpeakerMappings = campaign.discordSpeakerMappings ?? [];
-    
+
     this.nextSessionAt = campaign.nextSessionAt ?? undefined;
     this.lastSessionAt = campaign.lastSessionAt ?? undefined;
     this.createdAt = campaign.createdAt || new Date();
@@ -393,6 +425,55 @@ export const validateGroupSnapshot = (
   }
   if (errors.length > 0) {
     throw new Error(`Errores en el snapshot del grupo:\n${errors.join("\n")}`);
+  }
+  return true;
+};
+
+/**
+ * validateInventory validate a campaign inventory
+ * Throws on validation failure.
+ */
+
+export const validateInventory = ({ capacity, items, money }: Partial<Inventory>): boolean => {
+  const errors: string[] = [];
+  if (capacity === null || capacity === undefined || capacity < 0) {
+    errors.push("La capacidad del inventario debe ser 0 o mayor");
+  }
+  if (money === null || money === undefined || money < 0) {
+    errors.push("El dinero debe ser un número igual o mayor a 0");
+  }
+  if (items === null || items === undefined) {
+    errors.push("Los objetos del inventario no pueden ser nulos");
+  }
+  if (errors.length > 0) {
+    throw new Error(`Errores en el inventario:\n${errors.join("\n")}`);
+  }
+  return true;
+};
+
+/**
+ * validateEmbeddedItem — Validates an item before adding/updating it in inventory.
+ * Throws on validation failure.
+ */
+export const validateEmbeddedItem = ({ title, description, quantity, value, tags }: Partial<EmbeddedItem>): boolean => {
+  const errors: string[] = [];
+  if (!title || title.trim().length < 1) {
+    errors.push("El nombre del objeto es requerido");
+  }
+  if (!description || description.trim().length < 1) {
+    errors.push("La descripción del objeto es requerida");
+  }
+  if (quantity === null || quantity === undefined || quantity < 0) {
+    errors.push("La cantidad debe ser 0 o mayor");
+  }
+  if (value === null || value === undefined || value < 0) {
+    errors.push("El valor no puede ser negativo");
+  }
+  if (!tags || !Array.isArray(tags)) {
+    errors.push("Las etiquetas deben ser un array");
+  }
+  if (errors.length > 0) {
+    throw new Error(`Errores en el objeto:\n${errors.join("\n")}`);
   }
   return true;
 };

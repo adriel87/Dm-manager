@@ -1,4 +1,4 @@
-import { assertNotFinalizada, assertUniqueMissionName, Campaign, CampaignI, CharacterRef, EmbeddedMission, EmbeddedNote, EmbeddedSession, GroupSnapshot, MissionStatusType, validateCampaign, validateCharacterRef, validateEmbeddedMission, validateEmbeddedNote, validateEmbeddedSession, validateGroupSnapshot } from "@/domain/campaign/campaign";
+import { assertNotFinalizada, assertUniqueMissionName, Campaign, CampaignI, CharacterRef, EmbeddedItem, EmbeddedMission, EmbeddedNote, EmbeddedSession, GroupSnapshot, Inventory, MissionStatusType, validateCampaign, validateCharacterRef, validateEmbeddedItem, validateEmbeddedMission, validateEmbeddedNote, validateEmbeddedSession, validateGroupSnapshot, validateInventory } from "@/domain/campaign/campaign";
 import { DnDClassType } from "@/domain/character/character";
 import { describe, expect, it } from "vitest";
 
@@ -59,6 +59,7 @@ describe("Campaign domain", () => {
         group: validGroup,
         missions: [validMission],
         sessions: [validSession],
+        inventory: { items: [], capacity: 100, money: 0 },,
         notes: [],
         discordSpeakerMappings: [],
     };
@@ -460,6 +461,97 @@ describe("Campaign domain", () => {
             const originalGroup = campaign.group;
             campaign.updateCampaign({ name: "Updated Name" });
             expect(campaign.group).toBe(originalGroup);
+        })
+    })
+
+    const validItem: EmbeddedItem = {
+        id: 'item-1',
+        title: 'Sword of Destiny',
+        description: 'A legendary sword',
+        quantity: 1,
+        value: 50,
+        tags: ['common'],
+    };
+
+    describe("validateEmbeddedItem", () => {
+        it("should return true for a valid item", () => {
+            const result = validateEmbeddedItem(validItem);
+            expect(result).toBe(true);
+        })
+
+        it("should throw when title is missing or empty", () => {
+            const invalid = { ...validItem, title: "" };
+            expect(() => validateEmbeddedItem(invalid)).toThrow("El nombre del objeto es requerido");
+        })
+
+        it("should throw when description is missing or empty", () => {
+            const invalid = { ...validItem, description: "" };
+            expect(() => validateEmbeddedItem(invalid)).toThrow("La descripción del objeto es requerida");
+        })
+
+        it("should throw when quantity is negative", () => {
+            const invalid = { ...validItem, quantity: -1 };
+            expect(() => validateEmbeddedItem(invalid)).toThrow("La cantidad debe ser 0 o mayor");
+        })
+
+        it("should throw when tags is missing or not an array", () => {
+            const invalid = { ...validItem, tags: undefined as any };
+            expect(() => validateEmbeddedItem(invalid)).toThrow("Las etiquetas deben ser un array");
+        })
+
+        it("should accumulate multiple errors and throw all of them", () => {
+            const invalid = { ...validItem, title: "", description: "", quantity: -1 };
+            expect(() => validateEmbeddedItem(invalid)).toThrow("Errores en el objeto:");
+        })
+    })
+
+    describe("validateInventory", () => {
+        const validInventory: Inventory = {
+            items: [],
+            capacity: 100,
+            money: 0,
+        };
+
+        it("should return true for a valid inventory", () => {
+            const result = validateInventory(validInventory);
+            expect(result).toBe(true);
+        })
+
+        it("should throw when capacity is negative", () => {
+            const invalid = { ...validInventory, capacity: -1 };
+            expect(() => validateInventory(invalid)).toThrow("La capacidad del inventario debe ser 0 o mayor");
+        })
+
+        it("should throw when money is negative", () => {
+            const invalid = { ...validInventory, money: -1 };
+            expect(() => validateInventory(invalid)).toThrow("El dinero debe ser un número igual o mayor a 0");
+        })
+
+        it("should accumulate multiple errors and throw all of them", () => {
+            const invalid = { ...validInventory, capacity: -1, money: -5 };
+            expect(() => validateInventory(invalid)).toThrow("Errores en el inventario:");
+        })
+    })
+
+    describe("Campaign constructor — inventory", () => {
+        it("should initialize inventory from data when provided", () => {
+            const inventoryData: Inventory = { items: [validItem], capacity: 50, money: 200 };
+            const campaign = new Campaign({ ...validCampaignData, inventory: inventoryData });
+            expect(campaign.inventory).toEqual(inventoryData);
+        })
+
+        it("should initialize default inventory when not provided", () => {
+            const dataWithoutInventory = { ...validCampaignData, inventory: undefined as any };
+            const campaign = new Campaign(dataWithoutInventory);
+            expect(campaign.inventory).toEqual({ capacity: 100, items: [], money: 0 });
+        })
+
+        it("should NOT mutate inventory when updateCampaign is called (managed via repository)", () => {
+            const inventoryData: Inventory = { items: [validItem], capacity: 50, money: 200 };
+            const campaign = new Campaign({ ...validCampaignData, inventory: inventoryData });
+            const originalInventory = campaign.inventory;
+            campaign.updateCampaign({ name: "Updated Name" });
+            expect(campaign.inventory).toBe(originalInventory);
         })
     })
 

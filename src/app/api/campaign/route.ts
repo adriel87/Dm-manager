@@ -27,7 +27,16 @@ export async function POST(req: NextRequest) {
     // Validate the body against the campaign schema (only root fields: name, description, status)
     const validatedData = campaignSchema.parse(body);
     
-    const createdCampaign = await createCampaign(repositories.campaign, validatedData as Omit<CampaignI, 'id'>);
+    // createCampaign use case will initialize empty missions[], sessions[], characters[], group=null
+    // Spread validated data with empty collections (use case will override but TypeScript needs them)
+    const createdCampaign = await createCampaign(repositories.campaign, {
+        ...validatedData,
+        missions: [],
+        sessions: [],
+        characters: [],
+        group: null,
+        inventory: { items: [], capacity: 100, money: 0 },
+    });
     return NextResponse.json(createdCampaign, { status: 201 });
 }
 

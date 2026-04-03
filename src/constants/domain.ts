@@ -18,6 +18,17 @@ export const PRIORITY_OPTIONS = [
 
 export type PriorityOption = (typeof PRIORITY_OPTIONS)[number]['key'];
 
+// ─── Inventory tag options ─────────────────────────────────────────────────────
+
+export const TAG_OPTIONS = [
+  { key: 'common', label: 'Común' },
+  { key: 'rare', label: 'Raro' },
+  { key: 'unique', label: 'Único' },
+  { key: 'mission', label: 'Misión' },
+] as const;
+
+export type TagOption = (typeof TAG_OPTIONS)[number]['key'];
+
 // ─── Note color options ────────────────────────────────────────────────────────
 
 export const NOTE_COLOR_OPTIONS = [

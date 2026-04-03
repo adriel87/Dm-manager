@@ -115,3 +115,18 @@ export const groupSnapshotInputSchema = z.object({
 });
 
 export type GroupSnapshotInput = z.infer<typeof groupSnapshotInputSchema>;
+
+// ========================================
+// Inventory Item Schema
+// ========================================
+const tagTypeEnum = z.enum(["common", "rare", "unique", "mission"]);
+
+export const embeddedItemSchema = z.object({
+  title: z.string().min(1, "El nombre del objeto es requerido"),
+  description: z.string().min(1, "La descripción del objeto es requerida"),
+  quantity: z.number().int().min(0, "La cantidad debe ser 0 o mayor"),
+  value: z.number().min(0, "El valor no puede ser negativo").default(0),
+  tags: z.array(tagTypeEnum).default([]),
+});
+
+export type EmbeddedItemInput = z.infer<typeof embeddedItemSchema>;

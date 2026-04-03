@@ -1,6 +1,7 @@
 import {
   CampaignI,
   CharacterRef,
+  EmbeddedItem,
   EmbeddedMission,
   EmbeddedNote,
   EmbeddedSession,
@@ -50,6 +51,7 @@ export const campaignRepository: CampaignRepository = {
       notes: [],
       characters: [],
       group: null,
+      inventory: { items: [], capacity: 100, money: 0 },
       discordSpeakerMappings: [],
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -64,7 +66,7 @@ export const campaignRepository: CampaignRepository = {
 
   updateCampaign: async (campaign: CampaignI) => {
     const collection = await getCollection("campaigns");
-    const { id, missions, sessions, notes, characters, group, discordSpeakerMappings, ...rootFields } = campaign;
+    const { id, missions, sessions, notes, characters, group, inventory, discordSpeakerMappings, ...rootFields } = campaign;
     
     // Only update root-level fields, exclude aggregate collections
     const result = await collection.findOneAndUpdate(
@@ -303,6 +305,75 @@ export const campaignRepository: CampaignRepository = {
           result,
           campaignMappers.fromMongoDocumentToEntity,
         )
+      : null;
+  },
+
+  // ========================================
+  // Inventory Sub-Document Operations
+  // ========================================
+  addInventoryItem: async (campaignId: string, item: EmbeddedItem) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId) },
+      {
+        $push: { "inventory.items": item } as any,
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(result, campaignMappers.fromMongoDocumentToEntity)
+      : null;
+  },
+
+  updateInventoryItem: async (campaignId: string, item: EmbeddedItem) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId), "inventory.items.id": item.id },
+      {
+        $set: {
+          "inventory.items.$": item,
+          updatedAt: new Date(),
+        },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(result, campaignMappers.fromMongoDocumentToEntity)
+      : null;
+  },
+
+  removeInventoryItem: async (campaignId: string, itemId: string) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId) },
+      {
+        $pull: { "inventory.items": { id: itemId } as any } as any,
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(result, campaignMappers.fromMongoDocumentToEntity)
+      : null;
+  },
+
+  incrementInventoryMoney: async (campaignId: string, delta: number) => {
+    const collection = await getCollection("campaigns");
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(campaignId) },
+      {
+        $inc: { "inventory.money": delta } as any,
+        $set: { updatedAt: new Date() },
+      },
+      { returnDocument: "after" }
+    );
+
+    return result
+      ? MapperUtils.fromMongoDocumentToEntity(result, campaignMappers.fromMongoDocumentToEntity)
       : null;
   },
 

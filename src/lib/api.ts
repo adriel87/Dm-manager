@@ -62,3 +62,24 @@ export async function apiPut<T>(
     return { data: null, error: 'Error de red. Verifica tu conexión e inténtalo de nuevo.' };
   }
 }
+
+export async function apiDelete(
+  path: string
+): Promise<{ error: string | null }> {
+  try {
+    const res = await fetch(`${BASE}${path}`, {
+      method: 'DELETE',
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return {
+        error: (data as { message?: string }).message ?? 'Error en la petición.',
+      };
+    }
+
+    return { error: null };
+  } catch {
+    return { error: 'Error de red. Verifica tu conexión e inténtalo de nuevo.' };
+  }
+}

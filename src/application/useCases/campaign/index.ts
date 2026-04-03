@@ -24,6 +24,13 @@ export * from './removeCharacter';
 export * from './assignGroup';
 export * from './removeGroup';
 
+// Inventory operations
+export * from './addInventoryItem';
+export * from './updateInventoryItem';
+export * from './removeInventoryItem';
+export * from './getInventory';
+export * from './transferInventoryMoney';
+
 // Note operations
 export * from './addNote';
 export * from './removeNote';
