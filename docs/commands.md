@@ -74,7 +74,9 @@ __test__/
     ├── missions/missionUseCase.test.ts
     ├── session/useCases.test.ts
     ├── group/useCases.test.ts
-    └── dashboard/useCases.test.ts
+    ├── dashboard/useCases.test.ts
+    ├── play/playModeCharacters.test.ts
+    └── recording/useCases.test.ts
 ```
 
 ## E2E Tests (Playwright)
@@ -107,10 +109,13 @@ e2e/
 ├── pages/                      ← Page Object Models
 │   ├── campaigns.page.ts
 │   ├── characters.page.ts
-│   └── campaign-detail.page.ts
+│   ├── campaign-detail.page.ts
+│   └── play-mode.page.ts
 ├── campaigns.spec.ts           ← TC-01 to TC-06
 ├── characters.spec.ts          ← TC-13 to TC-18
-└── campaign-detail.spec.ts     ← TC-07 to TC-12
+├── campaign-detail.spec.ts     ← TC-07 to TC-12
+├── inventory.spec.ts           ← Inventory management
+└── play-mode.spec.ts           ← Play Mode flows
 ```
 
 ## TypeScript
