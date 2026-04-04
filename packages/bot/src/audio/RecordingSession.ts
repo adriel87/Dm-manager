@@ -35,8 +35,7 @@ export class RecordingSession {
 
       const stream = this.connection.receiver.subscribe(userId, {
         end: {
-          behavior: EndBehaviorType.AfterSilence,
-          duration: 100,
+          behavior: EndBehaviorType.Manual,
         },
       })
 
