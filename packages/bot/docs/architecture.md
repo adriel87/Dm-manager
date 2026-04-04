@@ -37,9 +37,11 @@ packages/bot/
 ├── src/
 │   ├── api/
 │   │   └── dm-manager.client.ts    ← typed HTTP client (all API calls go here)
-│   ├── audio/                      ← Phase 3
+│   ├── audio/                      ← Phase 3 + 4
 │   │   ├── OpusAccumulator.ts      ← per-user stream → OGG Buffer via ffmpeg
-│   │   └── RecordingSession.ts     ← manages all speakers in a guild
+│   │   ├── RecordingSession.ts     ← manages all speakers in a guild
+│   │   ├── poller.ts               ← polls DM Manager until recording is transcribed/failed
+│   │   └── transcript.ts           ← formats TranscriptionSegment[] for Discord messages
 │   ├── commands/
 │   │   └── dm-record/              ← Phase 2
 │   │       ├── start.ts
@@ -108,6 +110,30 @@ Each guild has at most one active recording state. Transitions:
 
 ## Key design decisions
 
+### Functional Core + Imperative Shell
+
+All command handlers are split into two functions:
+
+- **`resolve*Command(opts)`** — pure function, no Discord imports, fully unit-tested. Receives plain data, returns a typed result object.
+- **`handle*(interaction, state, client)`** — Discord shell: calls the core, performs side effects (reply, API calls, state mutations). Not unit-tested.
+
+```typescript
+// Core — pure, testable
+export function resolveStopCommand(state: BotRecordingState | undefined): StopResult {
+  if (!state) return { ok: false, error: 'No hay ninguna grabación activa.' }
+  return { ok: true, campaignId: state.campaignId, recordingId: state.recordingId }
+}
+
+// Shell — Discord, not tested
+export async function handleStop(interaction, state, client): Promise<void> {
+  const result = resolveStopCommand(state.get(interaction.guildId!))
+  if (!result.ok) { await interaction.reply({ content: result.error, ephemeral: true }); return }
+  // ... side effects
+}
+```
+
+This pattern keeps the test suite fast and deterministic — no Discord mock infrastructure needed.
+
 ### Separate repository types vs shared package
 
 The bot treats the DM Manager as an external HTTP service. Types in `src/types/dm-manager.ts`
@@ -126,6 +152,15 @@ Guild recording state is held in a `Map<guildId, BotRecordingState>` in memory.
 - **Limitation**: a bot crash loses the active `recordingId`. The recording stays in `recording`
   status in the DM Manager and must be manually cleaned up (or a `/status` command can show it).
 - **Phase 6** will add SQLite persistence for crash recovery.
+
+### TDD approach
+
+The bot was built test-first. Each `resolve*Command` function has a corresponding test file in
+`__test__/commands/` that was written before the implementation. Audio components (`OpusAccumulator`,
+`RecordingSession`, `poller`, `transcript`) each have their own test file under `__test__/audio/`.
+The `GuildStateManager` and HTTP client are tested under `__test__/state/` and `__test__/api/`.
+
+Test command: `npm test` (Vitest, 116 tests across 13 files, all passing).
 
 ### Audio format (OGG/Opus, not WebM)
 

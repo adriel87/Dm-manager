@@ -308,6 +308,68 @@ El bot crea uno por cada usuario activo en el canal. Cuando el stream termina (s
 
 ---
 
+---
+
+## Phase 4 — Transcription polling
+
+After `/dm-record stop` completes and the audio is uploaded, the DM Manager sets the recording
+status to `"processing"`. The DM then runs `/dm-record transcribe` to trigger Whisper and see
+the result directly in Discord.
+
+### pollUntilTranscribed (`src/audio/poller.ts`)
+
+`/dm-record transcribe` triggers transcription via `POST .../transcribe`, then polls
+`GET .../recordings` every 3 seconds (default) until the recording reaches a terminal status:
+
+```
+POST /recordings/{id}/transcribe   ← trigger
+         │
+         │ (Whisper is processing...)
+         ▼
+loop (every 3s, up to 20 attempts):
+  GET /recordings?campaignId=...
+    ├── status: "processing"  → wait and retry
+    ├── status: "transcribed" → return { ok: true, recording }
+    └── status: "failed"      → return { ok: false, error: recording.transcriptionError }
+
+timeout after 20 attempts → return { ok: false, error: "Timeout..." }
+```
+
+The poller receives a minimal `client` interface (only `getRecordings`), making it fully
+unit-testable without any Discord or HTTP infrastructure.
+
+### formatTranscriptForDiscord (`src/audio/transcript.ts`)
+
+Once the poll succeeds, `TranscriptionSegment[]` from the recording is formatted into a Discord
+message string. Each segment renders as:
+
+```
+**SpeakerLabel** [MM:SS]: text spoken
+```
+
+Discord messages have a 2000-character limit. The formatter truncates at 1900 characters and
+appends `…(truncado)` to leave room for the surrounding reply content. If there are no segments,
+it returns `"(sin segmentos de transcripción)"`.
+
+### End-to-end flow after Phase 4
+
+```
+/dm-record stop
+  → RecordingSession.stop() → OGG buffers per speaker
+  → PUT /recordings/{id}/stop (audioData as base64)
+  → state.setLastStopped(guildId, { campaignId, recordingId })
+
+/dm-record transcribe
+  → resolveTranscribeCommand checks: no active recording + lastStopped exists
+  → POST /recordings/{id}/transcribe
+  → pollUntilTranscribed() polls every 3s
+  → formatTranscriptForDiscord(recording.transcription)
+  → editReply with transcript
+  → state.clearLastStopped(guildId)
+```
+
+---
+
 ## Diagrama del flujo de datos en el bot (Fase 3)
 
 ```

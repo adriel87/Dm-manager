@@ -112,13 +112,30 @@ If transcription fails, status is `"failed"` and `transcriptionError` contains t
 
 ---
 
-## 4. Get recordings (for /status)
+## 4. Get recordings (for /status and polling)
 
 ```
+GET /api/campaign/{campaignId}/recordings
 GET /api/campaign/{campaignId}/recordings?sessionId={sessionId}
 ```
 
 **Response 200:** array of Recording objects.
+
+Used by `/dm-record status` to show current recording info, and by the transcription poller
+(`pollUntilTranscribed`) to check recording status after triggering transcription.
+
+---
+
+## 5. Get campaigns (for autocomplete)
+
+```
+GET /api/campaign
+```
+
+**Response 200:** array of Campaign objects.
+
+Used to populate slash command autocomplete so DMs can select a campaign by name rather than
+typing an ID manually.
 
 ---
 
@@ -132,9 +149,11 @@ All endpoints return:
 | HTTP status | Meaning |
 |-------------|---------|
 | 400 | Invalid request body (Zod validation failed) |
-| 500 | Internal error (recording not found, storage error, Whisper error) |
+| 404 | Campaign or recording not found |
+| 500 | Internal error (storage error, Whisper error, unexpected failure) |
 
-The bot should display the `error` field to the DM in Discord when a non-2xx response is received.
+The bot client (`dm-manager.client.ts`) throws an `Error` with the `error` field on any non-2xx
+response. Command handlers catch this and display the message to the DM as an ephemeral reply.
 
 ---
 

@@ -4,12 +4,17 @@
  * Entry point — initializes the Discord client and registers event handlers.
  *
  * Phase 1: skeleton only. Client connects and logs "Bot ready" to console.
- * Phase 2 will add interaction handlers and slash command routing.
+ * Phase 2: adds interaction handlers, slash command routing, guild state management.
  * Phase 3 will add voice connection and audio capture.
  */
 
 import "dotenv/config";
 import { Client, GatewayIntentBits, Events } from "discord.js";
+import { GuildStateManager } from "./state/GuildStateManager.js";
+import { handleInteraction } from "./handlers/interactionCreate.js";
+import { handleVoiceStateUpdate } from "./handlers/voiceStateUpdate.js";
+import * as dmManagerClient from "./api/dm-manager.client.js";
+import type { DmManagerClient } from "./types/client.js";
 
 // ============================================================
 // Client setup
@@ -32,19 +37,44 @@ const client = new Client({
 });
 
 // ============================================================
+// State
+// ============================================================
+
+const state = new GuildStateManager();
+
+// Adapt the module exports to the DmManagerClient interface
+const apiClient: DmManagerClient = {
+  startRecording: dmManagerClient.startRecording,
+  stopRecording: dmManagerClient.stopRecording,
+  transcribeRecording: dmManagerClient.transcribeRecording,
+  getRecordings: dmManagerClient.getRecordings,
+  getCampaigns: dmManagerClient.getCampaigns,
+};
+
+// ============================================================
 // Event handlers
 // ============================================================
 
-client.once(Events.ClientReady, (readyClient) => {
+client.once(Events.ClientReady, async (readyClient) => {
   console.log(`[bot] Ready — logged in as ${readyClient.user.tag}`);
   console.log(`[bot] DM_MANAGER_URL = ${process.env.DM_MANAGER_URL ?? "(not set)"}`);
+
+  // Load persisted guild settings (default campaign IDs, etc.)
+  await state.loadSettings();
+  console.log("[bot] Guild settings loaded.");
 });
 
-// Phase 2: add interactionCreate handler here
-// client.on(Events.InteractionCreate, handleInteraction);
+client.on(Events.InteractionCreate, (interaction) => {
+  handleInteraction(interaction, state, apiClient).catch((err: unknown) => {
+    console.error("[bot] Unhandled error in interactionCreate handler:", err);
+  });
+});
 
-// Phase 3: add voiceStateUpdate handler here for late-join speaker detection
-// client.on(Events.VoiceStateUpdate, handleVoiceStateUpdate);
+client.on(Events.VoiceStateUpdate, (oldVoiceState, newVoiceState) => {
+  handleVoiceStateUpdate(oldVoiceState, newVoiceState, state).catch((err: unknown) => {
+    console.error("[bot] Unhandled error in voiceStateUpdate handler:", err);
+  });
+});
 
 // ============================================================
 // Login

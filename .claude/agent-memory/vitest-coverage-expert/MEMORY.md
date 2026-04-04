@@ -98,6 +98,15 @@ const value = await result; expect(value).toEqual(x)
 - Domain tests: `__test__/domain/<entity>.test.ts`
 - No infrastructure/mapper tests exist yet
 
+## Bot Package Test Infrastructure (added 2026-04-04)
+- `packages/bot/` is a separate Node.js package with its own Vitest setup
+- `packages/bot/vitest.config.ts` — `environment: 'node'`, includes `__test__/**/*.test.ts`
+- `packages/bot/__test__/api/dm-manager.client.test.ts` — 35 tests, all passing
+- Bot tsconfig uses `"module": "CommonJS"` — vitest handles it natively with `environment: 'node'`
+- Mock `fetch` with `vi.stubGlobal('fetch', vi.fn())` + `vi.unstubAllGlobals()` in afterEach
+- Set `process.env.DM_MANAGER_URL` in `beforeEach`, `delete` it in `afterEach`
+- Import source with `.js` extension in tests (e.g. `../../src/api/dm-manager.client.js`) — vitest resolves to `.ts`
+
 ## Dependencies
 - No extra test deps needed for unit tests (Vitest only)
 - For future integration/API route tests: would need `msw` or direct handler testing

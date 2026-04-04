@@ -46,3 +46,5 @@ next-env.d.ts
 packages/bot/dist/
 packages/bot/data/guilds.json
 packages/bot/storage/
+.claude/settings.local.json
+packages/bot/node_modules/.vite/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json

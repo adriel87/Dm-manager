@@ -76,13 +76,24 @@ npm run build && npm start
 - [`docs/architecture.md`](docs/architecture.md) — Bot architecture, state machine, component map
 - [`docs/api-contract.md`](docs/api-contract.md) — Exact HTTP contract with the DM Manager API
 
+## Testing
+
+```bash
+# Run all unit tests
+npm test
+```
+
+Tests cover all command cores, audio components, state manager, API client, and event handlers.
+The pattern used is **Functional Core + Imperative Shell**: pure `resolve*` functions are unit
+tested; Discord shell handlers (`handle*`) are not.
+
 ## Implementation phases
 
 | Phase | Status | What it adds |
 |-------|--------|--------------|
 | 1 — Skeleton + API client | ✅ Done | Types, HTTP client, bot shell, command definitions |
-| 2 — Slash commands (no audio) | 🔜 Next | `/link`, `/status` working; `/start`/`stop` scaffold |
-| 3 — Voice capture | 🔜 | Per-speaker OGG/Opus recording via ffmpeg |
-| 4 — Transcription flow | 🔜 | `/transcribe` command, end-to-end test |
-| 5 — Polish | 🔜 | Autocomplete, auto-stop on disconnect, Dockerfile |
+| 2 — Slash commands (no audio) | ✅ Done | `/link`, `/status`, `/start`, `/stop`, `/transcribe` handlers + auto-stop on disconnect |
+| 3 — Voice capture | ✅ Done | Per-speaker OGG/Opus recording via ffmpeg (`OpusAccumulator`, `RecordingSession`) |
+| 4 — Transcription flow | ✅ Done | Transcription polling, Discord transcript formatter, `StoppedRecording` state |
+| 5 — Polish | 🔜 | Autocomplete, Dockerfile |
 | 6 — Production | 🔜 | SQLite state persistence, chunked upload |

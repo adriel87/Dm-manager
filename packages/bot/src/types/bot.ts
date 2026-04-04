@@ -59,6 +59,21 @@ export interface GuildSettings {
 export type GuildSettingsStore = Record<string, GuildSettings>;
 
 // ============================================================
+// Stopped Recording State (Phase 4)
+// ============================================================
+
+/**
+ * Lightweight state kept after /dm-record stop completes.
+ * Persists just long enough for /dm-record transcribe to pick up the IDs.
+ * Cleared by handleTranscribe after polling finishes.
+ */
+export interface StoppedRecording {
+  campaignId: string
+  recordingId: string
+  stoppedAt: Date
+}
+
+// ============================================================
 // Command context
 // ============================================================
 
