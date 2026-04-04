@@ -1,0 +1,34 @@
+{
+  "name": "@dm-manager/bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Discord bot for DM Manager — records voice sessions and sends audio to the DM Manager API for transcription",
+  "main": "dist/bot.js",
+  "scripts": {
+    "dev": "tsx watch src/bot.ts",
+    "build": "tsc",
+    "start": "node dist/bot.js",
+    "deploy-commands": "tsx src/deploy-commands.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@discordjs/voice": "^0.19.2",
+    "better-sqlite3": "^12.8.0",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "ffmpeg-static": "^5.3.0",
+    "opusscript": "^0.0.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/ffmpeg-static": "^3.0.3",
+    "@types/node": "^20.17.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
