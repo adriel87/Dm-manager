@@ -68,8 +68,15 @@ export async function handleStart(
   _client: DmManagerClient
 ): Promise<void> {
   const guildId = interaction.guildId!
-  const member = interaction.guild?.members.cache.get(interaction.user.id)
-  const voiceChannel = member?.voice.channel ?? null
+
+  // interaction.guild puede ser null si el guild no está en el cache del cliente todavía.
+  // Usamos guilds.fetch() como fallback para garantizar que tenemos el Guild object.
+  // Luego accedemos a voiceStates (requiere GuildVoiceStates intent) en vez de members.cache,
+  // ya que members.cache no garantiza tener el GuildMember completo con voz.
+  const guild = interaction.guild ?? await interaction.client.guilds.fetch(guildId)
+  const voiceState = guild.voiceStates.cache.get(interaction.user.id)
+    ?? await guild.voiceStates.fetch(interaction.user.id).catch(() => null)
+  const voiceChannel = voiceState?.channel ?? null
 
   const sessionId =
     interaction.options.getString('session-id') ??
@@ -96,7 +103,7 @@ export async function handleStart(
     const voiceConnection = joinVoiceChannel({
       channelId: voiceChannel!.id,
       guildId: guildId,
-      adapterCreator: interaction.guild!.voiceAdapterCreator,
+      adapterCreator: guild.voiceAdapterCreator,
       selfDeaf: false,
       selfMute: true,
     })

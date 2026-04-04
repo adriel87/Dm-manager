@@ -3,10 +3,20 @@
  *
  * Accumulates raw Opus frames in memory while a user speaks,
  * then converts them to a valid OGG/Opus Buffer via ffmpeg on flush().
+ *
+ * Pipeline:
+ *   raw Opus frames (from Discord) → opusscript decoder → PCM s16le
+ *   → ffmpeg (-f s16le → -f ogg -c:a libopus) → OGG/Opus Buffer
+ *
+ * Why not `-f opus` directly in ffmpeg?
+ * The raw Opus demuxer is not included in most static ffmpeg builds
+ * (neither Windows gyan.dev nor Linux johnvansickle). Using PCM as
+ * the intermediary format works universally.
  */
 
 import { spawn } from 'child_process'
 import ffmpegPath from 'ffmpeg-static'
+import OpusScript from 'opusscript'
 
 export class OpusAccumulator {
   private readonly userId: string
@@ -48,14 +58,21 @@ export class OpusAccumulator {
       )
     }
 
+    // Decode each Opus frame to PCM (s16le, 48kHz, stereo) using opusscript.
+    // opusscript is pure JS/WASM — no native bindings, works on all platforms.
+    const decoder = new OpusScript(48000, 2)
+    const pcmChunks = this.frames.map(frame => Buffer.from(decoder.decode(frame)))
+    const pcmData = Buffer.concat(pcmChunks)
+    decoder.delete()
+
     return new Promise<Buffer>((resolve, reject) => {
       const proc = spawn(ffmpegPath as string, [
-        '-f', 'opus',
-        '-ar', '48000',
-        '-ac', '2',
+        '-f', 's16le',    // PCM 16-bit little-endian (universal format)
+        '-ar', '48000',   // 48kHz — Discord sample rate
+        '-ac', '2',       // stereo
         '-i', 'pipe:0',
         '-f', 'ogg',
-        '-c:a', 'copy',
+        '-c:a', 'libopus',
         'pipe:1',
       ])
 
@@ -70,13 +87,6 @@ export class OpusAccumulator {
         stderrOutput.push(data.toString())
       })
 
-      // stdout 'close' fires after all data has been flushed (no exit code here)
-      proc.stdout.on('close', () => {
-        // exitCode is set once the process exits; if still null, treat as 0 (success)
-        // We resolve here since stdout is fully read; if the process failed, the
-        // 'close' event on proc itself fires with the code and we reject there.
-      })
-
       proc.on('close', (code: number | null) => {
         if (code !== null && code !== 0) {
           reject(
@@ -89,9 +99,8 @@ export class OpusAccumulator {
         resolve(Buffer.concat(outputChunks))
       })
 
-      // Write all frames concatenated to stdin
-      const combined = Buffer.concat(this.frames)
-      proc.stdin.write(combined)
+      // Write PCM data to stdin
+      proc.stdin.write(pcmData)
       proc.stdin.end()
     })
   }

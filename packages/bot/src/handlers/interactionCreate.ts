@@ -34,7 +34,6 @@ export async function handleInteraction(
   if (interaction.commandName !== 'dm-record') return
 
   const subcommand = interaction.options.getSubcommand()
-
   switch (subcommand) {
     case 'link':
       await handleLink(interaction, state)

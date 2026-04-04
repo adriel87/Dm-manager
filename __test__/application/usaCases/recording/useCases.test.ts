@@ -253,21 +253,68 @@ describe('Recording use cases', () => {
       expect(mockRecordingRepository.createRecording).not.toHaveBeenCalled();
     });
 
-    it('should throw when session not found in campaign', async () => {
-      vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(validCampaign);
+    it('should auto-create a session when sessionId is not found in campaign', async () => {
+      const campaignWithOneSession: CampaignI = {
+        ...validCampaign,
+        sessions: [{ id: 'session-1', title: 'Sesión 1', notes: 'notas', sessionNumber: 1, date: new Date() }],
+      };
+      vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignWithOneSession);
+      vi.mocked(mockCampaignRepository.addSession).mockResolvedValue(campaignWithOneSession);
+      vi.mocked(mockRecordingRepository.createRecording).mockResolvedValue(validRecording);
+
+      await startRecording(
+        mockRecordingRepository,
+        mockCampaignRepository,
+        {
+          campaignId: 'campaign-1',
+          sessionId: 'nonexistent-session',
+          discordGuildId: 'guild-1',
+          discordChannelId: 'channel-1',
+        }
+      );
+
+      // Should have called addSession to create a new one
+      expect(mockCampaignRepository.addSession).toHaveBeenCalledOnce();
+      const createdSession = vi.mocked(mockCampaignRepository.addSession).mock.calls[0][1];
+      expect(createdSession.title).toBe('Sesión 2');
+      expect(createdSession.sessionNumber).toBe(2);
+      expect(createdSession.notes).toBe('Sesión creada automáticamente desde Discord');
+
+      // Recording should use the new session's id, not the original nonexistent one
+      const createdWith = vi.mocked(mockRecordingRepository.createRecording).mock.calls[0][0];
+      expect(createdWith.sessionId).not.toBe('nonexistent-session');
+      expect(createdWith.sessionId).toBe(createdSession.id);
+    });
+
+    it('should auto-create session with sessionNumber 1 when campaign has no sessions', async () => {
+      const campaignNoSessions: CampaignI = { ...validCampaign, sessions: [] };
+      vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignNoSessions);
+      vi.mocked(mockCampaignRepository.addSession).mockResolvedValue(campaignNoSessions);
+      vi.mocked(mockRecordingRepository.createRecording).mockResolvedValue(validRecording);
+
+      await startRecording(
+        mockRecordingRepository,
+        mockCampaignRepository,
+        { campaignId: 'campaign-1', sessionId: 'bot-generated-id', discordGuildId: 'guild-1', discordChannelId: 'channel-1' }
+      );
+
+      const createdSession = vi.mocked(mockCampaignRepository.addSession).mock.calls[0][1];
+      expect(createdSession.sessionNumber).toBe(1);
+      expect(createdSession.title).toBe('Sesión 1');
+    });
+
+    it('should throw when addSession fails during auto-create', async () => {
+      const campaignNoSessions: CampaignI = { ...validCampaign, sessions: [] };
+      vi.mocked(mockCampaignRepository.getCampaignById).mockResolvedValue(campaignNoSessions);
+      vi.mocked(mockCampaignRepository.addSession).mockResolvedValue(null);
 
       await expect(
         startRecording(
           mockRecordingRepository,
           mockCampaignRepository,
-          {
-            campaignId: 'campaign-1',
-            sessionId: 'nonexistent-session',
-            discordGuildId: 'guild-1',
-            discordChannelId: 'channel-1',
-          }
+          { campaignId: 'campaign-1', sessionId: 'bot-generated-id', discordGuildId: 'guild-1', discordChannelId: 'channel-1' }
         )
-      ).rejects.toThrow('Sesión con id "nonexistent-session" no encontrada en la campaña');
+      ).rejects.toThrow('Error al crear la sesión automáticamente');
 
       expect(mockRecordingRepository.createRecording).not.toHaveBeenCalled();
     });

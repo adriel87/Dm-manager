@@ -21,6 +21,8 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:bot": "npm test --workspace=packages/bot",
+    "test:all": "npm run test:run && npm run test:bot",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
@@ -58,5 +60,9 @@
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.60.1",
+    "@rollup/rollup-linux-x64-musl": "^4.60.1"
   }
 }

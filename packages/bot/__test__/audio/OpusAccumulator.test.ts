@@ -14,6 +14,15 @@ vi.mock('ffmpeg-static', () => ({ default: '/usr/bin/ffmpeg' }))
 // Mock child_process
 vi.mock('child_process')
 
+// Mock opusscript — identity decoder (decode returns the input buffer)
+// so PCM output equals the concatenation of input frames, keeping tests simple.
+vi.mock('opusscript', () => ({
+  default: vi.fn().mockImplementation(() => ({
+    decode: vi.fn((frame: Buffer) => frame),
+    delete: vi.fn(),
+  })),
+}))
+
 import { OpusAccumulator } from '../../src/audio/OpusAccumulator.js'
 import * as childProcess from 'child_process'
 
