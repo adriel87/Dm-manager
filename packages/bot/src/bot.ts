@@ -9,8 +9,10 @@
  */
 
 import "dotenv/config";
+import { join } from "path";
 import { Client, GatewayIntentBits, Events } from "discord.js";
 import { GuildStateManager } from "./state/GuildStateManager.js";
+import { BotDatabase } from "./state/BotDatabase.js";
 import { handleInteraction } from "./handlers/interactionCreate.js";
 import { handleVoiceStateUpdate } from "./handlers/voiceStateUpdate.js";
 import * as dmManagerClient from "./api/dm-manager.client.js";
@@ -40,7 +42,8 @@ const client = new Client({
 // State
 // ============================================================
 
-const state = new GuildStateManager();
+const db = new BotDatabase(join(process.cwd(), 'data', 'bot.db'));
+const state = new GuildStateManager(db);
 
 // Adapt the module exports to the DmManagerClient interface
 const apiClient: DmManagerClient = {

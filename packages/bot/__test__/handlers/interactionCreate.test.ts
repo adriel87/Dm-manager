@@ -34,6 +34,7 @@ import { handleTranscribe } from '../../src/commands/dm-record/transcribe.js'
 function makeInteraction(commandName: string, subcommand: string) {
   const reply = vi.fn().mockResolvedValue(undefined)
   return {
+    isAutocomplete: () => false,
     isChatInputCommand: () => true,
     commandName,
     options: {
@@ -46,6 +47,7 @@ function makeInteraction(commandName: string, subcommand: string) {
 
 function makeNonCommandInteraction() {
   return {
+    isAutocomplete: () => false,
     isChatInputCommand: () => false,
   }
 }

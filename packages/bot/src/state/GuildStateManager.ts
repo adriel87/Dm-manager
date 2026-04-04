@@ -9,6 +9,7 @@
 import { readFile, writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import type { BotRecordingState, GuildSettings, GuildSettingsStore, StoppedRecording } from '../types/bot.js'
+import type { BotDatabase } from './BotDatabase.js'
 
 // Path to persisted settings file, relative to package root (packages/bot/)
 const DATA_DIR = join(process.cwd(), 'data')
@@ -19,10 +20,19 @@ export class GuildStateManager {
   private readonly recordingStates = new Map<string, BotRecordingState>()
 
   // Stopped recording state (Phase 4) — lightweight, cleared after transcription
+  // Only used when no db is provided (legacy in-memory mode)
   private readonly stoppedStates = new Map<string, StoppedRecording>()
 
   // Guild persistent settings (loaded from / saved to guilds.json)
+  // Only used when no db is provided (legacy file mode)
   private settings: GuildSettingsStore = {}
+
+  // Optional SQLite database (Phase 6) — replaces guilds.json + stoppedStates Map
+  private readonly db?: BotDatabase
+
+  constructor(db?: BotDatabase) {
+    this.db = db
+  }
 
   // ============================================================
   // In-memory recording state
@@ -49,15 +59,26 @@ export class GuildStateManager {
   // ============================================================
 
   setLastStopped(guildId: string, stopped: StoppedRecording): void {
-    this.stoppedStates.set(guildId, stopped)
+    if (this.db) {
+      this.db.setStoppedRecording(guildId, stopped)
+    } else {
+      this.stoppedStates.set(guildId, stopped)
+    }
   }
 
   getLastStopped(guildId: string): StoppedRecording | undefined {
+    if (this.db) {
+      return this.db.getStoppedRecording(guildId)
+    }
     return this.stoppedStates.get(guildId)
   }
 
   clearLastStopped(guildId: string): void {
-    this.stoppedStates.delete(guildId)
+    if (this.db) {
+      this.db.clearStoppedRecording(guildId)
+    } else {
+      this.stoppedStates.delete(guildId)
+    }
   }
 
   // ============================================================
@@ -65,10 +86,17 @@ export class GuildStateManager {
   // ============================================================
 
   getDefaultCampaign(guildId: string): string | undefined {
+    if (this.db) {
+      return this.db.getDefaultCampaign(guildId)
+    }
     return this.settings[guildId]?.defaultCampaignId
   }
 
   async setDefaultCampaign(guildId: string, campaignId: string): Promise<void> {
+    if (this.db) {
+      this.db.setDefaultCampaign(guildId, campaignId)
+      return
+    }
     this.settings[guildId] = {
       ...this.settings[guildId],
       defaultCampaignId: campaignId,
@@ -77,6 +105,10 @@ export class GuildStateManager {
   }
 
   async clearDefaultCampaign(guildId: string): Promise<void> {
+    if (this.db) {
+      this.db.clearDefaultCampaign(guildId)
+      return
+    }
     if (this.settings[guildId]) {
       const { defaultCampaignId: _, ...rest } = this.settings[guildId]
       this.settings[guildId] = rest as GuildSettings
@@ -86,9 +118,14 @@ export class GuildStateManager {
 
   /**
    * Reads data/guilds.json on startup.
+   * No-op when a BotDatabase is provided (data already lives in SQLite).
    * If the file does not exist, silently returns with empty settings.
    */
   async loadSettings(): Promise<void> {
+    if (this.db) {
+      // SQLite already has all data — nothing to load
+      return
+    }
     try {
       const content = await readFile(GUILDS_FILE, 'utf-8')
       this.settings = JSON.parse(content) as GuildSettingsStore

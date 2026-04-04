@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import type { BotRecordingState, StoppedRecording } from '../../src/types/bot.js'
+import { BotDatabase } from '../../src/state/BotDatabase.js'
 
 // Mock fs/promises before importing the module under test
 vi.mock('fs/promises', () => ({
@@ -179,5 +180,85 @@ describe('GuildStateManager — stopped recording state', () => {
     manager.setLastStopped('guild-1', first)
     manager.setLastStopped('guild-1', second)
     expect(manager.getLastStopped('guild-1')).toBe(second)
+  })
+})
+
+describe('GuildStateManager with BotDatabase', () => {
+  let db: BotDatabase
+  let manager: GuildStateManager
+
+  function makeStopped(overrides: Partial<StoppedRecording> = {}): StoppedRecording {
+    return {
+      campaignId: 'campaign-1',
+      recordingId: 'recording-1',
+      stoppedAt: new Date('2024-01-01T00:00:00.000Z'),
+      ...overrides,
+    }
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    db = new BotDatabase(':memory:')
+    manager = new GuildStateManager(db)
+  })
+
+  afterEach(() => {
+    db.close()
+  })
+
+  it('TC-18: setDefaultCampaign — persists via db', async () => {
+    await manager.setDefaultCampaign('guild-1', 'campaign-db')
+    expect(db.getDefaultCampaign('guild-1')).toBe('campaign-db')
+  })
+
+  it('TC-19: getDefaultCampaign — reads from db', async () => {
+    db.setDefaultCampaign('guild-1', 'campaign-from-db')
+    expect(manager.getDefaultCampaign('guild-1')).toBe('campaign-from-db')
+  })
+
+  it('TC-20: clearDefaultCampaign — removes from db', async () => {
+    await manager.setDefaultCampaign('guild-1', 'campaign-db')
+    await manager.clearDefaultCampaign('guild-1')
+    expect(manager.getDefaultCampaign('guild-1')).toBeUndefined()
+    expect(db.getDefaultCampaign('guild-1')).toBeUndefined()
+  })
+
+  it('TC-21: setLastStopped — persists via db', () => {
+    const stopped = makeStopped()
+    manager.setLastStopped('guild-1', stopped)
+    expect(db.getStoppedRecording('guild-1')).toBeDefined()
+    expect(db.getStoppedRecording('guild-1')!.recordingId).toBe('recording-1')
+  })
+
+  it('TC-22: getLastStopped — retrieves from db with correct Date', () => {
+    const stopped = makeStopped({ stoppedAt: new Date('2024-03-10T08:00:00.000Z') })
+    db.setStoppedRecording('guild-1', stopped)
+    const result = manager.getLastStopped('guild-1')
+    expect(result).toBeDefined()
+    expect(result!.stoppedAt).toBeInstanceOf(Date)
+    expect(result!.stoppedAt.toISOString()).toBe('2024-03-10T08:00:00.000Z')
+  })
+
+  it('TC-23: clearLastStopped — removes from db', () => {
+    manager.setLastStopped('guild-1', makeStopped())
+    manager.clearLastStopped('guild-1')
+    expect(manager.getLastStopped('guild-1')).toBeUndefined()
+    expect(db.getStoppedRecording('guild-1')).toBeUndefined()
+  })
+
+  it('TC-24: loadSettings — is a no-op when db is provided', async () => {
+    db.setDefaultCampaign('guild-1', 'campaign-already-in-db')
+    // loadSettings should not wipe the db or override it with empty
+    await manager.loadSettings()
+    expect(manager.getDefaultCampaign('guild-1')).toBe('campaign-already-in-db')
+  })
+
+  it('TC-25: in-memory recording states (get/set/delete/has) work normally with db', () => {
+    const state = makeState('guild-1')
+    manager.set('guild-1', state)
+    expect(manager.has('guild-1')).toBe(true)
+    expect(manager.get('guild-1')).toBe(state)
+    manager.delete('guild-1')
+    expect(manager.has('guild-1')).toBe(false)
   })
 })

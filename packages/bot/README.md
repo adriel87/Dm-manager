@@ -14,8 +14,8 @@ Discord bot that records voice sessions and sends audio to the [DM Manager](../.
 
 | Command | Description |
 |---------|-------------|
-| `/dm-record link campaign-id:<id>` | Save the default campaign for this server |
-| `/dm-record start session-id:<id> [campaign-id:<id>]` | Join voice channel and start recording |
+| `/dm-record link campaign-id:<id>` | Save the default campaign for this server (supports autocomplete) |
+| `/dm-record start session-id:<id> [campaign-id:<id>]` | Join voice channel and start recording (campaign-id supports autocomplete) |
 | `/dm-record stop` | Stop recording and upload audio |
 | `/dm-record transcribe [language:<code>]` | Trigger Whisper transcription |
 | `/dm-record status` | Show what is being recorded right now |
@@ -70,6 +70,21 @@ npm run dev
 npm run build && npm start
 ```
 
+In production, the bot automatically creates `data/bot.db` (SQLite) on first run to persist guild
+settings and stopped recording state across restarts.
+
+### Alternative: Docker
+
+```bash
+# Build the image
+docker build -t dm-manager-bot .
+
+# Run with your .env file
+docker run --env-file .env dm-manager-bot
+```
+
+The image is a two-stage build: TypeScript is compiled in a `builder` stage, then the production image installs ffmpeg via `apk` and copies only the compiled output and production dependencies.
+
 ## Documentation
 
 - [`docs/audio-pipeline.md`](docs/audio-pipeline.md) — Deep explanation of how audio recording works: what is Opus, OGG, ffmpeg, per-speaker capture, and why each piece exists
@@ -83,9 +98,12 @@ npm run build && npm start
 npm test
 ```
 
-Tests cover all command cores, audio components, state manager, API client, and event handlers.
+Tests cover all command cores, audio components, state manager, API client, event handlers, and
+the `BotDatabase` SQLite wrapper (tested with `':memory:'`).
 The pattern used is **Functional Core + Imperative Shell**: pure `resolve*` functions are unit
 tested; Discord shell handlers (`handle*`) are not.
+
+143 tests across 16 files, all passing.
 
 ## Implementation phases
 
@@ -95,5 +113,5 @@ tested; Discord shell handlers (`handle*`) are not.
 | 2 — Slash commands (no audio) | ✅ Done | `/link`, `/status`, `/start`, `/stop`, `/transcribe` handlers + auto-stop on disconnect |
 | 3 — Voice capture | ✅ Done | Per-speaker OGG/Opus recording via ffmpeg (`OpusAccumulator`, `RecordingSession`) |
 | 4 — Transcription flow | ✅ Done | Transcription polling, Discord transcript formatter, `StoppedRecording` state |
-| 5 — Polish | 🔜 | Autocomplete, Dockerfile |
-| 6 — Production | 🔜 | SQLite state persistence, chunked upload |
+| 5 — Polish | ✅ Done | Autocomplete for `campaign-id`, Dockerfile |
+| 6 — Production | ✅ Done | SQLite state persistence (`data/bot.db`) via `BotDatabase` |

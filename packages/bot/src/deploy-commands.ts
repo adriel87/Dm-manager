@@ -47,6 +47,7 @@ const dmRecordCommand = new SlashCommandBuilder()
           .setName("campaign-id")
           .setDescription("Campaign ID (optional if /dm-record link was used)")
           .setRequired(false)
+          .setAutocomplete(true)
       )
   )
 
@@ -87,6 +88,7 @@ const dmRecordCommand = new SlashCommandBuilder()
           .setName("campaign-id")
           .setDescription("Campaign ID to use as default for /dm-record start")
           .setRequired(true)
+          .setAutocomplete(true)
       )
   );
 
