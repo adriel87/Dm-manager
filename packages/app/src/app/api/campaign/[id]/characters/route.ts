@@ -48,11 +48,14 @@ export async function POST(
     }
     
     // assignCharacter fetches full character from CharacterRepository and creates snapshot
+    // DM Discord identity is read from env vars (infrastructure concern — not the use case's job)
     const characterRef = await assignCharacter(
       repositories.campaign,
       repositories.character,
       campaignId,
-      characterId
+      characterId,
+      process.env.NEXT_PUBLIC_DM_DISCORD_USER_ID,
+      process.env.NEXT_PUBLIC_DM_DISCORD_USERNAME,
     );
     
     return NextResponse.json(characterRef, { status: 201 });

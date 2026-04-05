@@ -17,6 +17,7 @@ import { PlusIcon, XIcon } from '@/infrastructure/presentation/components/icons'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
 const DM_DISCORD_ID = process.env.NEXT_PUBLIC_DM_DISCORD_USER_ID ?? '';
+const DM_DISCORD_USERNAME = process.env.NEXT_PUBLIC_DM_DISCORD_USERNAME || 'DM';
 
 export interface SpeakerPreset {
   discordUserId: string;
@@ -95,7 +96,7 @@ export function SpeakerMappingModal({
         if (DM_DISCORD_ID && !mappings.some((m) => m.discordUserId === DM_DISCORD_ID)) {
           mappings = [
             ...mappings,
-            { discordUserId: DM_DISCORD_ID, discordUsername: 'DM', characterId: null, role: 'dm' as const },
+            { discordUserId: DM_DISCORD_ID, discordUsername: DM_DISCORD_USERNAME, characterId: null, role: 'dm' as const },
           ];
         }
 
