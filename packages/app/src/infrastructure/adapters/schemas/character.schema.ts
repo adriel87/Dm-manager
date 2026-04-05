@@ -15,7 +15,9 @@ export const characterSchema = z.object({
     location: z.string().optional(),
     isNPC: z.boolean().optional().default(false),
     playerName: z.string().optional(),
-    updatedAt: z.date().optional().default(undefined)
+    speakerId: z.string().optional(),
+    playerAlias: z.string().optional(),
+    updatedAt: z.date().optional()
 });
 
 export type CharacterSchema = z.infer<typeof characterSchema>;

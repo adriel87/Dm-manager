@@ -16,6 +16,14 @@ import { INPUT_CLASSES, MODAL_CLASSES, ERROR_CLASSES, SELECT_CLASSES } from '@/c
 import { PlusIcon, XIcon } from '@/infrastructure/presentation/components/icons';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
+const DM_DISCORD_ID = process.env.NEXT_PUBLIC_DM_DISCORD_USER_ID ?? '';
+
+export interface SpeakerPreset {
+  discordUserId: string;
+  discordUsername: string; // playerAlias ?? playerName ?? name
+  characterId: string;
+  characterName: string;
+}
 
 // Local view types
 interface SpeakerRowView {
@@ -31,6 +39,7 @@ interface SpeakerMappingModalProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onSaved: () => void;
+  speakerPresets?: SpeakerPreset[];
 }
 
 const EMPTY_ROW = (): SpeakerRowView => ({
@@ -52,13 +61,14 @@ export function SpeakerMappingModal({
   isOpen,
   onOpenChange,
   onSaved,
+  speakerPresets,
 }: SpeakerMappingModalProps) {
   const [rows, setRows] = useState<SpeakerRowView[]>([EMPTY_ROW()]);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingMappings, setIsLoadingMappings] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  // Fetch existing mappings whenever the modal opens
+  // Fetch existing mappings whenever the modal opens, then apply presets additively
   useEffect(() => {
     if (!isOpen) return;
     setIsLoadingMappings(true);
@@ -67,7 +77,28 @@ export function SpeakerMappingModal({
       .then(async (res) => {
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
-        const mappings: SpeakerRowView[] = Array.isArray(data) ? data : [];
+        let mappings: SpeakerRowView[] = Array.isArray(data) ? data : [];
+
+        // Auto-populate from character speakerIds (additive — don't overwrite existing)
+        const existingIds = new Set(mappings.map((m) => m.discordUserId));
+        const newRows = (speakerPresets ?? [])
+          .filter((p) => p.discordUserId && !existingIds.has(p.discordUserId))
+          .map((p) => ({
+            discordUserId: p.discordUserId,
+            discordUsername: p.discordUsername,
+            characterId: p.characterId,
+            role: 'player' as const,
+          }));
+        mappings = [...mappings, ...newRows];
+
+        // Auto-add DM row from env var (additive)
+        if (DM_DISCORD_ID && !mappings.some((m) => m.discordUserId === DM_DISCORD_ID)) {
+          mappings = [
+            ...mappings,
+            { discordUserId: DM_DISCORD_ID, discordUsername: 'DM', characterId: null, role: 'dm' as const },
+          ];
+        }
+
         setRows(mappings.length > 0 ? mappings : [EMPTY_ROW()]);
       })
       .catch(() => {
@@ -75,7 +106,7 @@ export function SpeakerMappingModal({
         setRows([EMPTY_ROW()]);
       })
       .finally(() => setIsLoadingMappings(false));
-  }, [isOpen, campaignId]);
+  }, [isOpen, campaignId, speakerPresets]);
 
   function handleClose() {
     setError(null);

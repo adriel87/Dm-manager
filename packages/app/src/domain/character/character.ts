@@ -11,6 +11,8 @@ export interface Character {
   location?: string;
   isNPC?: boolean; // Non-Player Character
   playerName?: string; // Real player's name for non-NPC characters
+  speakerId?: string; // Discord user ID for speaker mapping auto-population
+  playerAlias?: string; // Alias shown in speaker mapping (fallback: playerName ?? name)
   // Add more properties as needed
 }
 
@@ -34,6 +36,8 @@ export class CharacterEntity implements Character {
   location?: string;
   isNPC?: boolean;
   playerName?: string;
+  speakerId?: string;
+  playerAlias?: string;
   constructor(
     id: string,
     name: string,
@@ -47,6 +51,8 @@ export class CharacterEntity implements Character {
     location?: string,
     isNPC?: boolean,
     playerName?: string,
+    speakerId?: string,
+    playerAlias?: string,
   ) {
     if (!name || !age || !classType || level < 1 || hitPoints < 0) {
       throw new Error("Invalid character data");
@@ -63,6 +69,8 @@ export class CharacterEntity implements Character {
     this.location = location;
     this.isNPC = isNPC;
     this.playerName = playerName;
+    this.speakerId = speakerId;
+    this.playerAlias = playerAlias;
   }
   // Add methods for business logic if needed
   updateCharacter(partial: Partial<Character>) {
@@ -75,6 +83,8 @@ export class CharacterEntity implements Character {
     if (partial.location) this.location = partial.location;
     if (partial.isNPC !== undefined) this.isNPC = partial.isNPC;
     if (partial.playerName !== undefined) this.playerName = partial.playerName;
+    if (partial.speakerId !== undefined) this.speakerId = partial.speakerId;
+    if (partial.playerAlias !== undefined) this.playerAlias = partial.playerAlias;
     this.updatedAt = new Date();
   }
 }

@@ -24,7 +24,7 @@ export const whisperLocalProvider: TranscriptionProviderPort = {
     }
 
     const formData = new FormData();
-    formData.append('file', new Blob([audioBuffer], { type: 'audio/webm' }), 'audio.webm');
+    formData.append('file', new Blob([new Uint8Array(audioBuffer)], { type: 'audio/webm' }), 'audio.webm');
     formData.append('model', 'whisper-1');
     formData.append('response_format', 'verbose_json');
     formData.append('language', language);

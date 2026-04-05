@@ -11,5 +11,85 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  app:
+    build:
+      context: .
+      dockerfile: packages/app/Dockerfile
+    container_name: dm-manager-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: ./packages/app/.env
+        required: false
+    environment:
+      MONGODB_URI: mongodb://dungeon_master:dice_roller@mongodb:27017
+      MONGODB_DB: dungeon_master
+      REPOSITORY_TYPE: mongo
+      NEXT_PUBLIC_DM_DISCORD_USER_ID: ''
+    depends_on:
+      - mongodb
+
+  bot:
+    build:
+      context: .
+      dockerfile: packages/bot/Dockerfile
+    container_name: dm-manager-bot
+    env_file:
+      - path: ./packages/bot/.env
+        required: false
+    environment:
+      DM_MANAGER_URL: http://app:3000
+    volumes:
+      - bot-data:/app/data
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  # ── Monitoring stack ──────────────────────────────────────────────────────────
+
+  loki:
+    image: grafana/loki:3.3.2
+    container_name: dm-loki
+    user: "0"
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.3.2
+    container_name: dm-promtail
+    user: "0"
+    volumes:
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      loki:
+        condition: service_started
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: dm-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ./monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - loki
+    restart: unless-stopped
+
 volumes:
   mongo-data:
+  bot-data:
+  loki-data:
+  grafana-data:

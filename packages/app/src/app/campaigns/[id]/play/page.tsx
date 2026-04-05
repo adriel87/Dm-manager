@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { apiGet } from '@/lib/api';
 import { PlayModeView } from '@/infrastructure/presentation/components/play/PlayModeView';
+import type { SpeakerPreset } from '@/infrastructure/presentation/components/play/SpeakerMappingModal';
 import type { CharacterRef } from '@/domain/campaign/campaign';
+import type { Character } from '@/domain/character/character';
 import type { Note } from '@/infrastructure/presentation/components/campaigns/NoteItem';
 
 interface PlayModePageProps {
@@ -73,6 +75,18 @@ export default async function PlayModePage({ params }: PlayModePageProps) {
     (a, b) => b.sessionNumber - a.sessionNumber
   );
 
+  // Compute speaker presets from characters with a Discord speakerId
+  const allCharacters = await apiGet<Character[]>('/api/character') ?? [];
+  const assignedIds = new Set(campaign.characters.map((c) => c.id));
+  const speakerPresets: SpeakerPreset[] = allCharacters
+    .filter((c) => assignedIds.has(c.id) && !c.isNPC && c.speakerId)
+    .map((c) => ({
+      discordUserId: c.speakerId!,
+      discordUsername: c.playerAlias ?? c.playerName ?? c.name,
+      characterId: c.id,
+      characterName: c.name,
+    }));
+
   return (
     <main
       className="min-h-screen bg-zinc-900 px-4 py-6 lg:px-8"
@@ -85,6 +99,7 @@ export default async function PlayModePage({ params }: PlayModePageProps) {
         sessions={sortedSessions}
         characters={campaign.characters ?? []}
         notes={campaign.notes ?? []}
+        speakerPresets={speakerPresets}
       />
     </main>
   );

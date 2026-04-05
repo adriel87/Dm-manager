@@ -55,33 +55,33 @@ async function generateHexagonalStructure(entityName) {
   const structure = [
     // DOMAIN - En carpeta específica de la entidad
     {
-      dir: `src/domain/${camelName}`,
+      dir: `packages/app/src/domain/${camelName}`,
       file: `${camelName}.ts`
     },
     {
-      dir: `src/domain/${camelName}`,
+      dir: `packages/app/src/domain/${camelName}`,
       file: `${camelName}Repository.ts`
     },
-    
+
     // APPLICATION - Use Cases en carpeta específica de la entidad
     {
-      dir: `src/application/useCases/${camelName}`,
+      dir: `packages/app/src/application/useCases/${camelName}`,
       file: `create${pascalName}.ts`
     },
     {
-      dir: `src/application/useCases/${camelName}`,
+      dir: `packages/app/src/application/useCases/${camelName}`,
       file: `get${pascalName}.ts`
     },
     {
-      dir: `src/application/useCases/${camelName}`,
+      dir: `packages/app/src/application/useCases/${camelName}`,
       file: `getAll${pascalName}s.ts`
     },
     {
-      dir: `src/application/useCases/${camelName}`,
+      dir: `packages/app/src/application/useCases/${camelName}`,
       file: `update${pascalName}.ts`
     },
     {
-      dir: `src/application/useCases/${camelName}`,
+      dir: `packages/app/src/application/useCases/${camelName}`,
       file: `delete${pascalName}.ts`
     }
   ];
@@ -96,10 +96,10 @@ async function generateHexagonalStructure(entityName) {
   console.log(`\n${colors.green}🎉 Successfully generated hexagonal structure for ${pascalName}!${colors.reset}`);
   console.log(`\n${colors.blue}📁 Created structure:${colors.reset}`);
   console.log(`
-├── src/domain/${camelName}/
+├── packages/app/src/domain/${camelName}/
 │   ├── ${camelName}.ts
 │   └── ${camelName}Repository.ts
-└── src/application/useCases/${camelName}/
+└── packages/app/src/application/useCases/${camelName}/
     ├── create${pascalName}.ts
     ├── get${pascalName}.ts
     ├── getAll${pascalName}s.ts

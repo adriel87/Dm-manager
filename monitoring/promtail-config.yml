@@ -1,0 +1,46 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: name
+            values:
+              - dm-manager-app
+              - dm-manager-bot
+              - mongodb
+    relabel_configs:
+      # Usar el nombre del contenedor como label "container"
+      - source_labels: [__meta_docker_container_name]
+        regex: /(.*)
+        target_label: container
+
+      # Añadir el nombre de la imagen como label
+      - source_labels: [__meta_docker_container_image]
+        target_label: image
+
+      # Log stream desde stdout/stderr del contenedor
+      - source_labels: [__meta_docker_container_log_stream]
+        target_label: stream
+
+      # Label "app" para filtrar más fácil en Grafana
+      - source_labels: [__meta_docker_container_name]
+        regex: /dm-manager-(.*)
+        target_label: app
+        replacement: $1
+
+      # Para mongodb, app = mongodb
+      - source_labels: [__meta_docker_container_name]
+        regex: /mongodb
+        target_label: app
+        replacement: mongodb

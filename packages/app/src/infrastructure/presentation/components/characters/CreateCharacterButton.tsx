@@ -50,6 +50,9 @@ interface FormState {
   isNPC: boolean;
   description: string;
   location: string;
+  playerName: string;
+  playerAlias: string;
+  speakerId: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -61,6 +64,9 @@ const EMPTY_FORM: FormState = {
   isNPC: false,
   description: '',
   location: '',
+  playerName: '',
+  playerAlias: '',
+  speakerId: '',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -113,6 +119,12 @@ export function CreateCharacterButton() {
 
       if (form.description.trim()) body.description = form.description.trim();
       if (form.location.trim()) body.location = form.location.trim();
+
+      if (!form.isNPC) {
+        if (form.playerName.trim()) body.playerName = form.playerName.trim();
+        if (form.playerAlias.trim()) body.playerAlias = form.playerAlias.trim();
+        if (form.speakerId.trim()) body.speakerId = form.speakerId.trim();
+      }
 
       const { error: apiError } = await apiPost('/api/character', body);
 
@@ -246,6 +258,40 @@ export function CreateCharacterButton() {
                     aria-label="Es NPC"
                   />
                 </div>
+
+                {/* Player data — only for non-NPCs */}
+                {!form.isNPC && (
+                  <div className="flex flex-col gap-3 rounded-xl bg-zinc-800 border border-zinc-700 px-4 py-3">
+                    <p className="text-zinc-300 text-sm font-medium">Datos del jugador</p>
+                    <Input
+                      label="Nombre real del jugador"
+                      placeholder="Nombre real"
+                      value={form.playerName}
+                      onValueChange={(val) => setField('playerName', val)}
+                      isDisabled={isPending}
+                      classNames={INPUT_CLASSES}
+                      aria-label="Nombre real del jugador"
+                    />
+                    <Input
+                      label="Alias del jugador"
+                      placeholder="Alias en Discord o apodo"
+                      value={form.playerAlias}
+                      onValueChange={(val) => setField('playerAlias', val)}
+                      isDisabled={isPending}
+                      classNames={INPUT_CLASSES}
+                      aria-label="Alias del jugador"
+                    />
+                    <Input
+                      label="Discord User ID"
+                      placeholder="123456789012345678"
+                      value={form.speakerId}
+                      onValueChange={(val) => setField('speakerId', val)}
+                      isDisabled={isPending}
+                      classNames={INPUT_CLASSES}
+                      aria-label="Discord User ID del jugador"
+                    />
+                  </div>
+                )}
 
                 {/* Location */}
                 <Input

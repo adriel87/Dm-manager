@@ -93,3 +93,18 @@ client.login(token).catch((err: unknown) => {
   console.error("[bot] Failed to login:", err);
   process.exit(1);
 });
+
+// ============================================================
+// Graceful shutdown
+// ============================================================
+
+async function shutdown(signal: string): Promise<void> {
+  console.log(`[bot] Received ${signal} — shutting down...`);
+  client.destroy();
+  db.close();
+  console.log("[bot] Shutdown complete.");
+  process.exit(0);
+}
+
+process.on("SIGTERM", () => { shutdown("SIGTERM").catch(console.error); });
+process.on("SIGINT",  () => { shutdown("SIGINT").catch(console.error); });

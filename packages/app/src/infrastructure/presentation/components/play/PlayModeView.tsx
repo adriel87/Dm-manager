@@ -8,7 +8,7 @@ import { SessionPanel } from './SessionPanel';
 import { CharacterPanel } from './CharacterPanel';
 import { NotesPanel } from './NotesPanel';
 import { RecordingPanel } from './RecordingPanel';
-import { SpeakerMappingModal } from './SpeakerMappingModal';
+import { SpeakerMappingModal, type SpeakerPreset } from './SpeakerMappingModal';
 import { PlayModeActionMenu } from './PlayModeActionMenu';
 import { useBeforeUnload } from './useBeforeUnload';
 import { ChevronLeftIcon, DotFilledIcon, UsersIcon, FileTextIcon, MicIcon } from '@/infrastructure/presentation/components/icons';
@@ -51,6 +51,7 @@ interface PlayModeViewProps {
   sessions: EmbeddedSession[];
   characters: CharacterRef[];
   notes: Note[];
+  speakerPresets?: SpeakerPreset[];
 }
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? '';
@@ -93,6 +94,7 @@ export function PlayModeView({
   sessions: initialSessions,
   characters: initialCharacters,
   notes: initialNotes,
+  speakerPresets,
 }: PlayModeViewProps) {
   const router = useRouter();
   const [missions, setMissions] = useState<EmbeddedMission[]>(initialMissions);
@@ -304,6 +306,7 @@ export function PlayModeView({
         isOpen={speakerMappingModal.isOpen}
         onOpenChange={speakerMappingModal.onOpenChange}
         onSaved={refreshData}
+        speakerPresets={speakerPresets}
       />
     </div>
   );
