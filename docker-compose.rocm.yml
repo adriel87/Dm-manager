@@ -1,0 +1,19 @@
+# AMD ROCm GPU override — use on native Linux with ROCm drivers installed
+# Usage: docker compose -f docker-compose.yml -f docker-compose.rocm.yml up
+#
+# Requirements:
+#   - ROCm drivers installed on the host (rocm-smi should show your GPU)
+#   - /dev/kfd and /dev/dri must exist
+#   - User must be in 'video' and 'render' groups (or run as root)
+
+services:
+  whisper-service:
+    environment:
+      WHISPER__INFERENCE_DEVICE: cuda
+      WHISPER__COMPUTE_TYPE: float16
+    devices:
+      - /dev/kfd:/dev/kfd
+      - /dev/dri:/dev/dri
+    group_add:
+      - video
+      - render

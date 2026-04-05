@@ -1,0 +1,21 @@
+FROM rocm/pytorch:rocm6.2_ubuntu22.04_py3.10_pytorch_release_2.3.0
+
+WORKDIR /app
+
+# ctranslate2 >= 4.4.0 includes ROCm support via HIP
+RUN pip install --no-cache-dir \
+    "ctranslate2>=4.4.0" \
+    faster-whisper \
+    fastapi \
+    uvicorn \
+    python-multipart
+
+COPY packages/whisper-service/server.py .
+
+# ROCm exposes CUDA API via HIP — device="cuda" works in PyTorch/ctranslate2 with ROCm
+ENV WHISPER__MODEL=large-v3
+ENV WHISPER__INFERENCE_DEVICE=cuda
+ENV WHISPER__COMPUTE_TYPE=float16
+
+EXPOSE 8000
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]

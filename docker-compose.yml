@@ -11,6 +11,37 @@ services:
     volumes:
       - mongo-data:/data/db
 
+  whisper-service:
+    build:
+      context: .
+      dockerfile: packages/whisper-service/Dockerfile.rocm
+    container_name: dm-whisper
+    ports:
+      - "8000:8000"
+    environment:
+      WHISPER__MODEL: ${WHISPER_MODEL:-large-v3}
+      WHISPER__INFERENCE_DEVICE: ${WHISPER_INFERENCE_DEVICE:-cpu}
+      WHISPER__COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+    volumes:
+      - whisper-models:/root/.cache/huggingface
+    restart: unless-stopped
+
+  transcription-service:
+    build:
+      context: .
+      dockerfile: packages/transcription-service/Dockerfile
+    container_name: dm-transcription-service
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      TRANSCRIPTION_PROVIDER: ${TRANSCRIPTION_PROVIDER:-whisper-local}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      WHISPER_LOCAL_URL: ${WHISPER_LOCAL_URL:-http://whisper-service:8000}
+    depends_on:
+      - whisper-service
+    restart: unless-stopped
+
   app:
     build:
       context: .
@@ -25,9 +56,12 @@ services:
       MONGODB_URI: mongodb://dungeon_master:dice_roller@mongodb:27017
       MONGODB_DB: dungeon_master
       REPOSITORY_TYPE: mongo
+      TRANSCRIPTION_PROVIDER: transcription-service
+      TRANSCRIPTION_SERVICE_URL: http://transcription-service:3002
 
     depends_on:
       - mongodb
+      - transcription-service
 
   bot:
     build:
@@ -93,3 +127,4 @@ volumes:
   bot-data:
   loki-data:
   grafana-data:
+  whisper-models:
