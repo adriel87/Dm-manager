@@ -129,7 +129,7 @@ export interface CharacterRef {
 export interface GroupSnapshot {
   id: string;
   name: string;
-  members: Pick<Character, "id" | "name" | "classType">[];
+  members: Pick<Character, "id" | "name" | "classType" | "speakerId" | "playerAlias">[];
   description: string;
   snapshotAt: Date;
 }
@@ -139,6 +139,8 @@ type Character = {
   id: string;
   name: string;
   classType: DnDClassType;
+  speakerId?: string;
+  playerAlias?: string;
 };
 
 // ========================================

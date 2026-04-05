@@ -5,10 +5,11 @@ import {
 } from "@/domain/campaign/campaign";
 import { CampaignRepository } from "@/domain/campaign/CampaignRepository";
 import { CharacterRepository } from "@/domain/character/characterRepository";
+import type { SpeakerMapping } from "@/domain/recording/recording";
 
 /**
  * assignCharacter — Assigns a character to a campaign.
- * 
+ *
  * Steps:
  * 1. Fetch full character from CharacterRepository
  * 2. Fetch campaign
@@ -17,12 +18,15 @@ import { CharacterRepository } from "@/domain/character/characterRepository";
  * 5. Validate CharacterRef
  * 6. Check if character already exists in campaign
  * 7. Call campaignRepo.addCharacter
+ * 8. Auto-populate discordSpeakerMappings if character has speakerId (additive)
  */
 export const assignCharacter = async (
   campaignRepository: CampaignRepository,
   characterRepository: CharacterRepository,
   campaignId: string,
-  characterId: string
+  characterId: string,
+  dmDiscordUserId?: string,
+  dmDiscordUsername?: string,
 ): Promise<CharacterRef> => {
   try {
     // Step 1: Fetch full character
@@ -61,6 +65,44 @@ export const assignCharacter = async (
     const updatedCampaign = await campaignRepository.addCharacter(campaignId, characterRef);
     if (!updatedCampaign) {
       throw new Error("Error al asignar personaje a la campaña");
+    }
+
+    // Step 8: Auto-populate speaker mappings (additive — never overwrites existing entries)
+    const existingMappings: SpeakerMapping[] = updatedCampaign.discordSpeakerMappings ?? [];
+    const existingIds = new Set(existingMappings.map((m) => m.discordUserId));
+    const toAdd: SpeakerMapping[] = [];
+
+    if (!character.isNPC && character.speakerId && !existingIds.has(character.speakerId)) {
+      const displayName = character.playerAlias ?? character.playerName ?? character.name;
+      toAdd.push({
+        discordUserId: character.speakerId,
+        discordUsername: displayName,
+        characterId: character.id,
+        characterName: character.name,
+        label: displayName,
+        role: 'player',
+      });
+      existingIds.add(character.speakerId);
+    }
+
+    const dmId = dmDiscordUserId?.trim();
+    if (dmId && !existingIds.has(dmId)) {
+      const dmName = dmDiscordUsername?.trim() || 'DM';
+      toAdd.push({
+        discordUserId: dmId,
+        discordUsername: dmName,
+        characterId: null,
+        characterName: null,
+        label: dmName,
+        role: 'dm',
+      });
+    }
+
+    if (toAdd.length > 0) {
+      await campaignRepository.setSpeakerMappings(campaignId, [
+        ...existingMappings,
+        ...toAdd,
+      ]);
     }
 
     return characterRef;

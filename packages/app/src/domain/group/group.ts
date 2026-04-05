@@ -3,7 +3,7 @@ import { Character } from "../character/character";
 export interface Group {
   id: string;
   name: string;
-  members: Pick<Character, "id" | "name" | "classType">[];
+  members: Pick<Character, "id" | "name" | "classType" | "speakerId" | "playerAlias">[];
   description: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -24,7 +24,7 @@ export const validateGroup = (group: Partial<Group>): boolean => {
 };
 
 export function validateMembers(
-  members: Pick<Character, "id" | "name" | "classType">[],
+  members: Pick<Character, "id" | "name" | "classType" | "speakerId" | "playerAlias">[],
 ) {
   members?.forEach((member) => {
     if (!member.id || !member.name || !member.classType) {

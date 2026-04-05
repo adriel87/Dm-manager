@@ -56,7 +56,9 @@ export async function PUT(
       repositories.campaign,
       repositories.group,
       campaignId,
-      groupId
+      groupId,
+      process.env.NEXT_PUBLIC_DM_DISCORD_USER_ID,
+      process.env.NEXT_PUBLIC_DM_DISCORD_USERNAME,
     );
     
     return NextResponse.json(groupSnapshot);

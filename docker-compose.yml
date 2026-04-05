@@ -25,7 +25,7 @@ services:
       MONGODB_URI: mongodb://dungeon_master:dice_roller@mongodb:27017
       MONGODB_DB: dungeon_master
       REPOSITORY_TYPE: mongo
-      NEXT_PUBLIC_DM_DISCORD_USER_ID: ''
+
     depends_on:
       - mongodb
 

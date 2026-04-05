@@ -5,6 +5,8 @@ const memberSchema = z.object({
     id: z.string().min(1),
     name: z.string().min(1),
     classType: z.enum(Object.keys(DnDClassEnum) as [DnDClassType, ...DnDClassType[]]),
+    speakerId: z.string().optional(),
+    playerAlias: z.string().optional(),
 });
 
 export const groupSchema = z.object({

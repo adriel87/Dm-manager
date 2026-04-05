@@ -46,14 +46,14 @@ const EMPTY_FORM: FormState = {
 export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
   const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
-  const [characters, setCharacters] = useState<Pick<Character, 'id' | 'name' | 'classType'>[]>([]);
+  const [characters, setCharacters] = useState<Pick<Character, 'id' | 'name' | 'classType' | 'speakerId' | 'playerAlias'>[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const handleOpen = async () => {
     onOpen();
-    const chars = await apiGet<Pick<Character, 'id' | 'name' | 'classType'>[]>('/api/character');
+    const chars = await apiGet<Pick<Character, 'id' | 'name' | 'classType' | 'speakerId' | 'playerAlias'>[]>('/api/character');
     setCharacters(chars ?? []);
   };
 
@@ -81,7 +81,14 @@ export function CreateGroupButton({ campaigns }: CreateGroupButtonProps) {
       const members = form.memberIds
         .map((id) => {
           const char = characters.find((c) => c.id === id);
-          return char ? { id: char.id, name: char.name, classType: char.classType } : null;
+          if (!char) return null;
+          return {
+            id: char.id,
+            name: char.name,
+            classType: char.classType,
+            ...(char.speakerId && { speakerId: char.speakerId }),
+            ...(char.playerAlias && { playerAlias: char.playerAlias }),
+          };
         })
         .filter(Boolean) as { id: string; name: string; classType: string }[];
 
