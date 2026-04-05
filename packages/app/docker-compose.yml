@@ -1,0 +1,32 @@
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: dungeon_master
+      MONGO_INITDB_ROOT_PASSWORD: dice_roller
+      MONGO_INITDB_DATABASE: dungeon_master
+    volumes:
+      - mongo-data:/data/db
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dm-manager-app
+    ports:
+      - "3000:3000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      MONGODB_URI: mongodb://dungeon_master:dice_roller@mongodb:27017
+      MONGODB_DB: dungeon_master
+      REPOSITORY_TYPE: mongo
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo-data:

@@ -6,5 +6,6 @@ export default defineConfig({
     environment: 'node',
     root: resolve(__dirname),
     include: ['__test__/**/*.test.ts'],
+    setupFiles: ['__test__/setup.ts'],
   },
 })

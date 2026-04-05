@@ -28,7 +28,7 @@ Three concentric layers. Dependencies always point inward — inner layers never
 
 ## Layer Breakdown
 
-### Domain (`src/domain/`)
+### Domain (`packages/app/src/domain/`)
 Pure business logic. No framework dependencies, no I/O.
 
 Each entity has two files:
@@ -37,7 +37,7 @@ Each entity has two files:
 
 Entities: `campaign`, `character`, `mission`, `group`, `session`, `dashboard`, `recording`
 
-### Application (`src/application/useCases/`)
+### Application (`packages/app/src/application/useCases/`)
 Orchestrates domain logic. One folder per entity.
 
 Rules:
@@ -45,11 +45,11 @@ Rules:
 - Calls domain validation before delegating to the repository
 - Never imports concrete repository implementations
 
-### Infrastructure (`src/infrastructure/`)
+### Infrastructure (`packages/app/src/infrastructure/`)
 Concrete implementations of domain ports (**adapters**).
 
 ```
-src/infrastructure/
+packages/app/src/infrastructure/
 ├── adapters/
 │   ├── repositories/mongo/   ← MongoDB implementations of domain ports
 │   ├── mappers/              ← MongoDB document ↔ domain entity conversion
@@ -63,15 +63,15 @@ src/infrastructure/
     └── transcription.ts      ← TranscriptionProvider selection (env-driven)
 ```
 
-### Presentation (`src/app/`)
+### Presentation (`packages/app/src/app/`)
 Next.js 16 App Router. Two sub-layers:
 
-**API routes** (`src/app/api/<entity>/`):
+**API routes** (`packages/app/src/app/api/<entity>/`):
 - Import Zod schemas for input validation
 - Import repository instances from `infrastructure/config/repositories`
 - Call use cases (never call repositories directly)
 
-**UI** (`src/app/` pages + `src/components/`):
+**UI** (`packages/app/src/app/` pages + `packages/app/src/components/`):
 - Server Components fetch data via `fetchApi()` helper
 - Client Component islands handle interactivity (modals, filters, tabs)
 - Play Mode page (`/campaigns/[id]/play`) is a full Client Component island — see [Play Mode](#play-mode)
@@ -82,7 +82,7 @@ Next.js 16 App Router. Two sub-layers:
 
 ```
 HTTP Request
-  └─► API Route (src/app/api/)
+  └─► API Route (packages/app/src/app/api/)
         ├─ Zod schema validation (infrastructure/adapters/schemas/)
         └─► Use Case (application/useCases/)
               ├─ Domain validation (domain/)
@@ -158,7 +158,7 @@ HTTP Request
 
 ## MongoDB
 
-- Connection via `getCollection(collectionName)` in `src/infrastructure/config/mongodb.ts`
+- Connection via `getCollection(collectionName)` in `packages/app/src/infrastructure/config/mongodb.ts`
 - IDs stored as `ObjectId`, mapped to string `id` in domain entities via mappers
 - Local dev uses Docker Compose (see `commands.md` for credentials)
 
@@ -168,19 +168,19 @@ HTTP Request
 
 The Recording entity uses two extra ports beyond the standard `RecordingRepository`:
 
-- **`StorageProvider`** (`src/domain/recording/StorageProvider.ts`) — save/retrieve audio files. Implementation: `local.storage` (`infrastructure/adapters/storage/`). Selected via `src/infrastructure/config/storage.ts`.
-- **`TranscriptionProvider`** (`src/domain/recording/TranscriptionProvider.ts`) — transcribe audio to text. Implementations: `whisper-api` (OpenAI API) and `whisper-local` (local Whisper binary). Selected via `src/infrastructure/config/transcription.ts`.
+- **`StorageProvider`** (`packages/app/src/domain/recording/StorageProvider.ts`) — save/retrieve audio files. Implementation: `local.storage` (`infrastructure/adapters/storage/`). Selected via `packages/app/src/infrastructure/config/storage.ts`.
+- **`TranscriptionProvider`** (`packages/app/src/domain/recording/TranscriptionProvider.ts`) — transcribe audio to text. Implementations: `whisper-api` (OpenAI API) and `whisper-local` (local Whisper binary). Selected via `packages/app/src/infrastructure/config/transcription.ts`.
 
-Use cases in `src/application/useCases/recording/`:
+Use cases in `packages/app/src/application/useCases/recording/`:
 `startRecording`, `stopRecording`, `getRecording`, `getRecordingsBySession`, `transcribeRecording`, `retryTranscription`, `index`
 
 ---
 
 ## Play Mode
 
-Page: `src/app/campaigns/[id]/play/page.tsx` — Server Component shell that passes data down to the Client island.
+Page: `packages/app/src/app/campaigns/[id]/play/page.tsx` — Server Component shell that passes data down to the Client island.
 
-**Component tree** (`src/infrastructure/presentation/components/play/`):
+**Component tree** (`packages/app/src/infrastructure/presentation/components/play/`):
 
 ```
 PlayModeView (CC — root island)
@@ -201,6 +201,54 @@ PlayModeView (CC — root island)
 ```
 
 Supporting hooks: `useBeforeUnload` — prompts the user before leaving with an active session.
+
+---
+
+## Docker / Deployment
+
+The project is a monorepo with two deployable packages: `packages/app` (Next.js) and `packages/bot` (Discord bot).
+
+### Build context
+
+Both Dockerfiles use the **repo root** as their build context so they can access the root `package-lock.json` and workspace manifest. The `docker-compose.yml` at the repo root wires this together:
+
+```yaml
+app:
+  build:
+    context: .
+    dockerfile: packages/app/Dockerfile
+
+bot:
+  build:
+    context: .
+    dockerfile: packages/bot/Dockerfile
+```
+
+### Workspace-aware installs
+
+Inside each Dockerfile, dependencies are installed using the root lock file and npm workspaces:
+
+```dockerfile
+COPY package.json package-lock.json ./
+COPY packages/app/package.json ./packages/app/
+RUN npm ci --workspace=packages/app
+```
+
+This ensures the root `node_modules/` layout is reproduced correctly inside the image — important because Tailwind CSS v4 resolves `@heroui/theme` from the root `node_modules/`, not from `packages/app/node_modules/`.
+
+### Root `.dockerignore`
+
+A `.dockerignore` at the repo root prevents `node_modules/`, `.next/`, `dist/`, test files, `.git`, and `.claude/` from being sent to the build daemon.
+
+### Services
+
+| Service | Image source | Exposed port |
+|---------|-------------|-------------|
+| `mongodb` | `mongo` (Docker Hub) | 27017 |
+| `app` | `packages/app/Dockerfile` | 3000 |
+| `bot` | `packages/bot/Dockerfile` | — |
+
+The bot is linked to the app via `DM_MANAGER_URL=http://app:3000` (Docker internal network). Bot state is persisted in a named volume (`bot-data`) mounted at `/app/data`.
 
 ---
 

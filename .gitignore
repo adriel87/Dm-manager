@@ -18,6 +18,8 @@
 # next.js
 /.next/
 /out/
+packages/app/.next/
+packages/app/out/
 
 # production
 /build

@@ -1,0 +1,19 @@
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: dm-manager-bot
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DM_MANAGER_URL: http://host.docker.internal:3000
+    volumes:
+      - bot-data:/app/data
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  bot-data:
